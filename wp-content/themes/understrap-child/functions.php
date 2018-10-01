@@ -28,3 +28,72 @@ function add_child_theme_textdomain() {
     load_child_theme_textdomain( 'understrap-child', get_stylesheet_directory() . '/languages' );
 }
 add_action( 'after_setup_theme', 'add_child_theme_textdomain' );
+
+/**
+* BPM: Make Header Shrink on Page Scroll
+**/
+
+add_action ('wp_footer','vr_shrink_head',1);
+
+function vr_shrink_head() {
+    ?>
+    <script>
+        jQuery(document).ready(function($) {
+            $(window).scroll(function () {
+                if ($(window).scrollTop() > 100) {
+                    $('.mob-menu-header-holder').addClass('shrink');
+                }
+
+                else{
+                    $('.mob-menu-header-holder').removeClass('shrink');
+                }
+            });
+        });
+    </script>
+    <?php
+}
+
+/**
+* BPM: Multiple images for a post
+**/
+if (class_exists('MultiPostThumbnails')) {
+    new MultiPostThumbnails(
+        array(
+            'label' => __( 'Second Image', 'UnderStrap'),
+            'id' => 'second-image',
+            'post_type' => 'post'
+        )
+    );
+    new MultiPostThumbnails(
+        array(
+            'label' => 'Third Image',
+            'id' => 'third-image',
+            'post_type' => 'post'
+
+        )
+    );
+    new MultiPostThumbnails(
+        array(
+            'label' => 'Fourth Image',
+            'id' => 'fourth-image',
+            'post_type' => 'post'
+
+        )
+    );
+    new MultiPostThumbnails(
+        array(
+            'label' => 'Fifth Image',
+            'id' => 'fifth-image',
+            'post_type' => 'post'
+
+        )
+    );
+    new MultiPostThumbnails(
+        array(
+            'label' => 'Sixth Image',
+            'id' => 'sixth-image',
+            'post_type' => 'post'
+
+        )
+    );
+}
