@@ -7,6 +7,7 @@
 @import "vendor/mobile-menu";
 
 
+
 /*
 // Universal styling
 */
@@ -20,14 +21,14 @@ p {
 */
 .home {
     h3 {
-        text-align: right;
+        // text-align: right;
     }
 }
 
 // home slider id
 #welcome {
     margin-top: $s_xl!important;
-    height: 600px!important;
+    // height: 600px!important;
 }
 
 // home grid id
@@ -38,6 +39,21 @@ p {
 .m__large {
     margin-top: $s_xl;
     margin-bottom: $s_xl;
+}
+
+.p__large--top {
+    padding-top: $s_xl * 1.5;
+}
+
+/*
+// Full width page teplate (used in 3D pages)
+*/
+.entry-title {
+    padding: $s_xl;
+    text-align: center;
+    // color: $white;
+    // background-color: $primary;
+    font-size: $h1-font-size * 1.5;
 }
 
 /*

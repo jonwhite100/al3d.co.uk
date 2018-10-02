@@ -1,6 +1,6 @@
 {
   "browserSyncOptions" : {
-    "proxy": "localhost/al3d.co.uk",
+    "proxy": "localhost/charlottejefferis.co.uk",
     "notify": false
   },
   "browserSyncWatchFiles" : [
