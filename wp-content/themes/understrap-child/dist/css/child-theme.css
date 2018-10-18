@@ -10792,6 +10792,81 @@ a.skip-link {
 .gallery-caption {
   display: block; }
 
+.fade-in,
+.triptych-panel,
+.triptych-title {
+  -webkit-animation: fadeInOpacity 1.5s linear;
+          animation: fadeInOpacity 1.5s linear; }
+
+@-webkit-keyframes fadeInOpacity {
+  0% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+@keyframes fadeInOpacity {
+  0% {
+    opacity: 0; }
+  100% {
+    opacity: 1; } }
+
+.slide-up,
+.triptych-title {
+  -webkit-animation-name: slideInUp;
+          animation-name: slideInUp;
+  -webkit-animation-duration: .9s;
+          animation-duration: .9s;
+  -webkit-animation-fill-mode: both;
+          animation-fill-mode: both;
+  -webkit-animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+
+@-webkit-keyframes slideInUp {
+  0% {
+    opacity: 0;
+    -webkit-transform: translate3d(0, 75%, 0);
+            transform: translate3d(0, 75%, 0); }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; } }
+
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    -webkit-transform: translate3d(0, 75%, 0);
+            transform: translate3d(0, 75%, 0); }
+  100% {
+    opacity: 1;
+    -webkit-transform: none;
+            transform: none; } }
+
+/*
+// Line animation
+*/
+.animline {
+  fill: none;
+  stroke: black;
+  stroke-width: 2;
+  -webkit-animation: expand-from-centre 1s linear forwards;
+  animation: expand-from-centre 1s linear forwards; }
+
+@-webkit-keyframes expand-from-centre {
+  from {
+    stroke-dasharray: 0 300;
+    stroke-dashoffset: -150; }
+  to {
+    stroke-dasharray: 300 300;
+    stroke-dashoffset: 0; } }
+
+@keyframes expand-from-centre {
+  from {
+    stroke-dasharray: 0 300;
+    stroke-dashoffset: -150; }
+  to {
+    stroke-dasharray: 300 300;
+    stroke-dashoffset: 0; } }
+
 .site-main .post {
   text-align: left; }
   .site-main .post .entry-header {
@@ -10819,11 +10894,108 @@ a.skip-link {
   display: none; }
 
 .home .wrapper {
-  padding-top: 0; }
+  padding-top: 0;
+  margin-top: 380px; }
 
 .m__large {
   margin-top: 40px;
   margin-bottom: 40px; }
+
+/*
+// JMW slideshow!
+*/
+/*
+@include media-breakpoint-up(xs) { ... }
+@include media-breakpoint-up(sm) { ... }
+xs  400
+sm
+md  500
+lg  600
+xl  800
+*/
+.triptych {
+  position: absolute;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 400px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  margin-top: 130px; }
+
+.triptych-panel {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+  width: 100% / 3;
+  height: 400px;
+  position: relative;
+  overflow: hidden; }
+  .triptych-panel .triptych-title {
+    -webkit-animation-delay: 2s;
+            animation-delay: 2s; }
+  .triptych-panel:first-of-type {
+    -webkit-animation-delay: 0.45s;
+            animation-delay: 0.45s; }
+    .triptych-panel:first-of-type .triptych-title {
+      -webkit-animation-delay: 3s;
+              animation-delay: 3s; }
+  .triptych-panel:last-of-type {
+    -webkit-animation-delay: 0.65s;
+            animation-delay: 0.65s; }
+    .triptych-panel:last-of-type .triptych-title {
+      -webkit-animation-delay: 4s;
+              animation-delay: 4s; }
+
+.triptych-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  width: 100%;
+  height: 100%; }
+  .triptych-img img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    height: 100%;
+    min-width: 100%;
+    max-width: initial;
+    -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%); }
+
+.triptych-title {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  z-index: 101;
+  text-transform: uppercase;
+  text-align: center;
+  font-size: 2.5rem;
+  color: #fff;
+  -webkit-animation-delay: 2500ms;
+          animation-delay: 2500ms; }
+
+@media (min-width: 768px) {
+  .home .wrapper {
+    margin-top: 330px; }
+  .triptych {
+    height: 500px; } }
+
+@media (min-width: 992px) {
+  .home .wrapper {
+    margin-top: 380px; }
+  .triptych {
+    height: 600px; } }
+
+@media (min-width: 1200px) {
+  .triptych {
+    height: 800px; } }
 
 .flat-light .esg-filterbutton,
 .flat-light .esg-navigationbutton,
@@ -10877,6 +11049,7 @@ body.mob-menu-slideout-over {
     transition: all 0.25s ease-in-out; }
 
 /*
+
 // Universal styling
 */
 body,

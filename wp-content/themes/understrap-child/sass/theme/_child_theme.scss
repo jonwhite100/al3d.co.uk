@@ -1,4 +1,5 @@
 // import components
+@import "components/animations";
 @import "components/blog";
 @import "components/header";
 
@@ -6,9 +7,8 @@
 @import "vendor/essential-grid";
 @import "vendor/mobile-menu";
 
-
-
 /*
+
 // Universal styling
 */
 body,
@@ -44,6 +44,9 @@ p {
 .p__large--top {
     padding-top: $s_xl * 1.5;
 }
+
+
+
 
 /*
 // Full width page teplate (used in 3D pages)

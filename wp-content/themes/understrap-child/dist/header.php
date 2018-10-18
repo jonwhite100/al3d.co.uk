@@ -83,3 +83,30 @@ $container = get_theme_mod( 'understrap_container_type' );
 		</nav><!-- .site-navigation -->
 
 	</div><!-- #wrapper-navbar end -->
+
+	<?php if ( is_front_page() ) : ?>
+		<?php // get_template_part( 'global-templates/hero' ); ?>
+		<div class="triptych">
+			<div class="triptych-panel">
+				<div class="triptych-img">
+					<img src="http://bpm-web-hosting.co.uk/al3d/wp-content/uploads/2018/08/DSC_3678-1.jpg" alt="" />
+				</div>
+				<div class="triptych-title">Design</div>
+			</div>
+				<div class="triptych-panel">
+				<div class="triptych-img">
+					<img src="http://bpm-web-hosting.co.uk/al3d/wp-content/uploads/2018/08/large-residential02.jpg" alt="" />
+				</div>
+				<div class="triptych-title">Development</div>
+			</div>
+				<div class="triptych-panel">
+				<div class="triptych-img">
+					<img src="http://bpm-web-hosting.co.uk/al3d/wp-content/uploads/2018/08/res-extension01.jpg" alt="" />
+				</div>
+				<div class="triptych-title">Delivery</div>
+				<!-- <svg>
+				  <line class="animline" x1="0" y1="75" x2="300" y2="75"/>
+				</svg> -->
+			</div>
+		</div>
+	<?php endif; ?>

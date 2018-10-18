@@ -25,7 +25,7 @@ $sidebar_pos = get_theme_mod( 'understrap_sidebar_position' );
 		if ( ( is_active_sidebar( 'right-sidebar' ) && 'right' === $sidebar_pos ) || ( is_active_sidebar( 'left-sidebar' ) && 'left' === $sidebar_pos ) ) {
 			$html .= 'col-md-8 content-area" id="primary">';
 		} else {
-			$html .= 'col-md-12 content-area jonso" id="primary">';
+			$html .= 'col-md-12 content-area" id="primary">';
 		}
 		echo $html; // WPCS: XSS OK.
 	} elseif ( 'both' === $sidebar_pos ) {
