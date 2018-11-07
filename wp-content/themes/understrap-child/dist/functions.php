@@ -54,6 +54,14 @@ function vr_shrink_head() {
 }
 
 /**
+* BPM Add an addition menu location
+**/
+function register_my_menu() {
+    register_nav_menu('footer-menu',__( 'Footer Menu' ));
+}
+add_action( 'init', 'register_my_menu' );
+
+/**
 * BPM: Multiple images for a post
 **/
 if (class_exists('MultiPostThumbnails')) {
