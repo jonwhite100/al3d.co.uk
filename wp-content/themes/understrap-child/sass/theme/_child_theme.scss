@@ -1,6 +1,7 @@
 // import components
 @import "components/animations";
 @import "components/blog";
+@import "components/footer";
 @import "components/header";
 
 // import plugin / vendor overrides
@@ -8,7 +9,6 @@
 @import "vendor/mobile-menu";
 
 /*
-
 // Universal styling
 */
 body,
@@ -44,8 +44,6 @@ p {
 .p__large--top {
     padding-top: $s_xl * 1.5;
 }
-
-
 
 
 /*
