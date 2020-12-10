@@ -16,7 +16,7 @@ $s-lg: $s-md * 2;
 $s-xl: $s-lg + $s-md;
 
 // Colours
-$primary:  #bb2c29 !default; // red
+$primary:  #5f4b79 !default; // red
 $secondary: #f2c230 !default;
 $tertiary: #b8ccd9 !default;
 
@@ -42,16 +42,17 @@ $input-font-size: .85rem;
 $input-bg: darken($gray-100, 5%);
 $input-border-color: darken($gray-100, 5%);
 
-// Fonts
-@import url('https://use.typekit.net/uyi5cvn.css'); // sass-lint:disable-line no-url-domains no-url-protocols
 
-$font-family-sans-serif: open-sans, sans-serif !default;
-$headings-font-family: open-sans-condensed, sans-serif !default;
+// Fonts
+@import url("https://use.typekit.net/ieo8wqq.css"); // sass-lint:disable-line no-url-domains no-url-protocols
+
+$font-family-sans-serif: 'Muli', sans-serif !default;
+$headings-font-family: 'Muli', sans-serif !default;
 $logo-font-family: handel-gothic, sans-serif !default;
 $headings-font-weight: 300 !default;
 $headings-text-transform: 'uppercase' !default;
 
-$headings-color: $gray-300 !default;
+$headings-color: $primary !default;
 $body-color: $gray-300 !default;
 $body-bg: $white;
 
@@ -61,12 +62,13 @@ $h2-font-size: $font-size-base * 2.1 !default;
 $h3-font-size: $font-size-base * 1.5 !default;
 $h4-font-size: $font-size-base * 1.1 !default;
 
+
 // $h5-font-size: $font-size-base * 1.25 !default;
 // $h6-font-size: $font-size-base !default;
 
 // Footer widgets
 $c-wrapper-footer-widgets: $white !default;
-$c-wrapper-footer-widgets-bg: $primary !default;
+$c-wrapper-footer-widgets-bg: pink !default;
 $c-wrapper-footer-widgets-link: $white !default;
 
 // Footer copyright info

@@ -1,270 +1,230 @@
 <?php
 /**
- * Functions related to editor blocks for the Gutenberg editor plugin.
+ * Block and style registration functions.
  *
  * @package gutenberg
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	die( 'Silence is golden.' );
-}
-
 /**
- * Registers a block type.
- *
- * @since 0.1.0
- * @since 0.6.0 Now also accepts a WP_Block_Type instance as first parameter.
- *
- * @param string|WP_Block_Type $name Block type name including namespace, or alternatively a
- *                                   complete WP_Block_Type instance. In case a WP_Block_Type
- *                                   is provided, the $args parameter will be ignored.
- * @param array                $args {
- *     Optional. Array of block type arguments. Any arguments may be defined, however the
- *     ones described below are supported by default. Default empty array.
- *
- *     @type callable $render_callback Callback used to render blocks of this block type.
- * }
- * @return WP_Block_Type|false The registered block type on success, or false on failure.
+ * Substitutes the implementation of a core-registered block type, if exists,
+ * with the built result from the plugin.
  */
-function register_block_type( $name, $args = array() ) {
-	return WP_Block_Type_Registry::get_instance()->register( $name, $args );
-}
-
-/**
- * Unregisters a block type.
- *
- * @since 0.1.0
- * @since 0.6.0 Now also accepts a WP_Block_Type instance as first parameter.
- *
- * @param string|WP_Block_Type $name Block type name including namespace, or alternatively a
- *                                   complete WP_Block_Type instance.
- * @return WP_Block_Type|false The unregistered block type on success, or false on failure.
- */
-function unregister_block_type( $name ) {
-	return WP_Block_Type_Registry::get_instance()->unregister( $name );
-}
-
-/**
- * Parses blocks out of a content string.
- *
- * @since 0.5.0
- *
- * @param  string $content Post content.
- * @return array  Array of parsed block objects.
- */
-function gutenberg_parse_blocks( $content ) {
-	/*
-	 * If there are no blocks in the content, return a single block, rather
-	 * than wasting time trying to parse the string.
-	 */
-	if ( ! has_blocks( $content ) ) {
-		return array(
-			array(
-				'attrs'     => array(),
-				'innerHTML' => $content,
+function gutenberg_reregister_core_block_types() {
+	// Blocks directory may not exist if working from a fresh clone.
+	$blocks_dirs = array(
+		__DIR__ . '/../build/block-library/blocks/' => array(
+			'block_folders' => array(
+				'audio',
+				'button',
+				'buttons',
+				'classic',
+				'code',
+				'column',
+				'columns',
+				'file',
+				'gallery',
+				'group',
+				'heading',
+				'html',
+				'image',
+				'list',
+				'media-text',
+				'missing',
+				'more',
+				'navigation-link',
+				'nextpage',
+				'paragraph',
+				'preformatted',
+				'pullquote',
+				'quote',
+				'separator',
+				'social-links',
+				'spacer',
+				'subhead',
+				'table',
+				'text-columns',
+				'verse',
+				'video',
+				'embed',
 			),
-		);
-	}
+			'block_names'   => array_merge(
+				array(
+					'archives.php'                => 'core/archives',
+					'block.php'                   => 'core/block',
+					'calendar.php'                => 'core/calendar',
+					'categories.php'              => 'core/categories',
+					'cover.php'                   => 'core/cover',
+					'latest-comments.php'         => 'core/latest-comments',
+					'latest-posts.php'            => 'core/latest-posts',
+					'navigation.php'              => 'core/navigation',
+					'navigation-link.php'         => 'core/navigation-link',
+					'rss.php'                     => 'core/rss',
+					'search.php'                  => 'core/search',
+					'shortcode.php'               => 'core/shortcode',
+					'social-link.php'             => 'core/social-link',
+					'tag-cloud.php'               => 'core/tag-cloud',
+					'post-author.php'             => 'core/post-author',
+					'post-comment.php'            => 'core/post-comment',
+					'post-comment-author.php'     => 'core/post-comment-author',
+					'post-comment-content.php'    => 'core/post-comment-content',
+					'post-comment-date.php'       => 'core/post-comment-date',
+					'post-comments.php'           => 'core/post-comments',
+					'post-comments-count.php'     => 'core/post-comments-count',
+					'post-comments-form.php'      => 'core/post-comments-form',
+					'post-content.php'            => 'core/post-content',
+					'post-date.php'               => 'core/post-date',
+					'post-excerpt.php'            => 'core/post-excerpt',
+					'post-featured-image.php'     => 'core/post-featured-image',
+					'post-hierarchical-terms.php' => 'core/post-hierarchical-terms',
+					'post-tags.php'               => 'core/post-tags',
+					'post-title.php'              => 'core/post-title',
+					'query.php'                   => 'core/query',
+					'query-loop.php'              => 'core/query-loop',
+					'query-pagination.php'        => 'core/query-pagination',
+					'site-logo.php'               => 'core/site-logo',
+					'site-tagline.php'            => 'core/site-tagline',
+					'site-title.php'              => 'core/site-title',
+					'template-part.php'           => 'core/template-part',
+				)
+			),
+		),
+		__DIR__ . '/../build/edit-widgets/blocks/'  => array(
+			'block_folders' => array(
+				'legacy-widget',
+				'widget-area',
+			),
+			'block_names'   => array(
+				'legacy-widget.php' => 'core/legacy-widget',
+				'widget-area.php'   => 'core/widget-area',
+			),
+		),
+	);
+	foreach ( $blocks_dirs as $blocks_dir => $details ) {
+		$block_folders = $details['block_folders'];
+		$block_names   = $details['block_names'];
 
-	$parser = new Gutenberg_PEG_Parser;
-	return $parser->parse( _gutenberg_utf8_split( $content ) );
-}
+		$registry = WP_Block_Type_Registry::get_instance();
 
-/**
- * Returns an array of the names of all registered dynamic block types.
- *
- * @return array Array of dynamic block names.
- */
-function get_dynamic_block_names() {
-	$dynamic_block_names = array();
+		foreach ( $block_folders as $folder_name ) {
+			$block_json_file = $blocks_dir . $folder_name . '/block.json';
 
-	$block_types = WP_Block_Type_Registry::get_instance()->get_all_registered();
-	foreach ( $block_types as $block_type ) {
-		if ( $block_type->is_dynamic() ) {
-			$dynamic_block_names[] = $block_type->name;
+			// Ideally, all paths to block metadata files should be listed in
+			// WordPress core. In this place we should rather use filter
+			// to replace paths with overrides defined by the plugin.
+			$metadata = json_decode( file_get_contents( $block_json_file ), true );
+			if ( ! is_array( $metadata ) || ! $metadata['name'] ) {
+				return false;
+			}
+
+			if ( $registry->is_registered( $metadata['name'] ) ) {
+				$registry->unregister( $metadata['name'] );
+			}
+
+			register_block_type_from_metadata( $block_json_file );
+		}
+
+		foreach ( $block_names as $file => $block_names ) {
+			if ( ! file_exists( $blocks_dir . $file ) ) {
+				return;
+			}
+
+			if ( is_string( $block_names ) ) {
+				if ( $registry->is_registered( $block_names ) ) {
+					$registry->unregister( $block_names );
+				}
+			} elseif ( is_array( $block_names ) ) {
+				foreach ( $block_names as $block_name ) {
+					if ( $registry->is_registered( $block_name ) ) {
+						$registry->unregister( $block_name );
+					}
+				}
+			}
+
+			require $blocks_dir . $file;
 		}
 	}
-
-	return $dynamic_block_names;
 }
 
+add_action( 'init', 'gutenberg_reregister_core_block_types' );
+
 /**
- * Retrieve the dynamic blocks regular expression for searching.
+ * Complements the implementation of block type `core/social-icon`, whether it
+ * be provided by core or the plugin, with derived block types for each
+ * "service" (WordPress, Twitter, etc.) supported by Social Links.
  *
- * @since 3.6.0
+ * This ensures backwards compatibility for any users running the Gutenberg
+ * plugin who have used Social Links prior to their conversion to block
+ * variations.
  *
- * @return string
+ * This shim is INTENTIONALLY left out of core, as Social Links haven't yet
+ * landed there.
+ *
+ * @see https://github.com/WordPress/gutenberg/pull/19887
  */
-function get_dynamic_blocks_regex() {
-	$dynamic_block_names   = get_dynamic_block_names();
-	$dynamic_block_pattern = (
-		'/<!--\s+wp:(' .
-		str_replace( '/', '\/',                 // Escape namespace, not handled by preg_quote.
-			str_replace( 'core/', '(?:core/)?', // Allow implicit core namespace, but don't capture.
-				implode( '|',                   // Join block names into capture group alternation.
-					array_map( 'preg_quote',    // Escape block name for regular expression.
-						$dynamic_block_names
-					)
-				)
-			)
-		) .
-		')(\s+(\{.*?\}))?\s+(\/)?-->/'
+function gutenberg_register_legacy_social_link_blocks() {
+	$services = array(
+		'amazon',
+		'bandcamp',
+		'behance',
+		'chain',
+		'codepen',
+		'deviantart',
+		'dribbble',
+		'dropbox',
+		'etsy',
+		'facebook',
+		'feed',
+		'fivehundredpx',
+		'flickr',
+		'foursquare',
+		'goodreads',
+		'google',
+		'github',
+		'instagram',
+		'lastfm',
+		'linkedin',
+		'mail',
+		'mastodon',
+		'meetup',
+		'medium',
+		'pinterest',
+		'pocket',
+		'reddit',
+		'skype',
+		'snapchat',
+		'soundcloud',
+		'spotify',
+		'tumblr',
+		'twitch',
+		'twitter',
+		'vimeo',
+		'vk',
+		'wordpress',
+		'yelp',
+		'youtube',
 	);
 
-	return $dynamic_block_pattern;
-}
-
-/**
- * Renders a single block into a HTML string.
- *
- * @since 1.9.0
- *
- * @param  array $block A single parsed block object.
- * @return string String of rendered HTML.
- */
-function gutenberg_render_block( $block ) {
-	$block_name  = isset( $block['blockName'] ) ? $block['blockName'] : null;
-	$attributes  = is_array( $block['attrs'] ) ? $block['attrs'] : array();
-	$raw_content = isset( $block['innerHTML'] ) ? $block['innerHTML'] : null;
-
-	if ( $block_name ) {
-		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $block_name );
-		if ( null !== $block_type && $block_type->is_dynamic() ) {
-			return $block_type->render( $attributes );
-		}
+	foreach ( $services as $service ) {
+		register_block_type(
+			'core/social-link-' . $service,
+			array(
+				'category'        => 'widgets',
+				'attributes'      => array(
+					'url'     => array(
+						'type' => 'string',
+					),
+					'service' => array(
+						'type'    => 'string',
+						'default' => $service,
+					),
+					'label'   => array(
+						'type' => 'string',
+					),
+				),
+				'render_callback' => 'gutenberg_render_block_core_social_link',
+			)
+		);
 	}
-
-	if ( $raw_content ) {
-		return $raw_content;
-	}
-
-	return '';
 }
 
-/**
- * Parses dynamic blocks out of `post_content` and re-renders them.
- *
- * @since 0.1.0
- *
- * @param  string $content Post content.
- * @return string          Updated post content.
- */
-function do_blocks( $content ) {
-	$rendered_content      = '';
-	$dynamic_block_pattern = get_dynamic_blocks_regex();
-
-	while ( preg_match( $dynamic_block_pattern, $content, $block_match, PREG_OFFSET_CAPTURE ) ) {
-		$opening_tag     = $block_match[0][0];
-		$offset          = $block_match[0][1];
-		$block_name      = $block_match[1][0];
-		$is_self_closing = isset( $block_match[4] );
-
-		// Reset attributes JSON to prevent scope bleed from last iteration.
-		$block_attributes_json = null;
-		if ( isset( $block_match[3] ) ) {
-			$block_attributes_json = $block_match[3][0];
-		}
-
-		// Since content is a working copy since the last match, append to
-		// rendered content up to the matched offset...
-		$rendered_content .= substr( $content, 0, $offset );
-
-		// ...then update the working copy of content.
-		$content = substr( $content, $offset + strlen( $opening_tag ) );
-
-		// Make implicit core namespace explicit.
-		$is_implicit_core_namespace = ( false === strpos( $block_name, '/' ) );
-		$normalized_block_name      = $is_implicit_core_namespace ? 'core/' . $block_name : $block_name;
-
-		// Find registered block type. We can assume it exists since we use the
-		// `get_dynamic_block_names` function as a source for pattern matching.
-		$block_type = WP_Block_Type_Registry::get_instance()->get_registered( $normalized_block_name );
-
-		// Attempt to parse attributes JSON, if available.
-		$attributes = array();
-		if ( ! empty( $block_attributes_json ) ) {
-			$decoded_attributes = json_decode( $block_attributes_json, true );
-			if ( ! is_null( $decoded_attributes ) ) {
-				$attributes = $decoded_attributes;
-			}
-		}
-
-		$inner_content = '';
-
-		if ( ! $is_self_closing ) {
-			$end_tag_pattern = '/<!--\s+\/wp:' . str_replace( '/', '\/', preg_quote( $block_name ) ) . '\s+-->/';
-			if ( ! preg_match( $end_tag_pattern, $content, $block_match_end, PREG_OFFSET_CAPTURE ) ) {
-				// If no closing tag is found, abort all matching, and continue
-				// to append remainder of content to rendered output.
-				break;
-			}
-
-			// Update content to omit text up to and including closing tag.
-			$end_tag    = $block_match_end[0][0];
-			$end_offset = $block_match_end[0][1];
-
-			$inner_content = substr( $content, 0, $end_offset );
-			$content       = substr( $content, $end_offset + strlen( $end_tag ) );
-		}
-
-		// Replace dynamic block with server-rendered output.
-		$rendered_content .= $block_type->render( $attributes, $inner_content );
-	}
-
-	// Append remaining unmatched content.
-	$rendered_content .= $content;
-
-	// Strip remaining block comment demarcations.
-	$rendered_content = preg_replace( '/<!--\s+\/?wp:.*?-->\r?\n?/m', '', $rendered_content );
-
-	return $rendered_content;
-}
-add_filter( 'the_content', 'do_blocks', 9 ); // BEFORE do_shortcode().
-
-/**
- * Remove all dynamic blocks from the given content.
- *
- * @since 3.6.0
- *
- * @param string $content Content of the current post.
- * @return string
- */
-function strip_dynamic_blocks( $content ) {
-	return preg_replace( get_dynamic_blocks_regex(), '', $content );
-}
-
-/**
- * Adds the content filter to strip dynamic blocks from excerpts.
- *
- * It's a bit hacky for now, but once this gets merged into core the function
- * can just be called in `wp_trim_excerpt()`.
- *
- * @since 3.6.0
- *
- * @param string $text Excerpt.
- * @return string
- */
-function strip_dynamic_blocks_add_filter( $text ) {
-	add_filter( 'the_content', 'strip_dynamic_blocks', 8 ); // Before do_blocks().
-
-	return $text;
-}
-add_filter( 'get_the_excerpt', 'strip_dynamic_blocks_add_filter', 9 ); // Before wp_trim_excerpt().
-
-/**
- * Removes the content filter to strip dynamic blocks from excerpts.
- *
- * It's a bit hacky for now, but once this gets merged into core the function
- * can just be called in `wp_trim_excerpt()`.
- *
- * @since 3.6.0
- *
- * @param string $text Excerpt.
- * @return string
- */
-function strip_dynamic_blocks_remove_filter( $text ) {
-	remove_filter( 'the_content', 'strip_dynamic_blocks', 8 );
-
-	return $text;
-}
-add_filter( 'wp_trim_excerpt', 'strip_dynamic_blocks_remove_filter', 0 ); // Before all other.
+add_action( 'init', 'gutenberg_register_legacy_social_link_blocks' );

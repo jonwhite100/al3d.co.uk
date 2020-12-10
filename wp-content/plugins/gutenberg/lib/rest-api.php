@@ -11,50 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Registers the REST API routes needed by the Gutenberg editor.
+ * Handle a failing oEmbed proxy request to try embedding as a shortcode.
  *
- * @since 2.8.0
- */
-function gutenberg_register_rest_routes() {
-	$controller = new WP_REST_Block_Renderer_Controller();
-	$controller->register_routes();
-
-	/**
-	 * Filters the search handlers to use in the REST search controller.
-	 *
-	 * @since 3.3.0
-	 *
-	 * @param array $search_handlers List of search handlers to use in the controller. Each search
-	 *                               handler instance must extend the `WP_REST_Search_Handler` class.
-	 *                               Default is only a handler for posts.
-	 */
-	$search_handlers = apply_filters( 'wp_rest_search_handlers', array( new WP_REST_Post_Search_Handler() ) );
-
-	$controller = new WP_REST_Search_Controller( $search_handlers );
-	$controller->register_routes();
-
-	foreach ( get_post_types( array( 'show_in_rest' => true ), 'objects' ) as $post_type ) {
-		$class = ! empty( $post_type->rest_controller_class ) ? $post_type->rest_controller_class : 'WP_REST_Posts_Controller';
-
-		// Check if the class exists and is a subclass of WP_REST_Controller.
-		if ( ! is_subclass_of( $class, 'WP_REST_Controller' ) ) {
-			continue;
-		}
-
-		// Initialize the Autosaves controller.
-		$autosaves_controller = new WP_REST_Autosaves_Controller( $post_type->name );
-		$autosaves_controller->register_routes();
-	}
-}
-add_action( 'rest_api_init', 'gutenberg_register_rest_routes' );
-
-/**
- * Make sure oEmbed REST Requests apply the WP Embed security mechanism for WordPress embeds.
- *
- * @see  https://core.trac.wordpress.org/ticket/32522
- *
- * TODO: This is a temporary solution. Next step would be to edit the WP_oEmbed_Controller,
- * once merged into Core.
+ * @see https://core.trac.wordpress.org/ticket/45447
  *
  * @since 2.3.0
  *
@@ -64,396 +23,334 @@ add_action( 'rest_api_init', 'gutenberg_register_rest_routes' );
  * @return WP_HTTP_Response|object|WP_Error    The REST Request response.
  */
 function gutenberg_filter_oembed_result( $response, $handler, $request ) {
-	if ( 'GET' !== $request->get_method() ) {
+	if ( ! is_wp_error( $response ) || 'oembed_invalid_url' !== $response->get_error_code() ||
+			'/oembed/1.0/proxy' !== $request->get_route() ) {
 		return $response;
 	}
 
-	if ( is_wp_error( $response ) && 'oembed_invalid_url' !== $response->get_error_code() ) {
+	// Try using a classic embed instead.
+	global $wp_embed;
+	$html = $wp_embed->shortcode( array(), $_GET['url'] );
+	if ( ! $html ) {
 		return $response;
 	}
 
-	// External embeds.
-	if ( '/oembed/1.0/proxy' === $request->get_route() ) {
-		if ( is_wp_error( $response ) ) {
-			// It's possibly a local post, so lets try and retrieve it that way.
-			$post_id = url_to_postid( $_GET['url'] );
-			$data    = get_oembed_response_data( $post_id, apply_filters( 'oembed_default_width', 600 ) );
+	global $wp_scripts;
 
-			if ( $data ) {
-				// It's a local post!
-				$response = (object) $data;
-			} else {
-				// Try using a classic embed, instead.
-				global $wp_embed;
-				$html = $wp_embed->shortcode( array(), $_GET['url'] );
-				if ( $html ) {
-					return array(
-						'provider_name' => __( 'Embed Handler', 'gutenberg' ),
-						'html'          => $html,
-					);
-				}
-			}
-		}
-
-		// Make sure the HTML is run through the oembed sanitisation routines.
-		$response->html = wp_oembed_get( $_GET['url'], $_GET );
+	// Check if any scripts were enqueued by the shortcode, and include them in
+	// the response.
+	$enqueued_scripts = array();
+	foreach ( $wp_scripts->queue as $script ) {
+		$enqueued_scripts[] = $wp_scripts->registered[ $script ]->src;
 	}
 
-	return $response;
+	return array(
+		'provider_name' => __( 'Embed Handler', 'gutenberg' ),
+		'html'          => $html,
+		'scripts'       => $enqueued_scripts,
+	);
 }
 add_filter( 'rest_request_after_callbacks', 'gutenberg_filter_oembed_result', 10, 3 );
 
 /**
- * Add additional 'visibility' rest api field to taxonomies.
+ * Add fields required for site editing to the /themes endpoint.
  *
- * Used so private taxonomies are not displayed in the UI.
+ * @todo Remove once Gutenberg's minimum required WordPress version is v5.5.
+ * @see https://core.trac.wordpress.org/ticket/49906
+ * @see https://core.trac.wordpress.org/changeset/47921
  *
- * @see https://core.trac.wordpress.org/ticket/42707
+ * @param WP_REST_Response $response The response object.
+ * @param WP_Theme         $theme    Theme object used to create response.
  */
-function gutenberg_add_taxonomy_visibility_field() {
-	register_rest_field(
-		'taxonomy',
-		'visibility',
-		array(
-			'get_callback' => 'gutenberg_get_taxonomy_visibility_data',
-			'schema'       => array(
-				'description' => __( 'The visibility settings for the taxonomy.', 'gutenberg' ),
-				'type'        => 'object',
-				'context'     => array( 'edit' ),
-				'readonly'    => true,
-				'properties'  => array(
-					'public'             => array(
-						'description' => __( 'Whether a taxonomy is intended for use publicly either via the admin interface or by front-end users.', 'gutenberg' ),
-						'type'        => 'boolean',
-					),
-					'publicly_queryable' => array(
-						'description' => __( 'Whether the taxonomy is publicly queryable.', 'gutenberg' ),
-						'type'        => 'boolean',
-					),
-					'show_ui'            => array(
-						'description' => __( 'Whether to generate a default UI for managing this taxonomy.', 'gutenberg' ),
-						'type'        => 'boolean',
-					),
-					'show_admin_column'  => array(
-						'description' => __( 'Whether to allow automatic creation of taxonomy columns on associated post-types table.', 'gutenberg' ),
-						'type'        => 'boolean',
-					),
-					'show_in_nav_menus'  => array(
-						'description' => __( 'Whether to make the taxonomy available for selection in navigation menus.', 'gutenberg' ),
-						'type'        => 'boolean',
-					),
-					'show_in_quick_edit' => array(
-						'description' => __( 'Whether to show the taxonomy in the quick/bulk edit panel.', 'gutenberg' ),
-						'type'        => 'boolean',
-					),
-				),
-			),
-		)
+function gutenberg_filter_rest_prepare_theme( $response, $theme ) {
+	$data   = $response->get_data();
+	$fields = array_keys( $data );
+
+	/**
+	 * The following is basically copied from Core's WP_REST_Themes_Controller::prepare_item_for_response()
+	 * (as of WP v5.5), with `rest_is_field_included()` replaced by `! in_array()`.
+	 * This makes sure that we add all the fields that are missing from Core.
+	 *
+	 * @see https://github.com/WordPress/WordPress/blob/019bc2d244c4d536338d2c634419583e928143df/wp-includes/rest-api/endpoints/class-wp-rest-themes-controller.php#L118-L167
+	 */
+	if ( ! in_array( 'stylesheet', $fields, true ) ) {
+		$data['stylesheet'] = $theme->get_stylesheet();
+	}
+
+	if ( ! in_array( 'template', $fields, true ) ) {
+		/**
+		 * Use the get_template() method, not the 'Template' header, for finding the template.
+		 * The 'Template' header is only good for what was written in the style.css, while
+		 * get_template() takes into account where WordPress actually located the theme and
+		 * whether it is actually valid.
+		 */
+		$data['template'] = $theme->get_template();
+	}
+
+	$plain_field_mappings = array(
+		'requires_php' => 'RequiresPHP',
+		'requires_wp'  => 'RequiresWP',
+		'textdomain'   => 'TextDomain',
+		'version'      => 'Version',
 	);
-}
 
-/**
- * Gets taxonomy visibility property data.
- *
- * @see https://core.trac.wordpress.org/ticket/42707
- *
- * @param array $object Taxonomy data from REST API.
- * @return array Array of taxonomy visibility data.
- */
-function gutenberg_get_taxonomy_visibility_data( $object ) {
-	// Just return existing data for up-to-date Core.
-	if ( isset( $object['visibility'] ) ) {
-		return $object['visibility'];
+	foreach ( $plain_field_mappings as $field => $header ) {
+		if ( ! in_array( $field, $fields, true ) ) {
+			$data[ $field ] = $theme->get( $header );
+		}
 	}
 
-	$taxonomy = get_taxonomy( $object['slug'] );
+	if ( ! in_array( 'screenshot', $fields, true ) ) {
+		// Using $theme->get_screenshot() with no args to get absolute URL.
+		$data['screenshot'] = $theme->get_screenshot() ? $theme->get_screenshot() : '';
+	}
 
-	return array(
-		'public'             => $taxonomy->public,
-		'publicly_queryable' => $taxonomy->publicly_queryable,
-		'show_ui'            => $taxonomy->show_ui,
-		'show_admin_column'  => $taxonomy->show_admin_column,
-		'show_in_nav_menus'  => $taxonomy->show_in_nav_menus,
-		'show_in_quick_edit' => $taxonomy->show_ui,
+	$rich_field_mappings = array(
+		'author'      => 'Author',
+		'author_uri'  => 'AuthorURI',
+		'description' => 'Description',
+		'name'        => 'Name',
+		'tags'        => 'Tags',
+		'theme_uri'   => 'ThemeURI',
 	);
-}
 
-add_action( 'rest_api_init', 'gutenberg_add_taxonomy_visibility_field' );
-
-/**
- * Add a permalink template to posts in the post REST API response.
- *
- * @param WP_REST_Response $response WP REST API response of a post.
- * @param WP_Post          $post The post being returned.
- * @param WP_REST_Request  $request WP REST API request.
- * @return WP_REST_Response Response containing the permalink_template.
- */
-function gutenberg_add_permalink_template_to_posts( $response, $post, $request ) {
-	if ( 'edit' !== $request['context'] ) {
-		return $response;
-	}
-
-	if ( ! function_exists( 'get_sample_permalink' ) ) {
-		require_once ABSPATH . '/wp-admin/includes/post.php';
-	}
-
-	$sample_permalink = get_sample_permalink( $post->ID, $post->post_title, '' );
-
-	$response->data['permalink_template'] = $sample_permalink[0];
-	$response->data['generated_slug']     = $sample_permalink[1];
-
-	return $response;
-}
-
-/**
- * Add the block format version to post content in the post REST API response.
- *
- * @todo This will need to be registered to the schema too.
- *
- * @param WP_REST_Response $response WP REST API response of a post.
- * @param WP_Post          $post The post being returned.
- * @param WP_REST_Request  $request WP REST API request.
- * @return WP_REST_Response Response containing the block_format.
- */
-function gutenberg_add_block_format_to_post_content( $response, $post, $request ) {
-	if ( 'edit' !== $request['context'] ) {
-		return $response;
-	}
-
-	$response_data = $response->get_data();
-	if ( isset( $response_data['content'] ) && is_array( $response_data['content'] ) && isset( $response_data['content']['raw'] ) ) {
-		$response_data['content']['block_format'] = gutenberg_content_block_version( $response_data['content']['raw'] );
-		$response->set_data( $response_data );
-	}
-
-	return $response;
-}
-
-/**
- * Include target schema attributes to links, based on whether the user can.
- *
- * @param WP_REST_Response $response WP REST API response of a post.
- * @param WP_Post          $post The post being returned.
- * @param WP_REST_Request  $request WP REST API request.
- * @return WP_REST_Response Response containing the new links.
- */
-function gutenberg_add_target_schema_to_links( $response, $post, $request ) {
-	$new_links  = array();
-	$orig_links = $response->get_links();
-	$post_type  = get_post_type_object( $post->post_type );
-	$orig_href  = ! empty( $orig_links['self'][0]['href'] ) ? $orig_links['self'][0]['href'] : null;
-	if ( 'edit' === $request['context'] && current_user_can( 'unfiltered_html' ) ) {
-		$new_links['https://api.w.org/action-unfiltered_html'] = array(
-			array(
-				'title'        => __( 'The current user can post HTML markup and JavaScript.', 'gutenberg' ),
-				'href'         => $orig_href,
-				'targetSchema' => array(
-					'type'       => 'object',
-					'properties' => array(
-						'unfiltered_html' => array(
-							'type' => 'boolean',
-						),
-					),
-				),
-			),
-		);
-	}
-
-	$response->add_links( $new_links );
-	return $response;
-}
-
-/**
- * Whenever a post type is registered, ensure we're hooked into it's WP REST API response.
- *
- * @param string $post_type The newly registered post type.
- * @return string That same post type.
- */
-function gutenberg_register_post_prepare_functions( $post_type ) {
-	add_filter( "rest_prepare_{$post_type}", 'gutenberg_add_permalink_template_to_posts', 10, 3 );
-	add_filter( "rest_prepare_{$post_type}", 'gutenberg_add_block_format_to_post_content', 10, 3 );
-	add_filter( "rest_prepare_{$post_type}", 'gutenberg_add_target_schema_to_links', 10, 3 );
-	add_filter( "rest_{$post_type}_collection_params", 'gutenberg_filter_post_collection_parameters', 10, 2 );
-	add_filter( "rest_{$post_type}_query", 'gutenberg_filter_post_query_arguments', 10, 2 );
-	return $post_type;
-}
-add_filter( 'registered_post_type', 'gutenberg_register_post_prepare_functions' );
-
-/**
- * Whenever a taxonomy is registered, ensure we're hooked into its WP REST API response.
- *
- * @param string $taxonomy The newly registered taxonomy.
- */
-function gutenberg_register_taxonomy_prepare_functions( $taxonomy ) {
-	add_filter( "rest_{$taxonomy}_collection_params", 'gutenberg_filter_term_collection_parameters', 10, 2 );
-	add_filter( "rest_{$taxonomy}_query", 'gutenberg_filter_term_query_arguments', 10, 2 );
-}
-add_filter( 'registered_taxonomy', 'gutenberg_register_taxonomy_prepare_functions' );
-
-/**
- * Ensure that the wp-json index contains the 'theme-supports' setting as
- * part of its site info elements.
- *
- * @param WP_REST_Response $response WP REST API response of the wp-json index.
- * @return WP_REST_Response Response that contains theme-supports.
- */
-function gutenberg_ensure_wp_json_has_theme_supports( $response ) {
-	$site_info = $response->get_data();
-	if ( ! array_key_exists( 'theme_supports', $site_info ) ) {
-		$site_info['theme_supports'] = array();
-	}
-	if ( ! array_key_exists( 'formats', $site_info['theme_supports'] ) ) {
-		$formats = get_theme_support( 'post-formats' );
-		$formats = is_array( $formats ) ? array_values( $formats[0] ) : array();
-		$formats = array_merge( array( 'standard' ), $formats );
-
-		$site_info['theme_supports']['formats'] = $formats;
-	}
-	if ( ! array_key_exists( 'post-thumbnails', $site_info['theme_supports'] ) ) {
-		$post_thumbnails = get_theme_support( 'post-thumbnails' );
-		if ( $post_thumbnails ) {
-			// $post_thumbnails can contain a nested array of post types.
-			// e.g. array( array( 'post', 'page' ) ).
-			$site_info['theme_supports']['post-thumbnails'] = is_array( $post_thumbnails ) ? $post_thumbnails[0] : true;
+	foreach ( $rich_field_mappings as $field => $header ) {
+		if ( ! in_array( $field, $fields, true ) ) {
+			$data[ $field ]['raw']      = $theme->display( $header, false, true );
+			$data[ $field ]['rendered'] = $theme->display( $header );
 		}
 	}
-	$response->set_data( $site_info );
+
+	$response->set_data( $data );
 	return $response;
 }
-add_filter( 'rest_index', 'gutenberg_ensure_wp_json_has_theme_supports' );
+add_filter( 'rest_prepare_theme', 'gutenberg_filter_rest_prepare_theme', 10, 2 );
 
 /**
- * Handle any necessary checks early.
+ * Registers the block directory.
  *
- * @param WP_HTTP_Response $response Result to send to the client. Usually a WP_REST_Response.
- * @param WP_REST_Server   $handler  ResponseHandler instance (usually WP_REST_Server).
- * @param WP_REST_Request  $request  Request used to generate the response.
+ * @since 6.5.0
  */
-function gutenberg_handle_early_callback_checks( $response, $handler, $request ) {
-	if ( 0 === strpos( $request->get_route(), '/wp/v2/' ) ) {
-		$can_unbounded_query = false;
-		$types               = get_post_types( array( 'show_in_rest' => true ), 'objects' );
-		foreach ( $types as $type ) {
-			if ( current_user_can( $type->cap->edit_posts ) ) {
-				$can_unbounded_query = true;
-			}
+function gutenberg_register_rest_block_directory() {
+	$block_directory_controller = new WP_REST_Block_Directory_Controller();
+	$block_directory_controller->register_routes();
+}
+add_filter( 'rest_api_init', 'gutenberg_register_rest_block_directory' );
+
+/**
+ * Registers the Block types REST API routes.
+ */
+function gutenberg_register_block_type() {
+	$block_types = new WP_REST_Block_Types_Controller();
+	$block_types->register_routes();
+}
+add_action( 'rest_api_init', 'gutenberg_register_block_type' );
+/**
+ * Registers the menu locations area REST API routes.
+ */
+function gutenberg_register_rest_menu_location() {
+	$nav_menu_location = new WP_REST_Menu_Locations_Controller();
+	$nav_menu_location->register_routes();
+}
+add_action( 'rest_api_init', 'gutenberg_register_rest_menu_location' );
+
+/**
+ * Registers the menu locations area REST API routes.
+ */
+function gutenberg_register_rest_customizer_nonces() {
+	$nav_menu_location = new WP_Rest_Customizer_Nonces();
+	$nav_menu_location->register_routes();
+}
+add_action( 'rest_api_init', 'gutenberg_register_rest_customizer_nonces' );
+
+
+/**
+ * Registers the Plugins REST API routes.
+ */
+function gutenberg_register_plugins_endpoint() {
+	$plugins = new WP_REST_Plugins_Controller();
+	$plugins->register_routes();
+}
+add_action( 'rest_api_init', 'gutenberg_register_plugins_endpoint' );
+
+/**
+ * Registers the Sidebars & Widgets REST API routes.
+ */
+function gutenberg_register_sidebars_and_widgets_endpoint() {
+	$sidebars = new WP_REST_Sidebars_Controller();
+	$sidebars->register_routes();
+
+	$widget_types = new WP_REST_Widget_Types_Controller();
+	$widget_types->register_routes();
+	$widgets = new WP_REST_Widgets_Controller();
+	$widgets->register_routes();
+}
+add_action( 'rest_api_init', 'gutenberg_register_sidebars_and_widgets_endpoint' );
+
+/**
+ * Registers the Batch REST API routes.
+ */
+function gutenberg_register_batch_endpoint() {
+	$batch = new WP_REST_Batch_Controller();
+	$batch->register_routes();
+}
+add_action( 'rest_api_init', 'gutenberg_register_batch_endpoint' );
+
+/**
+ * Hook in to the nav menu item post type and enable a post type rest endpoint.
+ *
+ * @param array  $args Current registered post type args.
+ * @param string $post_type Name of post type.
+ *
+ * @return array
+ */
+function wp_api_nav_menus_post_type_args( $args, $post_type ) {
+	if ( 'nav_menu_item' === $post_type ) {
+		$args['show_in_rest']          = true;
+		$args['rest_base']             = 'menu-items';
+		$args['rest_controller_class'] = 'WP_REST_Menu_Items_Controller';
+	}
+
+	return $args;
+}
+add_filter( 'register_post_type_args', 'wp_api_nav_menus_post_type_args', 10, 2 );
+
+/**
+ * Hook in to the nav_menu taxonomy and enable a taxonomy rest endpoint.
+ *
+ * @param array  $args Current registered taxonomy args.
+ * @param string $taxonomy Name of taxonomy.
+ *
+ * @return array
+ */
+function wp_api_nav_menus_taxonomy_args( $args, $taxonomy ) {
+	if ( 'nav_menu' === $taxonomy ) {
+		$args['show_in_rest']          = true;
+		$args['rest_base']             = 'menus';
+		$args['rest_controller_class'] = 'WP_REST_Menus_Controller';
+	}
+
+	return $args;
+}
+add_filter( 'register_taxonomy_args', 'wp_api_nav_menus_taxonomy_args', 10, 2 );
+
+/**
+ * Shim for get_sample_permalink() to add support for auto-draft status.
+ *
+ * This function filters the return from get_sample_permalink() and essentially
+ * re-runs the same logic minus the filters, but pretends a status of auto-save
+ * is actually publish in order to return the future permalink format.
+ *
+ * This is a temporary fix until we can patch get_sample_permalink()
+ *
+ * @see https://core.trac.wordpress.org/ticket/46266
+ *
+ * @param array  $permalink Array containing the sample permalink with placeholder for the post name, and the post name.
+ * @param int    $id        ID of the post.
+ * @param string $title     Title of the post.
+ * @param string $name      Slug of the post.
+ * @param object $post      WP_Post object.
+ *
+ * @return array Array containing the sample permalink with placeholder for the post name, and the post name.
+ */
+function gutenberg_auto_draft_get_sample_permalink( $permalink, $id, $title, $name, $post ) {
+	if ( 'auto-draft' !== $post->post_status ) {
+		return $permalink;
+	}
+	$ptype = get_post_type_object( $post->post_type );
+
+	$original_status = $post->post_status;
+	$original_date   = $post->post_date;
+	$original_name   = $post->post_name;
+
+	// Hack: get_permalink() would return ugly permalink for drafts, so we will fake that our post is published.
+	$post->post_status = 'publish';
+	$post->post_name   = sanitize_title( $post->post_name ? $post->post_name : $post->post_title, $post->ID );
+
+	// If the user wants to set a new name -- override the current one.
+	// Note: if empty name is supplied -- use the title instead, see #6072.
+	if ( ! is_null( $name ) ) {
+		$post->post_name = sanitize_title( $name ? $name : $title, $post->ID );
+	}
+
+	$post->post_name = wp_unique_post_slug( $post->post_name, $post->ID, $post->post_status, $post->post_type, $post->post_parent );
+
+	$post->filter = 'sample';
+
+	$permalink = get_permalink( $post, true );
+
+	// Replace custom post_type Token with generic pagename token for ease of use.
+	$permalink = str_replace( "%$post->post_type%", '%pagename%', $permalink );
+
+	// Handle page hierarchy.
+	if ( $ptype->hierarchical ) {
+		$uri = get_page_uri( $post );
+		if ( $uri ) {
+			$uri = untrailingslashit( $uri );
+			$uri = strrev( stristr( strrev( $uri ), '/' ) );
+			$uri = untrailingslashit( $uri );
 		}
-		if ( $request['per_page'] < 0 ) {
-			if ( ! $can_unbounded_query ) {
-				return new WP_Error( 'rest_forbidden_per_page', __( 'Sorry, you are not allowed make unbounded queries.', 'gutenberg' ), array( 'status' => rest_authorization_required_code() ) );
-			}
+
+		if ( ! empty( $uri ) ) {
+			$uri .= '/';
 		}
+		$permalink = str_replace( '%pagename%', "{$uri}%pagename%", $permalink );
 	}
-	return $response;
+
+	$permalink         = array( $permalink, $post->post_name );
+	$post->post_status = $original_status;
+	$post->post_date   = $original_date;
+	$post->post_name   = $original_name;
+	unset( $post->filter );
+
+	return $permalink;
 }
-add_filter( 'rest_request_before_callbacks', 'gutenberg_handle_early_callback_checks', 10, 3 );
+add_filter( 'get_sample_permalink', 'gutenberg_auto_draft_get_sample_permalink', 10, 5 );
 
 /**
- * Include additional query parameters on the posts query endpoint.
+ * Registers the image editor.
  *
- * @see https://core.trac.wordpress.org/ticket/43998
- *
- * @param array        $query_params JSON Schema-formatted collection parameters.
- * @param WP_Post_Type $post_type    Post type object being accessed.
- * @return array
+ * @since 7.x.0
  */
-function gutenberg_filter_post_collection_parameters( $query_params, $post_type ) {
-	if (
-		isset( $query_params['per_page'] ) &&
-		( $post_type->hierarchical || 'wp_block' === $post_type->name )
-	) {
-		// Change from '1' to '-1', which means unlimited.
-		$query_params['per_page']['minimum'] = -1;
-		// Default sanitize callback is 'absint', which won't work in our case.
-		$query_params['per_page']['sanitize_callback'] = 'rest_sanitize_request_arg';
+function gutenberg_register_image_editor() {
+	global $wp_version;
+
+	// Strip '-src' from the version string. Messes up version_compare().
+	$version = str_replace( '-src', '', $wp_version );
+
+	// Only register routes for versions older than WP 5.5.
+	if ( version_compare( $version, '5.5-beta', '<' ) ) {
+		$image_editor = new WP_REST_Image_Editor_Controller();
+		$image_editor->register_routes();
 	}
-	return $query_params;
 }
+add_filter( 'rest_api_init', 'gutenberg_register_image_editor' );
 
 /**
- * Filter post collection query parameters to include specific behavior.
+ * Registers the post format search handler.
  *
- * @see https://core.trac.wordpress.org/ticket/43998
+ * @param string $search_handlers     Title list of current handlers.
  *
- * @param array           $prepared_args Array of arguments for WP_Query.
- * @param WP_REST_Request $request       The current request.
- * @return array
+ * @return array Title updated list of handlers.
  */
-function gutenberg_filter_post_query_arguments( $prepared_args, $request ) {
-	if (
-		is_post_type_hierarchical( $prepared_args['post_type'] ) ||
-		'wp_block' === $prepared_args['post_type']
-	) {
-		// Avoid triggering 'rest_post_invalid_page_number' error
-		// which will need to be addressed in https://core.trac.wordpress.org/ticket/43998.
-		if ( -1 === $prepared_args['posts_per_page'] ) {
-			$prepared_args['posts_per_page'] = 100000;
-		}
+function gutenberg_post_format_search_handler( $search_handlers ) {
+	if ( current_theme_supports( 'post-formats' ) ) {
+		$search_handlers[] = new WP_REST_Post_Format_Search_Handler();
 	}
-	return $prepared_args;
+
+	return $search_handlers;
 }
+add_filter( 'wp_rest_search_handlers', 'gutenberg_post_format_search_handler', 10, 5 );
 
 /**
- * Include additional query parameters on the terms query endpoint.
+ * Registers the terms search handler.
  *
- * @see https://core.trac.wordpress.org/ticket/43998
+ * @param string $search_handlers Title list of current handlers.
  *
- * @param array  $query_params JSON Schema-formatted collection parameters.
- * @param object $taxonomy     Taxonomy being accessed.
- * @return array
+ * @return array Title updated list of handlers.
  */
-function gutenberg_filter_term_collection_parameters( $query_params, $taxonomy ) {
-	if ( $taxonomy->show_in_rest
-		&& ( false === $taxonomy->rest_controller_class
-			|| 'WP_REST_Terms_Controller' === $taxonomy->rest_controller_class )
-		&& isset( $query_params['per_page'] ) ) {
-		// Change from '1' to '-1', which means unlimited.
-		$query_params['per_page']['minimum'] = -1;
-		// Default sanitize callback is 'absint', which won't work in our case.
-		$query_params['per_page']['sanitize_callback'] = 'rest_sanitize_request_arg';
-	}
-	return $query_params;
+function gutenberg_term_search_handler( $search_handlers ) {
+	$search_handlers[] = new WP_REST_Term_Search_Handler();
+	return $search_handlers;
 }
-
-/**
- * Filter term collection query parameters to include specific behavior.
- *
- * @see https://core.trac.wordpress.org/ticket/43998
- *
- * @param array           $prepared_args Array of arguments for WP_Term_Query.
- * @param WP_REST_Request $request       The current request.
- * @return array
- */
-function gutenberg_filter_term_query_arguments( $prepared_args, $request ) {
-	// Can't check the actual taxonomy here because it's not
-	// passed through in $prepared_args (or the filter generally).
-	if ( 0 === strpos( $request->get_route(), '/wp/v2/' ) ) {
-		if ( -1 === $prepared_args['number'] ) {
-			// This should be unset( $prepared_args['number'] )
-			// but WP_REST_Terms Controller needs to be updated to support
-			// unbounded queries.
-			// Will be addressed in https://core.trac.wordpress.org/ticket/43998.
-			$prepared_args['number'] = 100000;
-		}
-	}
-	return $prepared_args;
-}
-
-/**
- * Include additional query parameters on the user query endpoint.
- *
- * @see https://core.trac.wordpress.org/ticket/43998
- *
- * @param array $query_params JSON Schema-formatted collection parameters.
- * @return array
- */
-function gutenberg_filter_user_collection_parameters( $query_params ) {
-	if ( isset( $query_params['per_page'] ) ) {
-		// Change from '1' to '-1', which means unlimited.
-		$query_params['per_page']['minimum'] = -1;
-		// Default sanitize callback is 'absint', which won't work in our case.
-		$query_params['per_page']['sanitize_callback'] = 'rest_sanitize_request_arg';
-	}
-	return $query_params;
-}
-add_filter( 'rest_user_collection_params', 'gutenberg_filter_user_collection_parameters' );
+add_filter( 'wp_rest_search_handlers', 'gutenberg_term_search_handler', 10, 5 );
