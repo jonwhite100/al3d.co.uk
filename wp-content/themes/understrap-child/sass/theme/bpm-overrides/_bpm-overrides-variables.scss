@@ -1,0 +1,122 @@
+// Use this file to overwrite the basic Bootstrap variables and add your own variables
+// To overwrite a Bootstrap variable you don´t have to touch the Bootstrap folder.
+// Just copy a variable from /sass/bootstrap/_variables.scss, paste it here and edit the value.
+// As example you find one of the most important Bootstrap variable below: $brand-primary.
+// Thats the ugly Bootstrap blue used for all the links, primary buttons etc.
+// Just add your color code here, compile the theme.scss file to change this color everywhere
+
+// Spacers
+$spacer: 1rem; // 16px;
+
+$s-sm: $spacer;
+$s-xs: $s-sm / 2;
+$s-xxs: $s-xs / 2;
+$s-md: $s-sm * 2;
+$s-lg: $s-md * 2;
+$s-xl: $s-lg + $s-md;
+
+// Colours
+$primary:  #bb2c29 !default; // red
+$secondary: #f2c230 !default;
+$tertiary: #b8ccd9 !default;
+
+$black: #000 !default;
+$white: #fff !default;
+$gray-100: #f8f9fa !default; // lightest gray
+$gray-200: #a2a4a5 !default; // lighter gray
+$gray-300: #767679 !default; // light gray from logo
+$gray-600: #444647 !default; // dark gray
+$gray-900: #212223 !default; // logo dark gray
+
+// Buttons
+$c-btn-pulse: rgba($secondary, 0) !default;
+$btn-border-radius: 0;
+
+
+// Fixed background
+$path-to-fixed-bg-newsletter: 'uploads/2019/09/bigplane-test-image.jpg' !default;
+
+// Forms
+$input-border-radius: 0;
+$input-font-size: .85rem;
+$input-bg: darken($gray-100, 5%);
+$input-border-color: darken($gray-100, 5%);
+
+// Fonts
+@import url('https://use.typekit.net/uyi5cvn.css'); // sass-lint:disable-line no-url-domains no-url-protocols
+
+$font-family-sans-serif: open-sans, sans-serif !default;
+$headings-font-family: open-sans-condensed, sans-serif !default;
+$logo-font-family: handel-gothic, sans-serif !default;
+$headings-font-weight: 300 !default;
+$headings-text-transform: 'uppercase' !default;
+
+$headings-color: $gray-300 !default;
+$body-color: $gray-300 !default;
+$body-bg: $white;
+
+$font-size-base: 1.25rem !default;
+$h1-font-size: $font-size-base * 2.5 !default;
+$h2-font-size: $font-size-base * 2.1 !default;
+$h3-font-size: $font-size-base * 1.5 !default;
+$h4-font-size: $font-size-base * 1.1 !default;
+
+// $h5-font-size: $font-size-base * 1.25 !default;
+// $h6-font-size: $font-size-base !default;
+
+// Footer widgets
+$c-wrapper-footer-widgets: $white !default;
+$c-wrapper-footer-widgets-bg: $primary !default;
+$c-wrapper-footer-widgets-link: $white !default;
+
+// Footer copyright info
+$c-wrapper-footer: $white !default;
+$c-wrapper-footer-bg: $black !default;
+
+$c-footer-menu-link: $white !default;
+
+// Site (comes befor Jombotron becasue of use of variables)
+$s-site-margin-top-sm: 0;
+$s-site-margin-top-md: 0;
+$s-site-margin-top-lg: 0;
+
+// Jumbotron
+$c-jumbotron-h1: $white !default;
+$c-jumbotron-h2: $white !default;
+$c-jumbotron-h2-bg: rgba($gray-900, .5) !default;
+$c-jumbotron-base-bg: $white !default;
+$s-jumbotron-height: 100vh !default; // TODO: put this and the Site (see above) into JMWhite properly
+
+$s-jumbotron-height-xs: 100vh;
+$s-jumbotron-height-sm: calc(#{$s-jumbotron-height} - 100px);
+$s-jumbotron-height-md: calc(#{$s-jumbotron-height} - 85px);
+$s-jumbotron-height-lg: calc(#{$s-jumbotron-height} - 90px);
+$s-jumbotron-height-xl: 90vh;
+$jumbotron-bg: transparent;
+
+// Navbar
+$c-navbar-bg: $white !default; // the whole of the sticky top
+$c-navbar-bg-shrink: $white !default; // when shrink class applied
+$c-navbar-collapse-bg: $white !default;
+
+$c-navbar-toggle-bg: $white !default; // hamburger
+$c-navbar-toggle-bg-shrink: $white !default;
+
+$navbar-light-color:                $body-color !default;
+$navbar-light-color-shrink:         $body-color !default;
+$navbar-light-hover-color:          $body-color !default;
+$navbar-light-active-color:         $body-color !default;
+$navbar-light-disabled-color:       $body-color !default;
+$navbar-light-toggler-border-color: $white;
+$navbar-light-toggler-border-color-shrink: $primary;
+
+$navbar-dark-color: $white !default;
+$navbar-dark-color-shrink:         $white !default;
+$navbar-dark-hover-color:          $white !default;
+$navbar-dark-active-color:         $white !default;
+$navbar-dark-disabled-color:       $white !default;
+$navbar-dark-toggler-border-color: $white;
+$navbar-dark-toggler-border-color-shrink: $primary;
+
+// Tile
+$c-tile: $white !default;

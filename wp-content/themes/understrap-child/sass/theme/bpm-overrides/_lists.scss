@@ -1,0 +1,50 @@
+.fa-ul {
+	margin: 0;
+
+	li {
+		padding-bottom: $s-xs;
+		padding-left: 1.5rem;
+		font-size: $font-size-base * .85;
+    	text-indent: -1.6rem;
+
+		&::before {
+			margin-right: $s-xs;
+			color: $secondary;
+			font-family: 'FontAwesome';
+			content: $fa-var-check;
+		}
+	}
+}
+
+.list-icon {
+	li {
+		align-items: center;
+		margin-bottom: $s-sm;
+	}
+}
+
+.wp-block-bpm-blocks-bpm-section-block-content {
+	li {
+		position: relative;
+		padding-left: $s-md + $s-xs;
+		line-height: $s-md + $s-xs;
+		list-style-type: none;
+
+		&::before {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: $s-md;
+			height: $s-md;
+			border: 4px solid $secondary;
+			border-radius: 50%;
+			background-color: $primary;
+			color: $white;
+			font-family: 'FontAwesome';
+			font-size: $s-sm;
+			line-height: 1.6;
+			text-align: center;
+    		content: '\f00c';
+		}
+	}
+}

@@ -1,0 +1,122 @@
+// content area padding
+.entry-content {
+	// padding-top: 4rem;
+	// padding-bottom: 4rem;
+	//
+	// .page-id-6 & {
+	// 	padding-bottom: -1rem;
+	// }
+
+	.home & {
+		padding-bottom: 0;
+	}
+}
+
+.entry-footer {
+	.home & {
+		margin-top: -#{$s-sm};
+	}
+}
+
+// center the background image
+.img-to-parent {
+	background-position: center;
+	background-size: cover;
+}
+
+// the tile layout element
+.tile {
+	&-reverse {
+		flex-direction: row-reverse;
+	}
+}
+
+.tile-text {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+
+	h2,
+	h3,
+	p,
+	ul,
+	.wp-bootstrap-blocks-button,
+	.form-group {
+		padding-right: $s-md;
+		padding-left: $s-md;
+
+		@include media-breakpoint-up(lg) {
+			padding-right: $s-xl;
+			padding-left: $s-xl;
+		}
+	}
+
+	h2,
+	h3,
+	p {
+		margin-bottom: $s-md;
+	}
+
+	.wp-bootstrap-blocks-button {
+		margin-bottom: $s-md;
+
+		@include media-breakpoint-up(lg) {
+			margin-bottom: 0;
+		}
+	}
+
+	h2,
+	h3 {
+		&:first-of-type {
+			margin-top: $s-md;
+		}
+
+		@include media-breakpoint-up(lg) {
+			margin-top: 0;
+		}
+	}
+
+	&.bg-primary {
+		color: $c-tile;
+	}
+
+	&.bg-light {
+		color: $body-color;
+	}
+}
+
+.tile-img {
+	.wp-block-image {
+		display: block;
+		min-height: 25rem;
+		margin-bottom: 0;
+
+		@include media-breakpoint-up(md) {
+			min-height: 100%;
+		}
+	}
+}
+
+// logos on the home page
+.wp-block-gallery {
+	.home & {
+		display: flex;
+		justify-content: center;
+		padding-top: $s-sm;
+	}
+}
+.blocks-gallery-item {
+	.home & {
+		display: inline-block;
+
+		figure {
+			align-items: center;
+		}
+
+		img {
+			max-width: 150px;
+			padding-right: $s-sm;
+			padding-left: $s-sm;
+		}
+	}
+}

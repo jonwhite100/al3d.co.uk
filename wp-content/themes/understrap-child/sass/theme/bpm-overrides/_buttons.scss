@@ -1,0 +1,23 @@
+// .btn.circle.border.btn-sm { // sass-lint:disable-line force-element-nesting
+// 	padding: $s-sm $s-md;
+// 	border-radius: 0;
+// 	border-color: $white !important; // sass-lint:disable-line no-important
+// 	background-color: $white;
+// 	color: $black;
+// 	font-family: $font-family-sans-serif;
+// 	font-size: 14px;
+// 	text-transform: uppercase;
+//
+// 	&:hover,
+// 	&:active {
+// 		transition: all .25s ease-in-out;
+// 		border-color: $gray-100 !important; // sass-lint:disable-line no-important
+// 		background-color: $gray-100;
+// 	}
+// }
+
+.btn {
+	br {
+		display: none;
+	}
+}

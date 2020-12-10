@@ -1,0 +1,16 @@
+.card-title {
+	.card-blog-post & {
+		padding-right: 0;
+		padding-left: 0;
+	}
+}
+
+.card-body {
+	display: flex;
+	flex-direction: column;
+	p {
+		&:last-of-type {
+			margin-top: auto;
+		}
+	}
+}
