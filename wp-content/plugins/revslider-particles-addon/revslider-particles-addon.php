@@ -4,7 +4,7 @@ Plugin Name: Slider Revolution Particles Effect
 Plugin URI: http://www.themepunch.com/
 Description: Add interactive particle animations to your sliders
 Author: ThemePunch
-Version: 1.0.6
+Version: 2.1.0
 Author URI: http://themepunch.com
 */
 
@@ -40,6 +40,13 @@ function rs_particles_init(){
 * call all needed functions on plugins loaded *
 **/
 add_action('plugins_loaded', 'rs_particles_init');
+register_activation_hook( __FILE__, 'rs_particles_init');
+
+//build js global var for activation
+add_filter( 'revslider_activate_addon', array('RsAddOnParticlesBase','get_data'),10,2);
+
+// get help definitions on-demand.  merges AddOn definitions with core revslider definitions
+add_filter( 'revslider_help_directory', array('RsAddOnParticlesBase','get_help'),10,1);
 
 
 ?>

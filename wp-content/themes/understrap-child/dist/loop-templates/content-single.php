@@ -25,7 +25,6 @@
 				) );
 				?>
 			</div>
-			<?php putRevSlider( 'highlight-carousel5' ); ?>
 		</div>
 	</div>
 

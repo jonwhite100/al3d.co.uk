@@ -4,7 +4,7 @@ Plugin Name: Slider Revolution Reveal Preloaders
 Plugin URI: http://www.themepunch.com/
 Description: Reveal your sliders in style
 Author: ThemePunch
-Version: 1.0.1
+Version: 2.0.0
 Author URI: http://themepunch.com
 */
 
@@ -29,7 +29,7 @@ require_once(RS_REVEALER_PLUGIN_PATH . 'includes/base.class.php');
 * handle everyting by calling the following function *
 **/
 function rs_revealer_init(){
-	
+
 	new RsRevealerBase();
 	
 }
@@ -38,6 +38,12 @@ function rs_revealer_init(){
 * call all needed functions on plugins loaded *
 **/
 add_action('plugins_loaded', 'rs_revealer_init');
+register_activation_hook( __FILE__, 'rs_revealer_init');
 
+//build js global var for activation
+add_filter( 'revslider_activate_addon', array('RsAddOnRevealerBase','get_data'),10,2);
+
+// get help definitions on-demand.  merges AddOn definitions with core revslider definitions
+add_filter( 'revslider_help_directory', array('RsAddOnRevealerBase','get_help'),10,1);
 
 ?>

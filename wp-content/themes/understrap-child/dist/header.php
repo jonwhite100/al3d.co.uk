@@ -86,6 +86,7 @@ $container = get_theme_mod( 'understrap_container_type' );
 
 	<?php if ( is_front_page() ) : ?>
 		<?php // get_template_part( 'global-templates/hero' ); ?>
+		<!--
 		<div class="triptych">
 			<div class="triptych-panel">
 				<div class="triptych-img">
@@ -104,9 +105,10 @@ $container = get_theme_mod( 'understrap_container_type' );
 					<img src="http://bpm-web-hosting.co.uk/al3d/wp-content/uploads/2018/08/res-extension01.jpg" alt="" />
 				</div>
 				<div class="triptych-title">Delivery</div>
-				<!-- <svg>
+				<svg>
 				  <line class="animline" x1="0" y1="75" x2="300" y2="75"/>
-				</svg> -->
+				</svg>
 			</div>
 		</div>
+		-->
 	<?php endif; ?>

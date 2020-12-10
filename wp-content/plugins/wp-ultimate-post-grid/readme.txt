@@ -3,7 +3,7 @@ Contributors: BrechtVds
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QG7KZMGFU325Y
 Tags: grid, isotope, filter, custom post type
 Requires at least: 3.5
-Tested up to: 4.9
+Tested up to: 5.5
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -14,30 +14,35 @@ Easily create filterable responsive grids for your posts, pages or custom post t
 
 Use WP Ultimate Post Grid to create responsive grids for your posts, pages or any custom post type. Optionally add an isotope filter for any taxonomy associated with those posts.
 
-Go to our website for [documentation and video lessons on all our features](http://bootstrapped.ventures/wp-ultimate-post-grid/).
+> <strong>See this plugin in action!</strong><br>
+> Check out [demos of our grids](https://bootstrapped.ventures/wp-ultimate-post-grid/) and all of the [plugin documentation](https://help.bootstrapped.ventures/collection/7-wp-ultimate-post-grid) to learn more.
 
 An overview of the WP Ultimate Post Grid features:
 
+*   **Live Preview** while building your grid
 *   Use posts, pages or **custom post types** as the source
 *   Grids are **responsive** and will look good on any device
 *   Ability to set **order by** options
 *   Link to the actual **post or featured image**
 *   Define **custom links** for posts
 *   Define **custom images** for posts
-*   Add an **isotope filter** for any taxonomy
+*   Add an **isotope filter** for any taxonomy or custom field
 *   **Deeplinking** directly to a filtered grid
 *   Grids and filters can be added anywhere with **their own shortcode**
 *   Multiple **templates** for your grids
+*   Extensive **Template Editor** to create any grid you want
 *   Possibility to use **pagination**
+*   Compatible with both **Classic Editor and Gutenberg** Block Editor
+*   Fully integrated with our WP Recipe Maker plugin for a **recipe  grid**
 
-We also have a [WP Ultimate Post Grid Premium version](http://bootstrapped.ventures/wp-ultimate-post-grid/) which offers the following features:
+We also have a [WP Ultimate Post Grid Premium version](https://bootstrapped.ventures/wp-ultimate-post-grid/) which offers the following features:
 
 *   **Limit your posts** by any taxonomy, author, date or post ID
 *   Use a **plain text filter** for your grid
 *   Have **dropdown filters** for any taxonomy
+*   Use a **checkbox filter** for any taxonomy
 *   Allow for **multiselect** in the filters
 *   Show the **post count** for the filter terms
-*   Extensive **Template Editor** to create any grid you want
 *   Create a grid of your **categories or tags**
 *   A **Load More button** for pagination
 *   **Load on filter** pagination
@@ -57,26 +62,93 @@ This plugin is under active development. Any feature requests are welcome!
 
 == Frequently asked questions ==
 
-= Where can I find more documenation? =
-[Over here!](http://bootstrapped.ventures/wp-ultimate-post-grid/)
-
-= Is this it? =
-
-It's still an early version of the plugin and we'll be adding new features every few weeks. Let us know what you're looking for and we might be able to include it!
+= Where can I find a demo and some more documentation? =
+Check out the [WP Ultimate Post Grid demo site](https://bootstrapped.ventures/wp-ultimate-post-grid/) and [WPUPG documentation](https://help.bootstrapped.ventures/collection/7-wp-ultimate-post-grid) for more information on all of the features!
 
 = Who made this? =
 
-[BootstrappedVentures.com](http://www.bootstrappedventures.com/)
+[Bootstrapped Ventures](https://bootstrapped.ventures)
 
 == Screenshots ==
 
-1. Create grids for any post type and filters for any taxonomy
-2. Easily style the filter buttons with a preview
-3. Add your grid and filter to any page or post with separate shortcodes
-4. The result of this example
-5. Everything is fully responsive
+1. Easily create multiple grids with Live Preview
+2. Use Gutenberg Blocks to add your grids to any post or page...
+3. ...or use the WP Ultimate Post Grid icon in the Classic Editor
+4. Customize the look & feel to match your website style
+5. Different free templates that are fully responsive and work on desktop, tablet and mobile
 
 == Changelog ==
+= 3.5.1 =
+* Fix: Filters not working correctly in some environments
+* Fix: Plugin sidebar problem in Gutenberg after unpinning
+
+= 3.5.0 =
+* Feature: New free Ruled template
+* Feature: Block display style for item terms
+* Feature: Show author image in template editor
+* Feature: Link item image in template editor
+* Feature: Spacer block for template editor
+* Improvement: Major performance boost for filters
+* Fix: Prevent PHP notices in WordPress 5.5
+
+= 3.4.0 =
+* Feature: Template Editor as part of the free plugin
+* Feature: Allow links for terms block in Template Editor
+* Improvement: Use i18n date function to make sure the date language is correct
+* Fix: Filter problem with multiple multi-select "OR" filters
+
+= 3.3.0 =
+* Feature: Filter by custom fields
+* Improvement: Better browser compatibility
+* Fix: Layout with items in set number of columns not working in some themes
+* Fix: Icons on Manage page not showing up on some server configurations
+* Fix: Hustle plugin compatibility
+
+= 3.2.1 =
+* Fix: Compatibility with Newsletter plugin
+
+= 3.2.0 =
+* Improvement: Don't force close on save
+* Fix: Better compatibility with JS deferring plugins
+
+= 3.1.0 =
+* Feature: Show filters on side of the grid
+* Feature: Optional labels for filters
+* Feature: Set border-radius for Isotope Filter and Pages Pagination
+* Feature: Ability to reorder filters
+* Feature: Option to display filters inline
+* Improvement: Better grid display before page has fully loaded
+* Improvement: Set global $post object for each grid item
+* Improvement: Grid post type should not be public
+* Improvement: Show grid name when editing
+* Improvement: Setting to choose what taxonomies to display the grid fields for
+* Fix: Hover color sticking in isotope filter because of keyboard focus
+
+= 3.0.1 =
+* Feature: Display private posts in a grid
+* Fix: Images not showing correctly in Media post type grid
+* Fix: Not saving "Items in Rows" layout mode
+
+= 3.0.0 =
+* Feature: Live Preview of grid when editing
+* Feature: Gutenberg blocks for grid and filters
+* Feature: Disable deeplinking per grid
+* Feature: Set different layout for desktop, tablet and mobile
+* Feature: Order terms by count
+* Feature: Create and combine multiple filters
+* Fix: Working pagination when using random order
+
+= 2.8.2 =
+* Improvement: Combined and minified JS files
+* Improvement: Only load JS files on pages with a grid
+
+= 2.8.1 =
+* Fix: ACF Compatibility problem
+
+= 2.8.0 =
+* Feature: No cache mode to improve compatibility (WPML)
+* Improvement: WordPress 5.0 compatibility
+* Improvement: Make sure grid only gets loaded once
 
 = 2.7.1 =
 * Improvement: Privacy policy content
@@ -220,6 +292,41 @@ It's still an early version of the plugin and we'll be adding new features every
 * Very first version of this plugin
 
 == Upgrade notice ==
+= 3.5.1 =
+Update to prevent filter problems
+
+= 3.5.0 =
+Update for a major performance improvement and some new template features
+
+= 3.4.0 =
+New Template Editor for the free plugin
+
+= 3.3.0 =
+Better browser and theme compatibility and a brand new filter feature
+
+= 3.2.1 =
+Improves compatibility with other plugins
+
+= 3.2.0 =
+Smaller update that ensures better compatibility with other plugins
+
+= 3.1.0 =
+A lot of great new features and improvements
+
+= 3.0.1 =
+Some immediate fixes for broken features
+
+= 3.0.0 =
+WARNING: This is a complete rebuild of the plugin. Please make sure you have time to test things. The update is not irreversible but does require some attention.
+
+= 2.8.2 =
+Some important performance improvements for the plugin assets
+
+= 2.8.1 =
+Update recommended when using the ACF plugin
+
+= 2.8.0 =
+Update for performance improvements and better compatibility
 
 = 2.7.1 =
 Added some privacy policy considerations

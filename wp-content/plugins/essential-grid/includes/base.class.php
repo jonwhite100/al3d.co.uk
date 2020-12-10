@@ -3,13 +3,13 @@
  * @package   Essential_Grid
  * @author    ThemePunch <info@themepunch.com>
  * @link      http://www.themepunch.com/essential/
- * @copyright 2016 ThemePunch
+ * @copyright 2020 ThemePunch
  */
 
 if( !defined( 'ABSPATH') ) exit();
 
 class Essential_Grid_Base {
-	
+
 	/**
 	 * Get $_GET Parameter
 	 */
@@ -31,7 +31,7 @@ class Essential_Grid_Base {
 	/**
 	 * Get $_POST/$_GET Parameter
 	 */
-	public static function getVar($arr,$key,$default = "", $type=""){
+	/*public static function getVar($arr,$key,$default = "", $type=""){
 		$val = $default;
 		if(isset($arr[$key]) && !empty($arr[$key])) $val = $arr[$key];
 
@@ -48,14 +48,46 @@ class Essential_Grid_Base {
 				$val = Essential_Grid_Base::stripslashes_deep($val);
 			break;
 		}
-		
+
 		// changed so local admin "default img" option can exist separately (i.e. be "removed", etc.)
-		/* 
-		if($key == "default-image" && empty($val)){
-			$val = get_option('tp_eg_global_default_img', '');
+		//if($key == "default-image" && empty($val)){
+		//	$val = get_option('tp_eg_global_default_img', '');
+		//}
+
+		return apply_filters('essgrid_getVar', $val, $arr, $key, $default, $type);
+	}*/
+	public static function getVar($arr, $key, $default = '', $type = ''){
+		$arr = (array)$arr;
+
+		if(is_array($key)){
+			$a = $arr;
+			foreach($key as $k => $v){
+				$a = self::getVar($a, $v, $default);
+			}
+			return apply_filters('essgrid_getVar', $a, $arr, $key, $default, $type);
+			/*$val = $default;
+			foreach($key as $k => $v){
+				$val = (array)$val;
+				$val = (isset($val[$v])) ? $val[$v] : $default;
+			}*/
+		}else{
+			$val = (isset($arr[$key])) ? $arr[$key] : $default;
 		}
-		*/
-		
+
+		switch($type){
+			case 'i': //int
+				$val = intval($val);
+			break;
+			case 'f': //float
+				$val = floatval($val);
+			break;
+			case 'r': //raw meaning, do nothing
+			break;
+			default:
+				$val = Essential_Grid_Base::stripslashes_deep($val);
+			break;
+		}
+
 		return apply_filters('essgrid_getVar', $val, $arr, $key, $default, $type);
 	}
 
@@ -65,7 +97,7 @@ class Essential_Grid_Base {
 	 */
 	public static function throw_error($message,$code=null){
 		$a = apply_filters('essgrid_throw_error', array('message' => $message, 'code' => $code));
-		
+
 		if(!empty($code))
 			throw new Exception($a['message'],$a['code']);
 		else
@@ -95,15 +127,19 @@ class Essential_Grid_Base {
         }
 
         $hex = str_replace("#", "", $hex);
-
+		$r = 0;
+		$g = 0;
+		$b = 0;
         if(strlen($hex) == 3) {
             $r = hexdec(substr($hex,0,1).substr($hex,0,1));
             $g = hexdec(substr($hex,1,1).substr($hex,1,1));
             $b = hexdec(substr($hex,2,1).substr($hex,2,1));
         } else {
-            $r = hexdec(substr($hex,0,2));
-            $g = hexdec(substr($hex,2,2));
-            $b = hexdec(substr($hex,4,2));
+			if(strlen($hex) >= 6){
+				$r = hexdec(substr($hex,0,2));
+				$g = hexdec(substr($hex,2,2));
+				$b = hexdec(substr($hex,4,2));
+			}
         }
 
         return apply_filters('essgrid_hex2rgba', 'rgba('.$r.', '.$g.', '.$b.', '.$transparency.')', $hex, $transparency);
@@ -129,8 +165,9 @@ class Essential_Grid_Base {
 	public static function get_text_intro($text, $limit, $type = 'words'){
 
 		$intro = $text;
-
-		if($type == 'words'){
+		if (empty($text)) {
+			// Do Nothing
+		}elseif($type == 'words'){
 			$arrIntro = explode(' ', $text, $limit);
 
 			if (count($arrIntro)>=$limit) {
@@ -160,44 +197,44 @@ class Essential_Grid_Base {
 	}
 
 	public static function bac_variable_length_excerpt($text, $length=1, $finish_sentence=1){
-	       
+
 	     $tokens = array();
 	     $out = '';
 	     $word = 0;
-	   
+
 	    //Divide the string into tokens; HTML tags, or words, followed by any whitespace.
 	    $regex = '/(<[^>]+>|[^<>\s]+)\s*/u';
 	    preg_match_all($regex, $text, $tokens);
-	    foreach ($tokens[0] as $t){ 
+	    foreach ($tokens[0] as $t){
 	        //Parse each token
-	        if ($word >= $length && !$finish_sentence){ 
+	        if ($word >= $length && !$finish_sentence){
 	            //Limit reached
 	            break;
 	        }
-	        if ($t[0] != '<'){ 
-	            //Token is not a tag. 
+	        if ($t[0] != '<'){
+	            //Token is not a tag.
 	            //Regular expression that checks for the end of the sentence: '.', '?' or '!'
 	            $regex1 = '/[\?\.\!]\s*$/uS';
-	            if ($word >= $length && $finish_sentence && preg_match($regex1, $t) == 1){ 
+	            if ($word >= $length && $finish_sentence && preg_match($regex1, $t) == 1){
 	                //Limit reached, continue until ? . or ! occur to reach the end of the sentence.
 	                $out .= trim($t);
 	                break;
-	            }   
+	            }
 	            $word++;
 	        }
 	        //Append what's left of the token.
-	        $out .= $t;     
+	        $out .= $t;
 	    }
 	    //Add the excerpt ending as a link.
 	    $excerpt_end = '';
-	     
+
 	    //Add the excerpt ending as a non-linked ellipsis with brackets.
 	    //$excerpt_end = ' [&hellip;]';
-	     
-	    //Append the excerpt ending to the token. 
+
+	    //Append the excerpt ending to the token.
 	    $out .= $excerpt_end;
-	     
-	    return trim(force_balance_tags($out)); 
+
+	    return trim(force_balance_tags($out));
 	}
 
 
@@ -219,12 +256,12 @@ class Essential_Grid_Base {
 			'medium' => __('Medium', EG_TEXTDOMAIN),
 			'large' => __('Large', EG_TEXTDOMAIN)
 		);
-		
+
 		return apply_filters('essgrid_get_all_image_sizes', array_merge($img_orig_sources, $custom_sizes));
 	}
 
 	/**
-	 * Get all media filtes 
+	 * Get all media filtes
 	 * since: 1.0.2
 	 */
 	public function get_all_media_filters(){
@@ -258,9 +295,9 @@ class Essential_Grid_Base {
 			'walden' => __('Walden', EG_TEXTDOMAIN),
 			'willow' => __('Willow', EG_TEXTDOMAIN),
 			'xpro2' => __('X-pro II', EG_TEXTDOMAIN),
-			'grayscale' => __('Grayscale', EG_TEXTDOMAIN)			
+			'grayscale' => __('Grayscale', EG_TEXTDOMAIN)
 		);
-		
+
 		return apply_filters('essgrid_get_all_media_filters',$media_filter_sources);
 	}
 
@@ -306,19 +343,25 @@ class Essential_Grid_Base {
 			'bottom'   => __('Bottom', EG_TEXTDOMAIN),
 			'left'   => __('Left', EG_TEXTDOMAIN),
 			'hide'   => __('Hide', EG_TEXTDOMAIN),
-			'single'   => __('Single', EG_TEXTDOMAIN),
-			'bulk'   => __('Bulk', EG_TEXTDOMAIN),
+			'single'   => __('Add Single Image', EG_TEXTDOMAIN),
+			'bulk'   => __('Add Bulk Images', EG_TEXTDOMAIN),
 			'choose_images'   => __('Choose Images', EG_TEXTDOMAIN),
-			'import_demo_post_heavy_loading'   => __('The following demo data will be imported: Grids, Custom Meta, PunchFonts. This can take a while, please do not leave the site until the import is finished', EG_TEXTDOMAIN),
+			'import_demo_post_heavy_loading'   => __('The following demo data will be imported: Ess. Grid Posts, Custom Meta, PunchFonts. This can take a while, please do not leave the site until the import is finished', EG_TEXTDOMAIN),
 			'import_demo_grids_210'   => __('The following demo data will be imported: Grids of the 2.1.0 update. This can take a while, please do not leave the site until the import is finished', EG_TEXTDOMAIN),
 			'save_settings'   => __('Save Settings', EG_TEXTDOMAIN),
 			'add_element'   => __('Add Element', EG_TEXTDOMAIN),
 			'edit_element'   => __('Edit Element', EG_TEXTDOMAIN),
+			'update_element'   => __('Update without Refresh', EG_TEXTDOMAIN),
+			'update_element_refresh'   => __('Update & Refresh Grid', EG_TEXTDOMAIN),
+			'globalcoloractive' => __('Color Skin Active', EG_TEXTDOMAIN),
+			'editskins' => __('Edit Skins', EG_TEXTDOMAIN),			
 			'remove_this_element'   => __('Really remove this element?', EG_TEXTDOMAIN),
 			'choose_skins'   => __('Choose Skins', EG_TEXTDOMAIN),
 			'add_selected'   => __('Add Selected', EG_TEXTDOMAIN),
 			'deleting_nav_skin_message'   => __('Deleting a Navigation Skin may result in missing Skins in other Grids. Proceed?', EG_TEXTDOMAIN),
 			'add_meta'   => __('Add Meta', EG_TEXTDOMAIN),
+			'backtooverview'   => __('Back to Overview', EG_TEXTDOMAIN),
+			'openimportdgrid'   => __('Open Imported Grid', EG_TEXTDOMAIN),
 			'add_widget_area'   => __('Add Widget Area', EG_TEXTDOMAIN),
 			'add_font'   => __('Add Google Font', EG_TEXTDOMAIN),
 			'save_post_meta'   => __('Save Post Meta', EG_TEXTDOMAIN),
@@ -330,7 +373,9 @@ class Essential_Grid_Base {
 			'handle_and_name_at_least_3'   => __('The handle and name has to be at least three characters long!', EG_TEXTDOMAIN),
 			'layout_settings'   => __('Layout Settings', EG_TEXTDOMAIN),
 			'close'   => __('Close', EG_TEXTDOMAIN),
-			'create_nav_skin'   => __('Save Navigation Skin', EG_TEXTDOMAIN),
+			'reset_nav_skin'   => __('Reset from Template', EG_TEXTDOMAIN),
+			'create_nav_skin'   => __('Create Navigation Skin', EG_TEXTDOMAIN),
+			'save_nav_skin'   => __('Save Navigation Skin', EG_TEXTDOMAIN),
 			'apply_changes'   => __('Save Changes', EG_TEXTDOMAIN),
 			'new_element_sanitize'   => __('new-element', EG_TEXTDOMAIN),
 			'really_delete_element_permanently'   => __('This will delete this element permanently, really proceed?', EG_TEXTDOMAIN),
@@ -340,6 +385,12 @@ class Essential_Grid_Base {
 			'class_name'   => __('Class:', EG_TEXTDOMAIN),
 			'class_name_short'   => __('Class', EG_TEXTDOMAIN),
 			'save_changes' => __('Save Changes', EG_TEXTDOMAIN),
+			'add_category' => __('Add Category', EG_TEXTDOMAIN),
+			'category_already_exists' => __('The Category existing already.', EG_TEXTDOMAIN),
+			'edit_category' => __('Edit Category', EG_TEXTDOMAIN),
+			'update_category' => __('Update Category', EG_TEXTDOMAIN),
+			'delete_category' => __('Delete Category', EG_TEXTDOMAIN),
+			'select_skin' => __('Select From Skins', EG_TEXTDOMAIN),
 			'enter_position' => __('Enter a Position', EG_TEXTDOMAIN),
 			'leave_not_saved'   => __('By leaving now, all changes since the last saving will be lost. Really leave now?', EG_TEXTDOMAIN),
 			'please_enter_unique_item_name' => __('Please enter a unique item name', EG_TEXTDOMAIN),
@@ -358,7 +409,14 @@ class Essential_Grid_Base {
 			'withoutmedia' => __('Without Media', EG_TEXTDOMAIN),
 			'selectyouritem' => __('Select Your Item', EG_TEXTDOMAIN),
 			'add_at_least_one_element' => __('Please add at least one element in Custom Grid mode', EG_TEXTDOMAIN),
-			'essential_grid_shortcode_creator' => __('Essential Grid Shortcode Creator', EG_TEXTDOMAIN),
+			'dontforget_title' => __('Please set a Title for the Grid', EG_TEXTDOMAIN),
+			'dontforget_alias' => __('Please set an Alias for the Grid', EG_TEXTDOMAIN),
+			'quickbuilder' => __('Quick Builder', EG_TEXTDOMAIN),
+			'insert_shortcode' => __('Insert / Update', EG_TEXTDOMAIN),
+			'read_shortcode' => __('Read Shortcode', EG_TEXTDOMAIN),
+			'import_shortcode' => __('Import Shortcode', EG_TEXTDOMAIN),
+			'edit_custom_item' => __('Edit Custom Item', EG_TEXTDOMAIN),
+			'no_pregrid_selected' => __('No Predefined Essential Grid has been selected !', EG_TEXTDOMAIN),
 //			'shortcode_generator' => __('Shortcode Generator', EG_TEXTDOMAIN),
 			'shortcode_could_not_be_correctly_parsed' => __('Shortcode could not be parsed.', EG_TEXTDOMAIN),
 			'please_add_at_least_one_layer' => __('Please add at least one Layer.', EG_TEXTDOMAIN),
@@ -375,13 +433,17 @@ class Essential_Grid_Base {
 			'filter' => __('Filter', EG_TEXTDOMAIN),
 			'skin' => __('Skin', EG_TEXTDOMAIN),
 			'custom_filter' => __('--- Custom Filter ---', EG_TEXTDOMAIN),
-			'delete_this_element' => __('Are you sure you want to delete this element?', EG_TEXTDOMAIN)
+			'delete_this_element' => __('Are you sure you want to delete this element?', EG_TEXTDOMAIN),
+			'editnavinfo' => __('Edit the selected navigation skin style', EG_TEXTDOMAIN),
+			'editnavinfodep' => __('Nav. Skin deprecated. Edit or reset from template!', EG_TEXTDOMAIN),
+			'select_skin_template' => __('Select Navigation Template', EG_TEXTDOMAIN)
+
 		);
 
 		return apply_filters('essgrid_get_javascript_multilanguage', $lang);
 	}
 
-	
+
 	/**
 	 * get grid animations
 	 */
@@ -404,7 +466,7 @@ class Essential_Grid_Base {
 		return apply_filters('essgrid_get_grid_animations', $animations);
 
 	}
-	
+
 	/**
 	 * get grid animations
 	 */
@@ -435,7 +497,7 @@ class Essential_Grid_Base {
 		return apply_filters('essgrid_get_grid_start_animations', $animations);
 
 	}
-	
+
 	/**
 	 * get grid item animations, since 2.1.6.2
 	 */
@@ -492,7 +554,14 @@ class Essential_Grid_Base {
 				'zoomfront' => __('Zoom from Front', EG_TEXTDOMAIN),
 				'flyleft' => __('Fly Left', EG_TEXTDOMAIN),
 				'flyright' => __('Fly Right', EG_TEXTDOMAIN),
-				'covergrowup' => __('Cover Grow', EG_TEXTDOMAIN)
+				'covergrowup' => __('Cover Grow', EG_TEXTDOMAIN),
+				'collapsevertical' => __('Collapse Vertical', EG_TEXTDOMAIN),
+				'collapsehorizontal' => __('Collapse Horizontal', EG_TEXTDOMAIN),
+				'linediagonal' => __('Line Diagonal', EG_TEXTDOMAIN),
+				'linehorizontal' => __('Line Horizontal', EG_TEXTDOMAIN),
+				'linevertical' => __('Line Vertical', EG_TEXTDOMAIN),
+				'spiralzoom' => __('Spiral Zoom', EG_TEXTDOMAIN),
+				'circlezoom' => __('Circle Zoom', EG_TEXTDOMAIN)
 			);
 		}else{
 			$animations = array(
@@ -521,7 +590,6 @@ class Essential_Grid_Base {
 				'slideupout' => __('Slide Up Out', EG_TEXTDOMAIN),
 				'slidedown' => __('Slide Down In', EG_TEXTDOMAIN),
 				'slidedownout' => __('Slide Down Out', EG_TEXTDOMAIN),
-
 				'slideshortleft' => __('Slide Short Left In', EG_TEXTDOMAIN),
 				'slideshortleftout' => __('Slide Short Left Out', EG_TEXTDOMAIN),
 				'slideshortright' => __('Slide Short Right In', EG_TEXTDOMAIN),
@@ -530,7 +598,6 @@ class Essential_Grid_Base {
 				'slideshortupout' => __('Slide Short Up Out', EG_TEXTDOMAIN),
 				'slideshortdown' => __('Slide Short Down In', EG_TEXTDOMAIN),
 				'slideshortdownout' => __('Slide Short Down Out', EG_TEXTDOMAIN),
-
 				'skewleft' => __('Skew Left In', EG_TEXTDOMAIN),
 				'skewleftout' => __('Skew Left Out', EG_TEXTDOMAIN),
 				'skewright' => __('Skew Right In', EG_TEXTDOMAIN),
@@ -552,7 +619,14 @@ class Essential_Grid_Base {
 				'flyright' => __('Fly Right In', EG_TEXTDOMAIN),
 				'flyrightout' => __('Fly Right Out', EG_TEXTDOMAIN),
 				'covergrowup' => __('Cover Grow In', EG_TEXTDOMAIN),
-				'covergrowupout' => __('Cover Grow Out', EG_TEXTDOMAIN)
+				'covergrowupout' => __('Cover Grow Out', EG_TEXTDOMAIN),
+				'collapsevertical' => __('Collapse Vertical', EG_TEXTDOMAIN),
+				'collapsehorizontal' => __('Collapse Horizontal', EG_TEXTDOMAIN),
+				'linediagonal' => __('Line Diagonal', EG_TEXTDOMAIN),
+				'linehorizontal' => __('Line Horizontal', EG_TEXTDOMAIN),
+				'linevertical' => __('Line Vertical', EG_TEXTDOMAIN),
+				'spiralzoom' => __('Spiral Zoom', EG_TEXTDOMAIN),
+				'circlezoom' => __('Circle Zoom', EG_TEXTDOMAIN)
 			);
 		}
 
@@ -561,7 +635,7 @@ class Essential_Grid_Base {
 		return apply_filters('essgrid_get_hover_animations', $animations);
 	}
 
-	
+
     /**
 	 * get media animations (only out animations!)
 	 */
@@ -582,7 +656,13 @@ class Essential_Grid_Base {
 			'zoomouttocorner' => __('Zoom Out To Side', EG_TEXTDOMAIN),
 			'zoomintocorner' => __('Zoom In To Side', EG_TEXTDOMAIN),
 			'zoomtodefault' => __('Zoom To Default', EG_TEXTDOMAIN),
+			'zoomdefaultblur' => __('Zoom Default Blur', EG_TEXTDOMAIN),
 			'mediazoom' => __('Zoom', EG_TEXTDOMAIN),
+			'blur' => __('Blur', EG_TEXTDOMAIN),
+			'fadeblur' => __('Fade Blur', EG_TEXTDOMAIN),
+			'grayscalein' => __('GrayScale In', EG_TEXTDOMAIN),
+			'grayscaleout' => __('GrayScale Out', EG_TEXTDOMAIN),
+			'zoomblur' => __('Zoom Blur', EG_TEXTDOMAIN),
             'zoombackout' => __('Zoom to Back', EG_TEXTDOMAIN),
             'zoomfrontout' => __('Zoom to Front', EG_TEXTDOMAIN),
             'zoomandrotate' => __('Zoom And Rotate', EG_TEXTDOMAIN)
@@ -615,13 +695,13 @@ class Essential_Grid_Base {
 	 * set basic columns if empty
 	 */
 	public static function set_basic_colums_custom($columns){
-		
+
 		if(is_array($columns)) return self::set_basic_colums($columns);
-		
+
 		$new_columns = array();
-		
+
 		$columns = (intval($columns) > 0) ? $columns : 5;
-		
+
 		$new_columns[] = $columns;
 		$new = $columns - ceil(($columns - 2) / 3) * 1;
 		$new_columns[] = ($new < 2) ? 2 : $new;
@@ -632,7 +712,7 @@ class Essential_Grid_Base {
 		$new_columns[] = 2;
 		$new_columns[] = 2;
 		$new_columns[] = 1;
-		
+
 		return apply_filters('essgrid_set_basic_colums_custom', $new_columns);
 	}
 
@@ -722,16 +802,6 @@ class Essential_Grid_Base {
 	/**
 	 * Get url to secific view.
 	 */
-	public static function getFontsUrl(){
-
-		$link = admin_url('admin.php?page=themepunch-google-fonts');
-		return apply_filters('essgrid_getFontsUrl', $link);
-	}
-
-
-	/**
-	 * Get url to secific view.
-	 */
 	public static function getViewUrl($viewName="",$urlParams="",$slug=""){
 		$params = "";
 
@@ -793,24 +863,24 @@ class Essential_Grid_Base {
 
 			// Remove NextGen Post Types from the list
 			if( !strpos($objType->labels->singular_name, 'extGEN') ){
-				$arrPostTypes[$key] = $objType->labels->singular_name;	
+				$arrPostTypes[$key] = $objType->labels->singular_name;
 			}
 			else{
-				unset($arrPostTypes[$key]);	
+				unset($arrPostTypes[$key]);
 			}
 		}
 
 		return apply_filters('essgrid_getPostTypesAssoc', $arrPostTypes, $arrPutToTop);
 	}
-	
-	
+
+
 	/**
 	 * Translate the Categories depending on selected language (needed for backend)
 	 * @since: 1.5.0
 	 */
 	public function translate_base_categories_to_cur_lang($postTypes){
 		global $sitepress;
-		
+
 		if(Essential_Grid_Wpml::is_wpml_exists()){
 			if(is_array($postTypes)){
 				foreach($postTypes as $key => $type){
@@ -822,17 +892,17 @@ class Essential_Grid_Base {
 				}
 			}
 		}
-		
+
 		return apply_filters('essgrid_translate_base_categories_to_cur_lang', $postTypes);
 	}
 
-	
+
 	/**
 	 * Get post types with categories.
 	 */
 	public static function getPostTypesWithCatsForClient(){
 		global $sitepress;
-		
+
 		$arrPostTypes = self::getPostTypesWithCats(true);
 
 		$globalCounter = 0;
@@ -858,7 +928,7 @@ class Essential_Grid_Base {
 			$arrOutput[$postType] = $arrCats;
 
 		}//loop types
-		
+
 		return apply_filters('essgrid_getPostTypesWithCatsForClient', $arrOutput);
 	}
 
@@ -876,7 +946,7 @@ class Essential_Grid_Base {
 			$arrTaxOutput = array();
 			foreach($arrTax as $taxName=>$taxTitle){
 				$cats = self::getCategoriesAssoc($taxName);
-				
+
 				if(!empty($cats))
 					$arrTaxOutput[] = array(
 							 "name"=>$taxName,
@@ -891,7 +961,7 @@ class Essential_Grid_Base {
 		return apply_filters('essgrid_getPostTypesWithCats', $arrPostTypesOutput);
 	}
 
-	
+
 	/**
 	 * get current language code
 	 */
@@ -902,7 +972,7 @@ class Essential_Grid_Base {
 		return apply_filters('essgrid_get_current_lang_code', $code);
 	}
 
-	
+
 	/**
 	 * get post types array with taxomonies
 	 */
@@ -957,7 +1027,7 @@ class Essential_Grid_Base {
 				$arrCats[$id] = $title;
 			}
 		}
-		
+
 		return apply_filters('essgrid_getCategoriesAssoc', $arrCats, $taxonomy);
 	}
 
@@ -967,7 +1037,7 @@ class Essential_Grid_Base {
 	 */
 	public static function getPostTypeTaxomonies($postType){
 		$arrTaxonomies = get_object_taxonomies(array('post_type' => $postType), 'objects');
-		
+
 		$arrNames = array();
 		foreach($arrTaxonomies as $key=>$objTax){
 			$arrNames[$objTax->name] = $objTax->labels->name;
@@ -982,14 +1052,14 @@ class Essential_Grid_Base {
 	 */
 	private static function getFirstCategory($cats){
 		$ret = '';
-		
+
 		foreach($cats as $key=>$value){
 			if(strpos($key,"option_disabled") === false){
 				$ret = $key;
 				break;
 			}
 		}
-		
+
 		return apply_filters('essgrid_getFirstCategory', $ret, $cats);
 	}
 
@@ -1030,7 +1100,7 @@ class Essential_Grid_Base {
 	 */
 	public static function getPostsByCategory($grid_id, $catID, $postTypes="any", $taxonomies="category", $pages = array(), $sortBy = 'ID', $direction = 'DESC', $numPosts=-1, $arrAddition = array(), $enable_caching = true, $relation = 'OR'){ //category
 		global $sitepress;
-		
+
 		//get post types
 		if(strpos($postTypes,",") !== false){
 			$postTypes = explode(",", $postTypes);
@@ -1055,7 +1125,7 @@ class Essential_Grid_Base {
 			//'fields' => 'ids,post_type'
 		);
 		$enable_caching = false;
-		
+
 		if(strpos($sortBy, 'eg-') === 0){
 			$meta = new Essential_Grid_Meta();
 			$m = $meta->get_all_meta(false);
@@ -1084,7 +1154,7 @@ class Essential_Grid_Base {
 				$sortBy = 'none';
 			}
 		}
-		
+
 		//add sort by (could be by meta)
 		if(strpos($sortBy, "meta_num_") === 0){
 			$metaKey = str_replace("meta_num_", "", $sortBy);
@@ -1101,6 +1171,10 @@ class Essential_Grid_Base {
 		if($query["orderby"] == "likespost"){
 			$query["orderby"] = "meta_value";
 			$query["meta_key"] = "eg_votes_count";
+		}
+
+		if(isset($query['meta_key'])){
+			$query['meta_key'] = ($query['meta_key'] === 'stock') ? '_stock' : $query['meta_key'];
 		}
 
 		//get taxonomies array
@@ -1123,9 +1197,9 @@ class Essential_Grid_Base {
 						'field' => 'id',
 						'terms' => $catID
 					);
-					
-					if($relation == 'AND') $taxArray['operator'] = 'AND';
-					
+
+					if($relation == 'AND') $taxArray['operator'] = 'IN';
+
 					$taxQuery[] = $taxArray;
 				}
 			}else{		//single taxomony
@@ -1134,22 +1208,22 @@ class Essential_Grid_Base {
 					'field' => 'id',
 					'terms' => $catID
 				);
-				
+
 				if($relation == 'AND') $taxArray['operator'] = 'AND';
-			
+
 				$taxQuery[] = $taxArray;
 			}
-			
+
 			$taxQuery['relation'] = $relation;
 
 			$query['tax_query'] = $taxQuery;
 		} //if exists taxanomies
-		
+
 		$query['suppress_filters'] = false;
-		
+
 		if(!empty($arrAddition) && is_array($arrAddition)){
 			foreach($arrAddition as $han => $val){
-				if(strtolower(substr($val, 0, 5)) == 'array') {
+				if(strlen($val) >= 5 && strtolower(substr($val, 0, 5)) == 'array') {
 					$val = explode(',', str_replace(array('(', ')'), '', substr($val, 5)));
 					$arrAddition[$han] = $val;
 				}
@@ -1162,31 +1236,31 @@ class Essential_Grid_Base {
 				}
 			}
 		}
-		
+
 		if($query['orderby'] == 'none') $query['orderby'] = 'post__in';
-		
+
 		if(empty($grid_id)) $grid_id = time();
-		
+
 		//add wpml transient
 		$lang_code = '';
 		if(Essential_Grid_Wpml::is_wpml_exists()){
 			$lang_code = Essential_Grid_Wpml::get_current_lang_code();
 		}
-		
+
 		$objQuery = false;
-		
+
 		$query_type = get_option('tp_eg_query_type', 'wp_query');
-		
+
 		if($objQuery === false){
-		
+
 			echo '<!-- CACHE CREATED FOR: '.$grid_id.' -->';
 
 			$query = apply_filters( 'essgrid_get_posts', $query, $grid_id );
-			
+
 			if($query_type == 'wp_query'){
 				$wp_query = new WP_Query();
 				$wp_query->parse_query($query);
-				
+
 				$objQuery = $wp_query->get_posts();
 				//$objQuery = new WP_Query($query);
 			}else{
@@ -1197,9 +1271,9 @@ class Essential_Grid_Base {
 			if(is_array($postTypes) && in_array('page', $postTypes) && count($postTypes) > 1 || $postTypes == 'page'){ //Page is selected and also another custom category
 				$query['post_type'] = 'page';
 				unset($query['tax_query']); //delete category/tag filtering
-			
-				$query['post__in'] = $pages;	
-				
+
+				$query['post__in'] = $pages;
+
 				if($query_type == 'wp_query'){
 					$wp_query = new WP_Query();
 					$wp_query->parse_query($query);
@@ -1208,7 +1282,7 @@ class Essential_Grid_Base {
 				}else{
 					$objQueryPages = get_posts($query);
 				}
-				
+
 				if($query_type == 'wp_query'){
 					if(is_object($objQueryPages) && is_object($objQuery)){
 						$objQuery->posts = array_merge($objQuery->posts, $objQueryPages->posts);
@@ -1224,7 +1298,7 @@ class Essential_Grid_Base {
 						$objQuery = $objQueryPages;
 					}
 				}
-				
+
 				//remove duplicated posts
 				/*if($query_type == 'wp_query'){
 					if(is_object($objQueryPages) && is_object($objQuery)){
@@ -1241,7 +1315,7 @@ class Essential_Grid_Base {
 						$objQuery = $objQueryPages;
 					}
 				//}
-				
+
 				//remove duplicated posts
 				/*if($query_type == 'wp_query'){
 					if(!empty($objQuery->posts)){
@@ -1267,27 +1341,27 @@ class Essential_Grid_Base {
 					}
 				//}
 			}
-			
+
 			if($enable_caching){
 				set_transient( 'ess_grid_trans_query_'.$grid_id.$lang_code, $objQuery, 60*60*24 );
 			}
-			
+
 		}else{
 			echo '<!-- CACHE FOUND FOR: '.$grid_id.' -->';
 		}
-		
+
 		/*if($query_type == 'wp_query'){
 			$arrPosts = @$objQuery->posts;
 		}else{*/
 			$arrPosts = $objQuery;
 		//}
-		
-		
+
+
 		//check if we should rnd the posts
 		if($sortBy == 'rand' && !empty($arrPosts)){
 			shuffle($arrPosts);
 		}
-		
+
 		if(!empty($arrPosts)){
 			foreach($arrPosts as $key=>$post){
 
@@ -1326,7 +1400,7 @@ class Essential_Grid_Base {
 				$arrPosts[$key] = $arrPost;
 			}
 		}
-		
+
 		return apply_filters('essgrid_modify_posts', $arrPosts, $grid_id);
 	}
 
@@ -1335,9 +1409,9 @@ class Essential_Grid_Base {
 	 * Get taxonomies by post ID
 	 */
 	public static function get_custom_taxonomies_by_post_id($post_id){
-		
+
 		// get post by post id
-		$post = get_post( $post_id ); 
+		$post = get_post( $post_id );
 
 		// get post type by post
 		$post_type = $post->post_type;
@@ -1349,29 +1423,29 @@ class Essential_Grid_Base {
 		foreach ( $taxonomies as $taxonomy_slug => $taxonomy ){
 			// get the terms related to post
 			$c_terms = get_the_terms( $post->ID, $taxonomy_slug );
-			
+
 			if(!empty($c_terms)){
 				$terms = array_merge($terms, $c_terms);
 			}
 		}
-		
-		
+
+
 		return apply_filters('essgrid_get_custom_taxonomies_by_post_id', $terms, $post_id);
 	}
 
-	
+
 	/**
 	 * Receive all Posts by given IDs
 	 */
 	public static function get_posts_by_ids($ids, $sort_by = 'none', $sort_order = 'DESC'){
-		
+
 		$query = array(
 		   'post__in'	=> $ids,
 		   'post_type'	=> 'any',
 		   'order'		=> $sort_order,
 		   'numberposts'=> count($ids)
 		);
-		
+
 		if(strpos($sort_by, 'eg-') === 0){
 			$meta = new Essential_Grid_Meta();
 			$m = $meta->get_all_meta(false);
@@ -1400,7 +1474,7 @@ class Essential_Grid_Base {
 				$sort_by = 'none';
 			}
 		}
-		
+
 		//add sort by (could be by meta)
 		if(strpos($sort_by, "meta_num_") === 0){
 			$metaKey = str_replace("meta_num_", "", $sort_by);
@@ -1413,10 +1487,10 @@ class Essential_Grid_Base {
 		}else{
 			$query["orderby"] = $sort_by;
 		}
-		
+
 		if($query['orderby'] == 'none') $query['orderby'] = 'post__in';
 		$query = apply_filters('essgrid_get_posts_by_ids_query', $query, $ids);
-		
+
 		$objQuery = get_posts($query);
 
 		$arrPosts = $objQuery;
@@ -1439,11 +1513,11 @@ class Essential_Grid_Base {
 	 * @since: 1.2.0
 	 */
 	public static function get_popular_posts($max_posts = 20){
-		
+
 		$post_id = get_the_ID();
-		
+
 		$my_posts = array();
-		
+
 		$args = array(
 			'post_type' => 'any',
 			'posts_per_page' => $max_posts,
@@ -1452,18 +1526,18 @@ class Essential_Grid_Base {
 			'orderby'     => 'comment_count',
 			'order'       => 'DESC'
 		);
-		
+
 		$args = apply_filters('essgrid_get_popular_posts_query', $args, $post_id);
 		$posts = get_posts($args);
-		
+
 		foreach($posts as $post){
-		
+
 			if(method_exists($post, "to_array"))
 				$my_posts[] = $post->to_array();
 			else
 				$my_posts[] = (array)$post;
 		}
-		
+
 		return apply_filters('essgrid_get_popular_posts', $my_posts);
 	}
 
@@ -1473,11 +1547,11 @@ class Essential_Grid_Base {
 	 * @since: 1.2.0
 	 */
 	public static function get_latest_posts($max_posts = 20){
-		
+
 		$post_id = get_the_ID();
-		
+
 		$my_posts = array();
-		
+
 		$args = array(
 			'post_type' => 'any',
 			'posts_per_page' => $max_posts,
@@ -1487,90 +1561,96 @@ class Essential_Grid_Base {
 			'order'       => 'DESC'
 		);
 		$args = apply_filters('essgrid_get_latest_posts_query', $args, $post_id);
-		
+
 		$posts = get_posts($args);
-		
+
 		foreach($posts as $post){
-		
+
 			if(method_exists($post, "to_array"))
 				$my_posts[] = $post->to_array();
 			else
 				$my_posts[] = (array)$post;
 		}
-		
+
 		return apply_filters('essgrid_get_latest_posts', $my_posts);
 	}
-	
-	
+
+
 	/**
 	 * Receive all Posts that are related to the current post
 	 * @since: 1.2.0
+	 * changed: 3.0.8 (added distinction between categories or tags or both)
 	 */
-	public static function get_related_posts($max_posts = 20){
+	public static function get_related_posts($max_posts = 20, $related_by = "both"){
 		$my_posts = array();
-		
+
 		$post_id = get_the_ID();
-		
-		$tags_string = '';
-		$post_tags = get_the_tags();
-		if ($post_tags) {
-			foreach ($post_tags as $post_tag) {
-				$tags_string .= $post_tag->slug . ',';
+
+		if( in_array( $related_by, array( "both", "tags" ) ) ){
+			$tags_string = '';
+			$post_tags = get_the_tags();
+			if ($post_tags) {
+				foreach ($post_tags as $post_tag) {
+					$tags_string .= $post_tag->slug . ',';
+				}
 			}
+
+			$query = array(
+							'exclude' => $post_id,
+							'numberposts' => $max_posts,
+							'tag' => $tags_string
+						);
+
+			$get_relateds = apply_filters('essgrid_get_related_posts', $query, $post_id);
+			$tag_related_posts = get_posts($get_relateds);
 		}
-		
-		$query = array(
-						'exclude' => $post_id,
-						'numberposts' => $max_posts,
-						'tag' => $tags_string
-					  );
-					  
-		$get_relateds = apply_filters('essgrid_get_related_posts', $query, $post_id);
-		$tag_related_posts = get_posts($get_relateds);		
-		
-		
-		if(count($tag_related_posts) < $max_posts){
+		else {
+			$tag_related_posts = array();
+		}
+
+
+		if( $related_by == "categories" || ( $related_by == "both" &&  count( $tag_related_posts ) < $max_posts ) ){
 			$ignore = array();
 			foreach($tag_related_posts as $tag_related_post){
 				$ignore[] = $tag_related_post->ID;
 			}
 			$article_categories = get_the_category($post_id);
 			$category_string = '';
-			foreach($article_categories as $category) { 
+			foreach($article_categories as $category) {
 				$category_string .= $category->cat_ID . ',';
 			}
 			$max = $max_posts - count($tag_related_posts);
-			
+
 			$excl = implode(',', $ignore);
 			$query = array(
 							'exclude' => $excl,
 							'numberposts' => $max,
 							'category' => $category_string
 						  );
-						  
+
 			$get_relateds = apply_filters('essgrid_get_related_posts_query', $query, $post_id);
 			$cat_related_posts = get_posts($get_relateds);
-			
+
 			$tag_related_posts = $tag_related_posts + $cat_related_posts;
 		}
-		
+
 		foreach($tag_related_posts as $post){
-		
+
 			$the_post = array();
-			
+
 			if(method_exists($post, "to_array"))
 				$the_post = $post->to_array();
 			else
 				$the_post = (array)$post;
-			
+
 			if($the_post['ID'] == $post_id) continue;
-			
+
 			$my_posts[] = $the_post;
 		}
-		
+
 		return apply_filters('essgrid_get_related_posts', $my_posts);
 	}
-	
+
 
 	/**
 	 * get post categories by postID and taxonomies
@@ -1586,7 +1666,7 @@ class Essential_Grid_Base {
 		$arrCats = wp_get_post_terms( $postID, $arrTax);
 
 		$arrCats = self::convertStdClassToArray($arrCats);
-		
+
 		return apply_filters('essgrid_getPostCategories', $arrCats, $postID, $arrTax);
 	}
 
@@ -1656,8 +1736,8 @@ class Essential_Grid_Base {
 
 		return apply_filters('essgrid_getCatAndTaxData', $output, $catIDs);
 	}
-	
-	
+
+
 	/**
 	 * get categories list, copy the code from default wp functions
 	 */
@@ -1673,7 +1753,7 @@ class Essential_Grid_Base {
 		if(!empty($categories)){
 			foreach($categories as $key => $category){
 				if($key > 0) $thelist .= $seperator;
-				
+
 				switch($do_type){
 					case 'none':
 						$thelist .= $category->name;
@@ -1687,7 +1767,7 @@ class Essential_Grid_Base {
 						if($tax !== false){
 							$url = get_term_link($category, $tax);
 							if(is_wp_error($url)) $url = '';
-							
+
 						}else{
 							$url = get_category_link( $category->term_id );
 						}
@@ -1699,55 +1779,55 @@ class Essential_Grid_Base {
 
 		return apply_filters('essgrid_get_categories_html_list', $thelist, $catIDs, $do_type, $seperator, $tax);
 	}
-	
-	
+
+
 	/**
 	 * get categories by post IDs
 	 * @since: 1.2.0
 	 */
 	public static function get_categories_by_posts($posts){
 		$post_ids = array();
-		
+
 		$categories = array();
-		
+
 		if(!empty($posts)){
 			foreach($posts as $post){
 				$post_ids[] = $post['ID'];
 			}
 		}
-		
+
 		if(!empty($post_ids)){
 			foreach($post_ids as $post_id){
 				$cats = self::get_custom_taxonomies_by_post_id($post_id);
 				$categories = array_merge($categories, $cats);
 			}
 		}
-		
+
 		return apply_filters('essgrid_get_categories_by_posts', $categories, $posts);
-		
+
 	}
-	
-	
+
+
 	/**
 	 * translate categories obj to string
 	 * @since: 1.2.0
 	 */
 	public static function translate_categories_to_string($cats){
-		
+
 		$categories = array();
-		
+
 		if(!empty($cats)){
 			foreach($cats as $cat){
 				$categories[] = $cat->term_id;
 			}
 		}
-		
+
 		$categories = implode(',', $categories);
-		
+
 		return apply_filters('essgrid_translate_categories_to_string', $categories, $cats);
 	}
 
-	
+
 	/**
 	 * get categories by id's
 	 */
@@ -1764,9 +1844,9 @@ class Essential_Grid_Base {
 			$args['taxonomy'] = $tax;
 
 		$arrCats = get_categories( $args );
-		
+
 		return apply_filters('essgrid_get_categories_by_ids', $arrCats, $arrIDs, $tax);
-		
+
 	}
 
 
@@ -1796,7 +1876,7 @@ class Essential_Grid_Base {
 		);
 
 		$category_array = apply_filters('essgrid_get_create_category_by_slug', $category_array, $cat_slug, $cat_name);
-		
+
 		if(is_array($category_array) && !empty($category_array))
 			return $category_array['term_id'];
 		else
@@ -1809,24 +1889,24 @@ class Essential_Grid_Base {
 	 * get post taxonomies html list
 	 */
 	public static function get_tax_html_list($postID, $taxonomy, $seperator = ',', $do_type = 'link', $taxmax = false){
-		
+
 		if(empty($seperator)) $seperator  ='&nbsp;';
-		
+
 		$terms = get_the_terms($postID , $taxonomy);
 
-		$taxList = "";
+		$taxList = array();
 
 		if(!empty($terms)) {
 
 			foreach ($terms as $term) {
 						$taxList[] = '<a href="'.get_term_link($term->term_id).'" style="display:inline">'.$term->name.'</a>';
 					}
-		
+
 			if($taxmax) {
 				$taxs = array_slice($taxList, 0, $taxmax, true);
-				$taxList = implode($seperator, $taxs);
+				//$taxList = implode($seperator, $taxs);
 			}
-			
+
 			switch($do_type){
 				case 'none':
 					$taxList = implode($seperator, $taxList);
@@ -1846,9 +1926,9 @@ class Essential_Grid_Base {
 				case 'link':
 					$taxList = implode($seperator, $taxList);
 				break;
-				
+
 			}
-			
+
 		}
 
 		return apply_filters('essgrid_get_tax_html_list', $taxList, $postID, $seperator, $do_type);
@@ -1859,22 +1939,22 @@ class Essential_Grid_Base {
 	 * get post tags html list
 	 */
 	public static function get_tags_html_list($postID, $seperator = ',', $do_type = 'link', $tagmax = false){
-		
+
 		/* 2.1.5 */
 		if(empty($seperator)) $seperator  ='&nbsp;';
-		
+
 		$tagList = get_the_tag_list("",$seperator,"",$postID);
-		
+
 		/* 2.1.5 */
 		if(!empty($tagList)) {
-		
+
 			/* 2.1.5 */
 			if($tagmax) {
 				$tags = explode($seperator, $tagList);
 				$tags = array_slice($tags, 0, $tagmax, true);
 				$tagList = implode($seperator, $tags);
 			}
-			
+
 			switch($do_type){
 				case 'none':
 					$tagList = strip_tags($tagList);
@@ -1882,7 +1962,7 @@ class Essential_Grid_Base {
 				case 'filter':
 					$tags = strip_tags($tagList);
 					$tags = explode($seperator, $tags);
-					
+
 					$text = '';
 					if(!empty($tags)){
 						foreach($tags as $key => $tag){
@@ -1895,11 +1975,11 @@ class Essential_Grid_Base {
 				case 'link':
 					//return tagList as it is
 				break;
-				
+
 			}
-			
+
 		}
-		// var_dump($tagList);
+
 		return apply_filters('essgrid_get_tags_html_list', $tagList, $postID, $seperator, $do_type);
 	}
 
@@ -1919,29 +1999,29 @@ class Essential_Grid_Base {
 	 */
 	public static function output_demo_skin_html($data){
 		$data = apply_filters('essgrid_output_demo_skin_html_pre', $data);
-		
+
 		$grid = new Essential_Grid();
 		$base = new Essential_Grid_Base();
 		$item_skin = new Essential_Grid_Item_Skin();
-		
+
 		if(!isset($data['postparams']['source-type'])){ //something is wrong, print error
 			return array('error' => __('Something is wrong, this may have to do with Server limitations', EG_TEXTDOMAIN));
 		}
-		
+
 		$html = '';
 		$preview = '';
 
 		$preview_type = ($data['postparams']['source-type'] == 'custom') ? 'custom' : 'preview';
 
 		$grid_id = (isset($data['id']) && intval($data['id']) > 0) ? intval($data['id']) : '-1';
-		
+
 		ob_start();
 		$grid->output_essential_grid($grid_id, $data, $preview_type);
 		$html = ob_get_contents();
 		ob_clean();
 		ob_end_clean();
 
-		$skin = $base->getVar($data['params'], 'entry-skin', 0, 'i');
+		$skin = $base->getVar($data, array('params', 'entry-skin'), 0, 'i');
 		if($skin > 0){
 			ob_start();
 			$item_skin->init_by_id($skin);
@@ -1979,11 +2059,11 @@ class Essential_Grid_Base {
 					);
 
 		$custom_meta = $meta->get_all_meta(false);
-		
+
 		if(!empty($custom_meta)){
 			foreach($custom_meta as $cmeta){
 				if($cmeta['type'] == 'text') $cmeta['type'] = 'input';
-				
+
 				$elements[] = array('name' => 'eg-cm-'.$cmeta['handle'], 'type' => $cmeta['type'], 'default' => @$cmeta['default']);
 			}
 		}
@@ -2005,9 +2085,9 @@ class Essential_Grid_Base {
 	 */
 	public function get_post_media_source_data($post_id, $image_type){
 		$ret = array();
-		
+
 		$c_post = get_post($post_id);
-		
+
 		$ptid = get_post_thumbnail_id($post_id);
 		//$ret['featured-image'] = wp_get_attachment_url($ptid, $image_type);
 		$feat_img = wp_get_attachment_image_src($ptid, $image_type);
@@ -2022,7 +2102,7 @@ class Essential_Grid_Base {
 		$ret['featured-image-full-height'] = ($feat_img_full !== false) ? $feat_img_full['2'] : '';
 		$ret['content-image'] = $this->get_first_content_image(-1, $c_post);
 		$ret['content-iframe'] = $this->get_first_content_iframe(-1, $c_post);
-		
+
 		$content_id = $this->get_image_id_by_url($ret['content-image']);
 		$ret['content-image-alt'] = (!empty($content_id)) ? get_post_meta($content_id, '_wp_attachment_image_alt', true) : '';
 
@@ -2055,18 +2135,18 @@ class Essential_Grid_Base {
 
 		$ret['soundcloud'] = isset($values['eg_sources_soundcloud']) ? esc_attr($values['eg_sources_soundcloud'][0]) : '';
 		$ret['content-soundcloud'] = $this->get_first_content_soundcloud(-1, $c_post);
-		
+
 		$ret['html5']['mp4'] = isset($values['eg_sources_html5_mp4']) ? esc_attr($values['eg_sources_html5_mp4'][0]) : '';
 		$ret['html5']['ogv'] = isset($values['eg_sources_html5_ogv']) ? esc_attr($values['eg_sources_html5_ogv'][0]) : '';
 		$ret['html5']['webm'] = isset($values['eg_sources_html5_webm']) ? esc_attr($values['eg_sources_html5_webm'][0]) : '';
-		
+
 		$ret['image-fit'] = isset($values['eg_image_fit']) && $values['eg_image_fit'][0] != '-1' ? esc_attr($values['eg_image_fit'][0]) : '';
 		$ret['image-repeat'] = isset($values['eg_image_repeat']) && $values['eg_image_repeat'][0] != '-1' ? esc_attr($values['eg_image_repeat'][0]) : '';
 		$ret['image-align-horizontal'] = isset($values['eg_image_align_h']) && $values['eg_image_align_h'][0] != '-1' ? esc_attr($values['eg_image_align_h'][0]) : '';
 		$ret['image-align-vertical'] = isset($values['eg_image_align_v']) && $values['eg_image_align_v'][0] != '-1' ? esc_attr($values['eg_image_align_v'][0]) : '';
-		
+
 		$content_video = $this->get_first_content_video(-1, $c_post);
-		
+
 		if($content_video !== false){
 			$ret['content-html5']['mp4'] = @$content_video['mp4'];
 			$ret['content-html5']['ogv'] = @$content_video['ogv'];
@@ -2076,10 +2156,10 @@ class Essential_Grid_Base {
 			$ret['content-html5']['ogv'] = '';
 			$ret['content-html5']['webm'] = '';
 		}
-		
+
 		$ret['revslider'] = isset($values['eg_sources_revslider']) ? esc_attr($values['eg_sources_revslider'][0]) : '';
 		$ret['essgrid'] = isset($values['eg_sources_essgrid']) ? esc_attr($values['eg_sources_essgrid'][0]) : '';
-		
+
 		return apply_filters('essgrid_modify_media_sources', $ret, $post_id);
 
 	}
@@ -2089,20 +2169,20 @@ class Essential_Grid_Base {
 	 * return all media data of custom element that we may need
 	 */
 	public function get_custom_media_source_data($values, $image_type){
-		
+
 		$ret = array();
-		
+
 		$ret['youtube'] = isset($values['custom-youtube']) ? esc_attr($values['custom-youtube']) : '';
 		$ret['vimeo'] = isset($values['custom-vimeo']) ? esc_attr($values['custom-vimeo']) : '';
 		$ret['wistia'] = isset($values['wistia']) ? esc_attr($values['wistia']) : '';
-		
+
 		if(isset($values['custom-image']) || isset($values['custom-image-url'])) {
-			
+
 			if(isset($values['custom-image']) && $values['custom-image'] !== ''){
 				$alt_img = wp_get_attachment_image_src(esc_attr($values['custom-image']), $image_type);
 				$alt_img_full = wp_get_attachment_image_src(esc_attr($values['custom-image']), 'full');
 				$alt_text = get_post_meta(esc_attr($values['custom-image']), '_wp_attachment_image_alt', true);
-				
+
 			}
 			else {
 				$alt_img = $values['custom-image-url'];
@@ -2112,7 +2192,7 @@ class Essential_Grid_Base {
 					$alt_img_full =  $values['custom-image-url'];
 				$alt_text = '';
 			}
-			
+
 			$ret['featured-image'] = ($alt_img !== false && isset($alt_img['0'])) ? $alt_img['0'] : '';
 			$ret['featured-image-full'] = ($alt_img_full !== false && isset($alt_img_full['0'])) ? $alt_img_full['0'] : '';
 			$ret['featured-image-alt'] = ($alt_text !== '') ? $alt_text : '';
@@ -2120,16 +2200,16 @@ class Essential_Grid_Base {
 			$ret['featured-image-full-width'] = ($alt_img_full !== false) ? @$alt_img_full['1'] : '';
 			$ret['featured-image-height'] = ($alt_img !== false) ? @$alt_img['2'] : '';
 			$ret['featured-image-full-height'] = ($alt_img_full !== false) ? @$alt_img_full['2'] : '';
-			
+
 			$ret['alternate-image-preload-url'] = (isset($values['custom-preload-image-url'])) ? $values['custom-preload-image-url'] : '';
 		}
-		
+
 		if(isset($values['eg-alternate-image']) && $values['eg-alternate-image'] !== '') {
-			
+
 			$alt_img = wp_get_attachment_image_src(esc_attr($values['eg-alternate-image']), $image_type);
 			$alt_img_full = wp_get_attachment_image_src(esc_attr($values['eg-alternate-image']), 'full');
 			$alt_text = get_post_meta(esc_attr($values['eg-alternate-image']), '_wp_attachment_image_alt', true);
-			
+
 			$ret['alternate-image'] = ($alt_img !== false && isset($alt_img['0']) ) ? $alt_img['0'] : '';
 			$ret['alternate-image-full'] = ($alt_img_full !== false && isset($alt_img_full['0']) ) ? $alt_img_full['0'] : '';
 			$ret['alternate-image-alt'] = ($alt_text !== '') ? $alt_text : '';
@@ -2137,9 +2217,9 @@ class Essential_Grid_Base {
 			$ret['alternate-image-full-width'] = ($alt_img_full !== false) ? @$alt_img_full['1'] : '';
 			$ret['alternate-image-height'] = ($alt_img !== false) ? @$alt_img['2'] : '';
 			$ret['alternate-image-full-height'] = ($alt_img_full !== false) ? @$alt_img_full['2'] : '';
-			
+
 		}
-		
+
 		$ret['image-fit'] = isset($values['image-fit']) && $values['image-fit'] != '-1' ? esc_attr($values['image-fit']) : '';
 		$ret['image-repeat'] = isset($values['image-repeat']) && $values['image-repeat'] != '-1' ? esc_attr($values['image-repeat']) : '';
 		$ret['image-align-horizontal'] = isset($values['image-align-horizontal']) && $values['image-align-horizontal'] != '-1' ? esc_attr($values['image-align-horizontal']) : '';
@@ -2150,14 +2230,14 @@ class Essential_Grid_Base {
 		$ret['html5']['mp4'] = isset($values['custom-html5-mp4']) ? esc_attr($values['custom-html5-mp4']) : '';
 		$ret['html5']['ogv'] = isset($values['custom-html5-ogv']) ? esc_attr($values['custom-html5-ogv']) : '';
 		$ret['html5']['webm'] = isset($values['custom-html5-webm']) ? esc_attr($values['custom-html5-webm']) : '';
-		
+
 		$ret['html5']['webm'] = isset($values['custom-html5-webm']) ? esc_attr($values['custom-html5-webm']) : '';
 		$ret['html5']['webm'] = isset($values['custom-html5-webm']) ? esc_attr($values['custom-html5-webm']) : '';
-		
+
 		$ret['iframe'] = isset($values['iframe']) ? esc_attr($values['iframe']) : '';
 		$ret['revslider'] = isset($values['revslider']) ? esc_attr($values['revslider']) : '';
 		$ret['essgrid'] = isset($values['essgrid']) ? esc_attr($values['essgrid']) : '';
-		
+
 		return apply_filters('essgrid_get_custom_media_source_data', $ret);
 
 	}
@@ -2184,9 +2264,9 @@ class Essential_Grid_Base {
 						'content-wistia' =>  array('name' => __('First Content Wistia Video', EG_TEXTDOMAIN), 'type' => 'video'),
 						'content-soundcloud'=>array('name' => __('First Content SoundCloud', EG_TEXTDOMAIN), 'type' => 'play-circled')
 						);
-						
+
 		return apply_filters('essgrid_set_media_source_order', apply_filters('essgrid_get_media_source_order', $media));
-		
+
 	}
 
 
@@ -2208,11 +2288,11 @@ class Essential_Grid_Base {
 						'soundcloud' =>        array('name' => __('SoundCloud', EG_TEXTDOMAIN), 'type' => 'soundcloud'),
 						'iframe' =>            array('name' => __('iFrame', EG_TEXTDOMAIN), 'type' => 'link')
 						);
-						
+
 		return apply_filters('essgrid_set_lb_source_order', apply_filters('essgrid_get_lb_source_order', $media));
-		
+
 	}
-	
+
 	/**
 	 * set basic Order List for Lightbox Source
 	 */
@@ -2227,9 +2307,9 @@ class Essential_Grid_Base {
 						'arrowRight' =>	 array('name' => __('Right Arrow', EG_TEXTDOMAIN), 'type' => 'right'),
 						'close'      =>	 array('name' => __('Close Button', EG_TEXTDOMAIN), 'type' => 'cancel')
 						);
-						
+
 		return apply_filters('essgrid_set_lb_button_order', apply_filters('essgrid_get_lb_button_order', $buttons));
-		
+
 	}
 
 
@@ -2249,9 +2329,9 @@ class Essential_Grid_Base {
 						'alternate-image' => array('name' => __('Alternate Image', EG_TEXTDOMAIN), 'type' => 'picture'),
 						'content-image' =>	 array('name' => __('First Content Image', EG_TEXTDOMAIN), 'type' => 'picture')
 						);
-						
+
 		return apply_filters('essgrid_set_ajax_source_order', apply_filters('essgrid_get_ajax_source_order', $media));
-		
+
 	}
 
 
@@ -2270,67 +2350,86 @@ class Essential_Grid_Base {
 						'default-html-image' => array('name' => __('HTML5 Default Image', EG_TEXTDOMAIN), 'type' => 'picture'),
 						'no-image' =>		 array('name' => __('No Image', EG_TEXTDOMAIN), 'type' => 'align-justify')
 						);
-						
+
 		return apply_filters('essgrid_set_poster_source_order', apply_filters('essgrid_get_poster_source_order', $media));
-		
+
 	}
-	
-	
+
+
 	/**
 	 * remove essential grid shortcode from text
 	 * @since: 2.0
 	 */
 	public function strip_essential_shortcode($content){
-	
+
 		if(has_shortcode($content, 'ess_grid')){
 			global $shortcode_tags;
 			$stack = $shortcode_tags;
 			$shortcode_tags = array('ess_grid' => 1);
 			$content = strip_shortcodes($content);
-			
+
 			$shortcode_tags = $stack;
 		}
-		
+
 		return apply_filters('essgrid_strip_essential_shortcode', $content);
 	}
-	
-	
+
+
 	/**
 	 * retrieve all content gallery images in post text
 	 * @since: 1.5.4
 	 * @original: in Essential_Grid->check_for_shortcodes()
 	 */
-	public function get_all_gallery_images($content, $url = false){
-		
-		$ret = array();
-		
-		if($content !== null){ 
-			if(has_shortcode($content, 'gallery')){
-				
-				preg_match('/\[gallery.*ids=.(.*).\]/', $content, $img_ids);
-				
-				if(isset($img_ids[1])){
-					if($url == false){
-						if($img_ids[1] !== '') $ret = explode(',', $img_ids[1]);
-					}else{ //get URL instead of ID
-						$images = array();
-						$imgs = explode(',', $img_ids[1]);
-						foreach($imgs as $img){
-							$t_img = wp_get_attachment_image_src($img, 'full');
-							if($t_img !== false){
-								$images[] = $t_img[0];
-							}
-						}
-						$ret = $images;
-					}
-				}
+	 public function get_all_gallery_images($content, $url = false, $source = 'full'){
+
+ 		$ret = array();
+
+ 		if($content !== null){
+ 			if(has_shortcode($content, 'gallery')){
+
+ 				preg_match('/\[gallery.*ids=.(.*).\]/', $content, $img_ids);
+
+ 				if(isset($img_ids[1])){
+ 					if($url == false){
+ 						if($img_ids[1] !== '') $ret = explode(',', $img_ids[1]);
+ 					}else{ //get URL instead of ID
+ 						$images = array();
+ 						$imgs = explode(',', $img_ids[1]);
+ 						foreach($imgs as $img){
+ 							$t_img = wp_get_attachment_image_src($img, $source);
+ 							if($t_img !== false){
+ 								$images[] = $t_img[0];
+ 							}
+ 						}
+ 						$ret = $images;
+ 					}
+ 				}
+ 			}
+			else{
+				if (function_exists('parse_blocks')) { // KRISZTIAN CHANGE - PLEASE DOUBLE CHECK- FALLBACK
+					$blocks = parse_blocks( $content );
+			 		if(!empty($blocks)){
+			 			foreach($blocks as $block){
+			 				if('core/gallery' === $block['blockName'] && isset($block['attrs']['ids']) && is_array($block['attrs']['ids'])){
+			 					$images = array();
+			 					foreach($block['attrs']['ids'] as $img){
+			 						$t_img = wp_get_attachment_image_src($img, $source);
+			 						if($t_img !== false){
+			 							$images[] = $t_img[0];
+			 						}
+			 					}
+			 					$ret = $images;
+			 				}
+			 			}
+			 		}
+			 	}
 			}
-			
-		}
-		
-		return apply_filters('essgrid_get_all_gallery_images', $ret, $content, $url);
-	}
-	
+
+ 		}
+
+ 		return apply_filters('essgrid_get_all_gallery_images', $ret, $content, $url);
+ 	}
+
 
 	/**
 	 * retrieve the first content image in post text
@@ -2338,7 +2437,7 @@ class Essential_Grid_Base {
 	public function get_first_content_image($post_id, $post = false) {
 		if($post_id != -1)
 			$post = get_post($post_id);
-		
+
 		$first_img = '';
 		ob_start();
 		ob_end_clean();
@@ -2350,9 +2449,9 @@ class Essential_Grid_Base {
 		if(empty($first_img)){
 			$first_img = '';
 		}
-		
+
 		return apply_filters('essgrid_get_first_content_image', $first_img, $post_id, $post);
-		
+
 	}
 
 
@@ -2360,7 +2459,7 @@ class Essential_Grid_Base {
 	 * retrieve all content images in post text
 	 * @since: 1.5.4
 	 */
-	public function get_all_content_images($post_id, $post = false) {
+	public function get_all_content_images($post_id, $post = false, $source = 'full') {
 		if($post_id != -1)
 			$post = get_post($post_id);
 
@@ -2368,19 +2467,27 @@ class Essential_Grid_Base {
 		ob_start();
 		ob_end_clean();
 		$output = preg_match_all('/<img[^>]*src\s?=\s?([\'"])((?:(?!\1).)*)[^>]*>/i', $post->post_content, $matches);
-		
+
 		if(isset($matches[2][0]))
 			$images = $matches[2];
 
 		if(empty($images)){
 			$images = array();
+		}else{
+			if($source !== 'full'){
+				foreach($images as $i => $img){
+					$img_id		= $this->get_image_id_by_url($img);
+					$_img		= wp_get_attachment_image_src($img_id, $source);
+					$images[$i]	= (!empty($_img)) ? $_img[0] : $img;
+				}
+			}
 		}
-		
+
 		return apply_filters('essgrid_get_all_content_images', $images, $post_id, $post);
-		
+
 	}
-	
-	
+
+
 	/**
 	 * retrieve the first iframe in the post text
 	 * @since: 1.2.0
@@ -2388,23 +2495,23 @@ class Essential_Grid_Base {
 	public function get_first_content_iframe($post_id, $post = false) {
 		if($post_id != -1)
 			$post = get_post($post_id);
-		
+
 		$first_iframe = '';
 		ob_start();
 		ob_end_clean();
 		$output = preg_match_all('/<iframe.+src=[\'"]([^\'"]+)[\'"].*>/i', $post->post_content, $matches);
-		
+
 		if(isset($matches[0][0]))
 			$first_iframe = $matches[0][0];
 
 		if(empty($first_iframe)){
 			$first_iframe = '';
 		}
-		
+
 		return apply_filters('essgrid_get_first_content_iframe', $first_iframe, $post_id, $post);
-		
+
 	}
-	
+
 	/**
 	 * retrieve the first youtube video in the post text
 	 * @since: 1.2.0
@@ -2417,18 +2524,18 @@ class Essential_Grid_Base {
 		ob_start();
 		ob_end_clean();
 		$output = preg_match_all('/(http:|https:|:)?\/\/(?:[0-9A-Z-]+\.)?(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/ytscreeningroom\?v=|\/feeds\/api\/videos\/|\/user\S*[^\w\-\s]|\S*[^\w\-\s]))([\w\-]{11})[?=&+%\w-]*/i', $post->post_content, $matches);
-		
+
 		if(isset($matches[2][0]))
 			$first_yt = $matches[2][0];
 
 		if(empty($first_yt)){
 			$first_yt = '';
 		}
-		
+
 		return apply_filters('essgrid_get_first_content_youtube', $first_yt, $post_id, $post);
 	}
-	
-	
+
+
 	/**
 	 * retrieve the first vimeo video in the post text
 	 * @since: 1.2.0
@@ -2441,7 +2548,7 @@ class Essential_Grid_Base {
 		ob_start();
 		ob_end_clean();
 		$output = preg_match_all('/(http:|https:|:)?\/\/?vimeo\.com\/([0-9]+)\??|player\.vimeo\.com\/video\/([0-9]+)\??/i', $post->post_content, $matches);
-		
+
 		if(isset($matches[2][0]) && !empty($matches[2][0]))
 			$first_vim = $matches[2][0];
 		if(isset($matches[3][0]) && !empty($matches[3][0]))
@@ -2450,11 +2557,11 @@ class Essential_Grid_Base {
 		if(empty($first_vim)){
 			$first_vim = '';
 		}
-		
+
 		return apply_filters('essgrid_get_first_content_vimeo', $first_vim, $post_id, $post);
 	}
-	
-	
+
+
 	/**
 	 * retrieve the first wistia video in the post text
 	 * @since: 2.0.6
@@ -2468,7 +2575,7 @@ class Essential_Grid_Base {
 		ob_end_clean();
 		// /(http:|https:|:)?\/\/?wistia\.net\/([0-9a-z]+)\??|player\.wistia\.net\/video\/([0-9a-z]+)\??|(wistia.com|wi.st|wistia.net)\/(medias|embed)\/([0-9a-z]+)\.*/i
 		$output = preg_match_all('/(http:|https:|:)?\/\/?wistia\.net\/([0-9]+)\??|player\.wistia\.net\/video\/([0-9]+)\??/i', $post->post_content, $matches);
-		
+
 		if(isset($matches[2][0]))
 			$first_ws = $matches[2][0];
 
@@ -2476,16 +2583,16 @@ class Essential_Grid_Base {
 			$output = preg_match_all("/wistia\.com\/(medias|embed)\/([0-9a-z]+)/i", $post->post_content, $matches);
 			if(isset($matches[2][0]))
 				$first_ws = $matches[2][0];
-			
+
 			if(empty($first_ws)){
 				$first_ws = '';
 			}
 		}
-		
+
 		return apply_filters('essgrid_get_first_content_wistia', $first_ws, $post_id, $post);
 	}
-	
-	
+
+
 	/**
 	 * retrieve the first video in the post text
 	 * @since: 1.2.0
@@ -2493,12 +2600,12 @@ class Essential_Grid_Base {
 	public function get_first_content_video($post_id, $post = false) {
 		if($post_id != -1)
 			$post = get_post($post_id);
-		
+
 		$video = false;
 		ob_start();
 		ob_end_clean();
 		$output = preg_match_all("'<video>(.*?)</video>'si", $post->post_content, $matches);
-		
+
 		if(isset($matches[0][0])){
 			$videos = preg_match_all('/<source.+src=[\'"]([^\'"]+)[\'"].*>/i', $matches[0][0], $video_match);
 			if(isset($video_match[1]) && is_array($video_match[1])){
@@ -2522,12 +2629,12 @@ class Essential_Grid_Base {
 		if(empty($video)){
 			$video = false;
 		}
-		
+
 		return apply_filters('essgrid_get_first_content_video', $video, $post_id, $post);
-		
+
 	}
-	
-	
+
+
 	/**
 	 * retrieve the first soundcloud in the post text
 	 * @since: 1.2.0
@@ -2540,18 +2647,18 @@ class Essential_Grid_Base {
 		ob_start();
 		ob_end_clean();
 		$output = preg_match_all('/\/\/api.soundcloud.com\/tracks\/(.[0-9]*)/i', $post->post_content, $matches);
-		
+
 		if(isset($matches[1][0]))
 			$first_sc = $matches[1][0];
-			
+
 		if(empty($first_sc)){
 			$first_sc = '';
 		}
-		
+
 		return apply_filters('essgrid_get_first_content_soundcloud', $first_sc, $post_id, $post);
 	}
-	
-	
+
+
 	/**
 	 * retrieve the image id from the given image url
 	 * @since: 1.1.0
@@ -2563,25 +2670,30 @@ class Essential_Grid_Base {
 		// If there is no url, return.
 		if ( '' != $image_url ){
 
-			// Get the upload directory paths
-			$upload_dir_paths = wp_upload_dir();
+			$attachment_id = (function_exists('attachment_url_to_postid')) ? attachment_url_to_postid($image_url) : 0;
 
-			// Make sure the upload path base directory exists in the attachment URL, to verify that we're working with a media library image
-			if ( false !== strpos( $image_url, $upload_dir_paths['baseurl'] ) ) {
+			if(0 == $attachment_id){
+				// Get the upload directory paths
+				$upload_dir_paths = wp_upload_dir();
 
-				// If this is the URL of an auto-generated thumbnail, get the URL of the original image
-				$image_url = preg_replace( '/-\d+x\d+(?=\.(jpg|jpeg|png|gif)$)/i', '', $image_url );
+				// Make sure the upload path base directory exists in the attachment URL, to verify that we're working with a media library image
+				if ( false !== strpos( $image_url, $upload_dir_paths['baseurl'] ) ) {
 
-				// Remove the upload path base directory from the attachment URL
-				$image_url = str_replace( $upload_dir_paths['baseurl'] . '/', '', $image_url );
+					// If this is the URL of an auto-generated thumbnail, get the URL of the original image
+					$image_url = preg_replace( '/-\d+x\d+(?=\.(jpg|jpeg|png|gif)$)/i', '', $image_url );
 
-				// Finally, run a custom database query to get the attachment ID from the modified attachment URL
-				$attachment_id = $wpdb->get_var( $wpdb->prepare( "SELECT wposts.ID FROM $wpdb->posts wposts, $wpdb->postmeta wpostmeta WHERE wposts.ID = wpostmeta.post_id AND wpostmeta.meta_key = '_wp_attached_file' AND wpostmeta.meta_value = '%s' AND wposts.post_type = 'attachment'", $image_url ) );
+					// Remove the upload path base directory from the attachment URL
+					$image_url = str_replace( $upload_dir_paths['baseurl'] . '/', '', $image_url );
+
+					// Finally, run a custom database query to get the attachment ID from the modified attachment URL
+					$attachment_id = $wpdb->get_var( $wpdb->prepare( "SELECT wposts.ID FROM $wpdb->posts wposts, $wpdb->postmeta wpostmeta WHERE wposts.ID = wpostmeta.post_id AND wpostmeta.meta_key = '_wp_attached_file' AND wpostmeta.meta_value = '%s' AND wposts.post_type = 'attachment'", $image_url ) );
+
+				}
 
 			}
-			
+
 		}
-		
+
 		return apply_filters('essgrid_get_image_id_by_url', $attachment_id, $image_url);
 	}
 
@@ -2637,48 +2749,30 @@ class Essential_Grid_Base {
 
 		return apply_filters('essgrid_compress_css_post', $buffer);
 	}
-	
+
 	/**
 	 * shuffle by preserving the key
 	 * @since 1.5.1
 	 */
 	public function shuffle_assoc($list){
-		if (!is_array($list)) return $list; 
+		if (!is_array($list)) return $list;
 
-		$keys = array_keys($list); 
-		shuffle($keys); 
-		$random = array(); 
-		foreach($keys as $key){ 
-			$random[$key] = $list[$key]; 
+		$keys = array_keys($list);
+		shuffle($keys);
+		$random = array();
+		foreach($keys as $key){
+			$random[$key] = $list[$key];
 		}
-		
+
 		return apply_filters('essgrid_shuffle_assoc', $random);
 	}
-	
+
 	/**
 	 * prints out debug text if constant TP_DEBUG is defined and true
  	 * @since: 2.1.0
 	 */
 	public static function debug($value , $message, $where = "console"){
-		if( defined('TP_DEBUG') && TP_DEBUG ){
-			if($where=="console"){
-				echo '<script>
-					jQuery(document).ready(function(){
-						if(window.console) {
-							console.log("'.$message.'");
-							console.log('.json_encode($value).');
-						}
-					});
-				</script>
-				';
-			}
-			else{
-				var_dump($value);
-			}
-		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	/**
@@ -2697,9 +2791,16 @@ class Essential_Grid_Base {
 			  $x_display .= $x_parts[$x_count_parts - 1];
 		}
 		else $x_display = $num;
-	  	
+
 	  	return $x_display;
 	}
 
+	/**
+	 * sanitizes utf8 characters to unicode
+ 	 * @since: 3.0.9
+	 */
+	public static function sanitize_utf8_to_unicode($string){
+		return sanitize_key(json_encode($string));
+	}
 }
 ?>

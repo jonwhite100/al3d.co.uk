@@ -3,7 +3,7 @@
  * @package   Essential_Grid
  * @author    ThemePunch <info@themepunch.com>
  * @link      http://www.themepunch.com/essential/
- * @copyright 2016 ThemePunch
+ * @copyright 2020 ThemePunch
  * @since	  2.0
  */
  
@@ -33,7 +33,7 @@ class Essential_Grid_Search {
 		$this->settings = $settings;
 		
 		if(!is_admin()){ //only for frondend
-			if($base->getVar($settings['settings'], 'search-enable', 'off') == 'on'){
+			if($base->getVar($settings, array('settings', 'search-enable'), 'off') == 'on'){
 				add_action( 'wp_footer', array( $this, 'enqueue_styles' ) ); //wp_enqueue_scripts
 				add_action( 'wp_footer', array( $this, 'enqueue_scripts' ) ); //wp_enqueue_scripts
 			}
@@ -335,7 +335,7 @@ class Essential_Grid_Search {
 
 				var inp = cont.find('input');
 				setTimeout(function() {
-					inp.focus();
+					inp.trigger('focus');
 				},450);
 
 				inp.on('keyup',function(e) {
@@ -384,7 +384,7 @@ class Essential_Grid_Search {
 				},function() {
 					punchgs.TweenLite.to(bgs,0.4,{rotation:0});
 				})
-				bgs.click(function() {
+				bgs.on('click',function() {
 					punchgs.TweenLite.to(sw,0.4,{x:0,y:0,scale:0.8,autoAlpha:0,ease:punchgs.Power3.easeOut,onComplete:function(){
 						sw.remove();
 						//kill everything from essential !!!!

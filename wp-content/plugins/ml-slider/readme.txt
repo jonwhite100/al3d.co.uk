@@ -1,69 +1,83 @@
-=== MetaSlider ===
+=== Responsive Slider by MetaSlider - Slider and Carousel Plugin for WordPress ===
 Contributors: matchalabs, DavidAnderson, dnutbourne, kbat82
-Tags: wordpress slideshow,seo,slideshow,slider,widget,wordpress slider,image slider,flexslider,flex slider,nivoslider,nivo slider,responsive,responsive slides,coinslider,coin slider,slideshow,carousel,responsive slider,vertical slides
-Donate link: https://david.dw-perspective.org.uk/donate
+Tags: slideshow, slider, image slider, carousel, gallery, flexslider, wordpress slider, nivoslider, rotating banner, responsive slideshow, seo slideshow, unsplash
 Requires at least: 3.5
-Stable tag: 3.8.1
-Tested up to: 5.0
+Stable tag: 3.19.1
+Requires PHP: 5.2
+Tested up to: 5.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Easy to use WordPress slider plugin. Create SEO-optimized responsive slideshows with Nivo Slider, Flex Slider, Coin Slider and Responsive Slides.
+The best WordPress slider plugin. Easily create beautiful, responsive sliders and carousels with image, video, post feed, product, and layer slides.
 
 == Description ==
 
 Create powerful, SEO-optimized slideshows in minutes with the world's #1 slider plugin!
 
+[vimeo https://vimeo.com/393891282]
+
 With WordPress’ most popular slider plugin, enhancing your blog or website couldn’t be easier: simply select images from your WordPress Media Library, drag and drop them into place, and then set the slide captions, links and SEO fields all from one page.
 
+**NEW: Easily search and download free images to your slideshow from Unsplash.com**
+
 Choose one of 4 different slideshow types, and use our provided short-code or template to embed the slideshows.
+
+Apply one of our professional slidehow designs to really make your website stand out.
+
+**Gutenberg compatible**
 
 **Included slideshow types:**
 
 * **Flex Slider 2** - responsive, 2 transition effects, carousel mode
-* **Nivo Slider** - responsive, 16 transition effects, 4 themes
+* **Nivo Slider** - responsive, 16 transition effects
 * **Responsive Slides** - responsive & incredibly light weight
 * **Coin Slider** - 4 transition effects
 
 **Features**
 
 * Simple, easy to use interface - perfect for individual users, developers & clients!
+* Access to free photos via Unsplash.com
 * Create Responsive, SEO-optimized slideshows in seconds
-* Unrestricted support for Image slides (supports caption, link, title text, alt text)
+* Unrestricted support for image slides (supports caption, link, title text, alt text)
 * Full width slideshow support
 * Drag and drop slide reordering
-* Admin preview
 * Intelligent image cropping
 * Set image crop position
-* Built in Widget and Shortcode
+* Themes - includes 11 free professional slideshow themes
+* Built in Gutenberg block, Widget and Shortcode
 * Loads of slideshow configuration options - transition effect, speed etc (per slideshow)
 * Fully localized
 * WordPress Multi Site compatible
 * Compatible with translation plugins (WPML, PolyLang & qTranslate)
-* Extensive Developer API (hooks & filters)
+* Extensive developer API (hooks & filters)
 * Fast - only the minimum JavaScript/CSS is included on your page
+* Import/Export slideshows.
 * Free basic support (covering installation issues and theme/plugin conflicts)
-* Lightbox support with the [MetaSlider Lightbox](https://wordpress.org/plugins/ml-slider-lightbox/) addon
+* Lightbox support with the [MetaSlider Lightbox](https://wordpress.org/plugins/ml-slider-lightbox/) add-on
 
 **General:**
+
 * Simple and intuitive interface – perfect for individual users, developers & clients!
 * Fast – requires only the minimum JavaScript/CSS on your page
 * Creatively responsive
-	
+
 **Creative:**
+
 * Unrestricted full-width support for image slides, including captions, links, title texts and alt. texts.
-* Includes drag and drop slide reordering, intelligent image cropping, set image crop position. 
-* Multiple slideshow configuration options (e.g. for speed, 
-* Has Admin Preview
+* Includes drag and drop slide reordering, intelligent image cropping, set image crop position.
+* Multiple slideshow configuration options (e.g. for speed, timing, plus many more!)
 
 **Other:**
-* Includes Admin preview, plus built-in Widget and Short-code
+
+* Preview from within the admin area
+* Shortcode lets you add the slideshow anyway
 * Fully localized
-* WordPress Multi-site compatible, and 
-* compatible with translation plugins (WPML, PolyLang & qTranslate)
+* WordPress Multi-site compatible, and
+* Compatible with translation plugins (WPML, PolyLang & qTranslate)
 * Developer Friendly, with extensive hooks & filters
 
 **Support:**
+
 * Includes free basic support (covering installation issues and theme/plugin conflicts).
 
 The <a href="https://www.metaslider.com/upgrade">MetaSlider Pro</a> includes added support for:
@@ -71,21 +85,29 @@ The <a href="https://www.metaslider.com/upgrade">MetaSlider Pro</a> includes ad
 * YouTube & Vimeo slides
 * HTML slides
 * Layer slides with CSS3 animations & HTML5 Video backgrounds
+* Full-featured text editor to include extra CSS
 * Dynamic Post Feed/Featured Image Slides (content slider)
-* Custom Themes
+* Slide scheduling & slide visibility
+* Custom Themes - build your own theme
 * Thumbnail Navigation
 * Premium Support
 
 Read more and thanks to:
 
 * [Flex Slider](http://flexslider.woothemes.com/)
-* [Responsive Slides](http://responsive-slides.viljamis.com/)
+* [Responsive Slides](http://responsiveslides.com/)
 * [Coin Slider](http://workshop.rs/projects/coin-slider/)
-* [Nivo Slider](http://dev7studios.com/nivo-slider/)
+* [Nivo Slider](https://github.com/Codeinwp/Nivo-Slider-jQuery)
 
-Find out more at https://www.metaslider.com
+Find out more at <a href="https://www.metaslider.com">metaslider.com</a>
 
 Follow us on Twitter: [@wpmetaslider](https://twitter.com/wpmetaslider)
+
+**Privacy Policy:**
+
+MetaSlider uses the Appsero SDK to collect non-sensitive diagnostic data upon a user's confirmation. This data helps us to troubleshoot problems faster & make product improvements.
+
+MetaSlider only collects this diagnostic data when a user allows it via a notice in WP Admin or MetaSlider settings. View our [privacy policy](https://www.metaslider.com/privacy-policy).
 
 == Installation ==
 
@@ -151,6 +173,255 @@ See https://www.metaslider.com/documentation/image-cropping/
 
 == Changelog ==
 
+= 3.19.1 - 2020/Dec/1 =
+* TWEAK: Adds option to filter HTML Purify
+* TWEAK: Updates Appsero dependency version
+
+= 3.19.0 - 2020/Nov/12 =
+
+* ACCESSIBILITY: Fixes typo on svg button in Simply Dark
+* TWEAK: Adds install date to optin Appsero report
+* TWEAK: Adds passive listener option to FlexSlider touch events
+* FIX: Processes library assets to minify and optimize (production ready)
+
+= 3.18.9 - 2020/Nov/5 =
+
+* FIX: Adds polyfill for WP 4.5 wp_add_inline_script
+* FIX: Removes some non PHP 5.3 code from 3rd party lib
+
+= 3.18.8 - 2020/Nov/2 =
+
+* TWEAK: Pass callback function to Appsero instead of relying on caching.
+* TWEAK: Switches Appsero integration to only collected info on the user that logged in.
+* FIX: Adds PHP5.3 compatibility by removing array shorthand syntax
+
+= 3.18.7 - 2020/Oct/27 =
+
+* TWEAK: Clean up some of the Analytic specific items and reporting bugs. Note: no bugs related to improper handling.
+
+= 3.18.6 - 2020/Oct/26 =
+
+* FIX: Remove PHP 7.3 specific trailing commas
+
+= 3.18.5 - 2020/Oct/22 =
+
+* TWEAK: Moves the support related items to a separate page in prep to make it more robust.
+* TWEAK: Updates privacy policy and opt-in product analytics
+
+= 3.18.3/4 - 2020/Oct/15 =
+
+* TWEAK: Updates plugin name to better describe its use, but keep plugin page title simple
+
+= 3.18.2 - 2020/Oct/02 =
+
+* FIX: Scopes slideshow cache to site (for multi-site support)
+
+= 3.18.1 - 2020/Sept/21 =
+
+* FIX: Removes Nivo loading gif and add back specificity
+
+= 3.18.0 - 2020/Sept/05 =
+
+* FEATURE/FIX: Updates UI elements and updates icon set (FA was causing issues on some hosts)
+
+= 3.17.6 - 2020/Aug/31 =
+
+* FIX: Fixes issue with build script and script version number
+
+= 3.17.5 - 2020/Aug/31 =
+
+* FIX: Fixes bug where the notices nonce script loading relied on jQuery
+
+= 3.17.4 - 2020/Aug/29 =
+
+* FIX: Adds extra check for HTML Purify class (fixes conflict with CiviCRM)
+* TWEAK: Tweaks to the deploy script (patch version numbers might jump as a result)
+
+= 3.17.2 - 2020/Aug/28 =
+
+* TWEAK: Archives the "Thank you" dashboard notice for now
+* TWEAK: Limits loading admin specific code from the front end
+* TWEAK: Switches to a new CI and build process (report any issues to our support channel)
+* TWEAK: Adds extra permission_callback check to settings routes
+* SECURITY: Adds extra filtering of captions using HTML Purifier (http://htmlpurifier.org/). Reminder: Only users with `edit_others_posts` capability can edit slideshows, which is a role that may be added by third party plugins (ex. Shop Managers from WooCommerce have this role). If you need to limit who can edit your slideshows, then you can update this with the filter `metaslider_capability`, for example to `manage_options`. Contact us in support for more information. (Thanks to Fortinet Fortiguard Labs)
+
+= 3.17.1 - 2020/Aug/13 =
+
+* TWEAK: Adds permission_callback check to register_rest_route as an added redundency
+* TWEAK: Updates colorbox's jQuery .live() function to use .on()
+
+= 3.17.0 - 2020/Aug/5 =
+
+* FEATURE: Adds setting page to update some default settings
+* FEATURE: Adds export and import functionality
+* TWEAK: Updates jQuery to work with WP 5.5 (while maintaining backwards compatibility)
+* FIX: Fixes a bug where FlexSlider carousel doesn't calculate margins properly
+* FIX: Fixes a bug where custom themes would show on fresh slideshows
+
+= 3.16.4 - 2020/April/16 =
+
+* FIX: Addresses a conflict with Gutenberg modules that some users are seeing (fix in 3.16.3 was incomplete)
+
+= 3.16.2 - 2020/April/08 =
+
+* FIX: Updates Gutenberg module to use the new @wordpress/block-editor library
+
+= 3.16.1 - 2020/April/03 =
+
+* TWEAK: Updates the media_buttons_context hook to use media_buttons
+
+= 3.16.0 - 2020/Mar/25 =
+
+* FEATURE: Adds sorting options to the dropdown drawer module
+* TWEAK: Expand error handler attempt to catch errors from elsewhere
+* TWEAK: Expand search results from 15 to 25 and make that customizable
+* TWEAK: Adds a reactive title module
+* TWEAK: Updates to use WP style notifications and modals
+* TWEAK: Loads in recent slideshows and lets the user opt to load more
+* TWEAK: Switches anitmation to requestAnimationFrame for added performance
+* TWEAK: Separates settings saving logic from slides, and saves in chunks of 10 slides
+* TWEAK: Adds warning message to users that have a very low input var setting
+* TWEAK: Adds fallback for 404 routes to admin-ajax
+* TWEAK: Adds ability to use the JS dev build for debugging. Use SCRIPT_DEBUG to enable
+* FIX: Fixes issue where single quotes in settings input fields would cause a blank page
+* FIX: Removes unwanted side menu items on the media library view
+
+= 3.15.3 - 2019/Nov/28 =
+
+* FIX: Updates layout breaks in WP5.3
+
+= 3.15.2 - 2019/Nov/14 =
+
+* TWEAK: Adds loaded event that other plugins can wait for
+* TWEAK: Updates a few UI elements on the search bar and slideshow drawer
+* TWEAK: Adds better checks for error messages
+* FIX: Fixes an issue where cetain settings would show when not needed
+* FIX: Fixes a layout break in IE11
+* FIX: Addresses performance issues with a very large collection of slideshows
+
+= 3.15.1 - 2019/Oct/22 =
+
+* FIX: Adds better check for slide image thumbnails and count
+* FIX: Updates $ to jQuery on the admin settings screen
+
+= 3.15.0 - 2019/Oct/21 =
+
+* FEATURE: Adds a new way to navigate slideshows
+* TWEAK: Adds various accessibility enhancements to FlexSlider
+* TWEAK: Adds extra checks for REST enabled sites
+* TWEAK: Updates notices
+* FIX: Updates various RTL language styling issues
+* FIX: Fixes bug where new slides wouldn't crop until pressing save
+* FIX: Fixes various layout breaks from other languages
+
+= 3.14.0 - 2019/July/26 =
+
+* FEATURE: Adds ability to duplicate a slideshow
+* FEATURE: Adds toolbar with various utilities
+* FEATURE: Adds unified notification system
+* REFACTOR: Moves inline styles out of the body tag
+* REFACTOR: Refactors the preview module to be called from anywhere
+* REFACTOR: Refactors the way slides and the slideshow saving works
+* REFACTOR: Refactors the shortcode copy module
+* REFACTOR: Adds helper functions to better manage the routes files
+* FIX: Fixes a bug where adding a class name via Gutenberg crashes the block
+
+= 3.13.1 - 2019/May/11 =
+
+* TWEAK: Corrects a check on a variable in Theme.php, preventing a possible PHP notice
+
+= 3.13.0 - 2019/May/7 =
+
+* FEATURE: Allows captions to inherit the image description
+* FEATURE: Adds support for theme developers to register a theme
+* TWEAK: Adds extra checks for when a theme is missing
+* TWEAK: Removes some ancient code for compatibility with PHP < 5.1
+* TWEAK: Stops random theme being inherited when user removes it
+* REFACTOR: DOM appended slides are now rendered as Vue components
+
+= 3.12.1 - 2019/Mar/18 =
+
+* FIX: Fixes a bug where Nivo and Coin Slider did not ship with the plugin
+
+= 3.12.0 - 2019/Mar/18 =
+
+* TWEAK: Sets a default theme on a newly created slideshow
+* TWEAK: Adds various trivial code quality fixes
+* FEATURE: Adds access to the Unsplash.com image library
+
+= 3.11.1 - 2019/Jan/30 =
+
+* FIX: Update Gutenberg compatibility
+
+= 3.11.0 - 2019/Jan/30 =
+
+* FEATURE: Adds drag and drop module
+* FEATURE: Adds a convenient start page for new users
+* FIX: Fixes layout issue with notices served by other plugins
+* FIX: Updates Gutenberg container styles
+* FIX: Fixes issue where Coin Slider wouldn't open in a new window
+* FIX: Updates support for Elementor page builder
+* TWEAK: Updates various UI elements
+* TWEAK: Removes fonts to reduce package size
+* TWEAK: Adds an escape output of slideshow titles
+* REFACTOR: Removes defunct preview method
+
+= 3.10.3 - 2018/Dec/04 =
+
+* FIX: Updates Gutenberg compatibility
+
+= 3.10.2 - 2018/Nov/21 =
+
+* FIX: Fixes bug in with captions in NivoSlider
+
+= 3.10.1 - 2018/Nov/20 =
+
+* TWEAK: Removes redundant height and width attributes
+* FIX: Fixes bug in PHP 5.2 where images would not import
+* FIX: Updates various translation errors and adds translator tips
+* FIX: Allows the folder name to be safely changed
+* FIX: Fixes the situation where using a different folder name breaks everything
+* FIX: Fixes a Gutenberg-related bug that appears in WP5.0 beta2
+
+= 3.10.0 - 2018/Oct/25 =
+
+* FEATURE: Adds 11 new themes users can apply to their slideshows
+* FEATURE: Adds ability to preview a slideshow with a theme
+* FEATURE: Adds ability for a theme developer to add instructions
+* FEATURE: Adds unique images by theme if a user is importing images
+* FEATURE: Adds new channel for user feedback
+* FEATURE: Adds new developer filters to adjust slide output/visibility
+* FIX: Updates unusable filter when attempting to filter slides by type
+* FIX: Fixes a bug when babel-polyfil is loaded more than once
+* FIX: Adds an extra check for an error before saving the theme
+* TWEAK: Adds a title to the theme module
+* TWEAK: Adds ability to import images with captions, title, alt and desc. from a theme.
+
+= 3.9.1 - 2018/Sept/28 =
+
+* FIX: Fixes a bug where some slides get appended inside others.
+
+= 3.9.0 - 2018/Sept/11 =
+
+* FEATURE: Adds the option to toggle autoplay for Coin Slider
+* FEATURE: Adds keyboard shortcuts to preview
+* FEATURE: Adds full width toggle to preview
+* FEATURE: Adds a light and dark preview option
+* FEATURE: Adds ability to import images if none exist
+* FEATURE: Adds Gutenberg block
+* FEATURE: Adds ability to use the title in a shortcode
+* FEATURE: Adds translation functionality to JS components
+* TWEAK: Updates Pro slide types descriptions
+* TWEAK: Adds placeholder and comparison table entries for schedule functionality
+* TWEAK: Adds compatibility with Pro feature ability to change layer slide background
+* TWEAK: Updates option name on slideshow select box as title name changes.
+* TWEAK: Adds default Flexslider fonts to repo for users that require them.
+* TWEAK: Adds filters to slides edit buttons
+* TWEAK: Tweaks edits buttons style
+* FIX: Limits image srcset to image and layer slides (fixes post feed image)
+* FIX: Fixes broken Nivo themes (due to css specificity)
+* FIX: Fixes bug where icons would jump during delete
+
 = 3.8.1 - 2018/Jun/07 =
 
 * FIX: Limits responsive image srcset to slideshows with cropping disabled only
@@ -165,7 +436,7 @@ See https://www.metaslider.com/documentation/image-cropping/
 * TWEAK: Adds default Flexslider fonts to repo for users that require them.
 * FIX: Fixes error when trying to save many slides
 * FIX: Fixes broken markup in settings in some languages.
-* FIX: Fixes bug that always strips referral tags. 
+* FIX: Fixes bug that always strips referral tags.
 * FIX: Adds a check to the copy/paste element to make sure it exists before adding an event
 * REFACTOR: Removes plugin dependency on Notice class
 * REFACTOR: Standardizes the code to deny direct access
@@ -178,11 +449,11 @@ See https://www.metaslider.com/documentation/image-cropping/
 
 = 3.7.1 - 2018/Mar/13 =
 
-* FIX: Updates FlexSlider to remove flash on page load. 
+* FIX: Updates FlexSlider to remove flash on page load.
 
 = 3.7.0 - 2018/Feb/26 =
 
-* FEATURE: Allows users to inherit default captions and other data from the image. 
+* FEATURE: Allows users to inherit default captions and other data from the image.
 * FIX: Adds capability filter to pages.
 * TWEAK: Updates to the correct support link.
 
@@ -660,6 +931,3 @@ More info/Comments: http://www.metaslider.com/coming-soon-meta-slider-2-6-free/
 
 = 1.0 [15/02/13] =
 * Initial version
-
-== Upgrade Notice ==
-* 3.8.1 : This update includes added support for retina images, responsive images, and addresses a few bugs (including in 3.8.0), including when a slideshow has a large quantity of slides.

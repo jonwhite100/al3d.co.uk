@@ -4,203 +4,236 @@
     *   Javascript Functions
     *   ------------------------------------------------
     *   WP Mobile Menu
-    *   Copyright WP Mobile Menu 2017 - http://www.wpmobilemenu.com
-    *
+    *   Copyright WP Mobile Menu 2018 - http://www.wpmobilemenu.com
     *
     */
 
+    "use strict";
     
-   "use strict";
-    
-   (function ($) {
-      jQuery( document ).ready( function() {
-  
-        jQuery( document ).on( 'click', '.show-nav-right .mobmenu-push-wrap,  .show-nav-right .mobmenu-overlay', function ( e ) { 
-  
-          e.preventDefault();
-          jQuery( '.mobmenu-right-bt' ).first().trigger( 'click' );
-          e.stopPropagation();
-  
-        });
-          
-        jQuery( document ).on( 'click', '.show-nav-left .mobmenu-push-wrap,  .show-nav-left .mobmenu-overlay', function ( e ) { 
-  
-          e.preventDefault();
-          jQuery( '.mobmenu-left-bt' ).first().trigger( 'click' );
-          e.stopPropagation();
-  
-        });
-    
-        
-        if ( jQuery( 'body' ).find( '.mobmenu-push-wrap' ).length <= 0 &&  jQuery( 'body' ).hasClass( 'mob-menu-slideout' ) ) {
-          jQuery( 'body' ).wrapInner( '<div class="mobmenu-push-wrap"></div>' );
-          jQuery( '.mobmenu-push-wrap' ).after( jQuery( '.mob-menu-left-panel' ).detach() );
-          jQuery( '.mobmenu-push-wrap' ).after( jQuery( '.mob-menu-right-panel' ).detach() );
-          jQuery( '.mobmenu-push-wrap' ).after( jQuery( '.mob-menu-header-holder' ).detach() ); 
-          
-          if ( jQuery('.mob-menu-header-holder' ).attr( 'data-detach-el' ) != '' ) {
-            jQuery( '.mobmenu-push-wrap' ).after( jQuery(   jQuery('.mob-menu-header-holder' ).attr( 'data-detach-el' ) ).detach() ); 
-          }
-  
-          // Double Check the the menu display classes where added to the body.
-          var menu_display_type = jQuery( '.mob-menu-header-holder' ).attr( 'data-menu-display' );
-  
-          if ( menu_display_type != '' && !jQuery( 'body' ).hasClass( menu_display_type ) ) {
-            jQuery( 'body' ).addClass( menu_display_type );
-          }
-  
-          jQuery( '#wpadminbar' ).appendTo( 'body' );
+    jQuery( document ).ready( function($) {
 
-          jQuery( 'video' ).each( function(){
-            if( 'autoplay' === jQuery( this ).attr('autoplay') ) {
-              jQuery( this )[0].play();
-            }
-          });
+      function mobmenuOpenSubmenus( menu ) {
+        var submenu = $(menu).parent().next();
+        if ( $(menu).parent().next().hasClass( 'show-sub-menu' )  ) {
+          $(menu).find('.show-sub-menu' ).hide();
+          $(menu).toggleClass( 'show-sub');
+        } else {
+          if ( ! $( menu ).parents('.show-sub-menu').prev().hasClass('mob-expand-submenu') && submenu[0] !== $('.show-sub-menu')[0] && $( menu ).parent('.sub-menu').length <= 0 ) {
   
+            $(menu).parent().find( '.show-submenu' ).first().hide().toggleClass( 'show-sub-menu' );
+            $(menu).toggleClass( 'show-sub');
   
+          }
         }
 
-        jQuery( document ).on( 'click',  '.mobmenu-left-bt, .mob-menu-left-panel .mobmenu_content a, .show-nav-left .mob-cancel-button' , function ( e ) {  
+        if ( !$( menu ).parent().next().hasClass( 'show-sub-menu' ) ) {
+          submenu.fadeIn( 'slow' );
+        } else {  
+          submenu.hide();
+        }
+  
+        if ( ! $('body').hasClass('mob-menu-sliding-menus') ) {
+          $( menu ).find('.open-icon').toggleClass('hide');
+          $( menu ).find('.close-icon').toggleClass('hide');
+        }
 
-          // Parent Link open submenu(1st Level).
-          if ( jQuery(this).parent().parent().parent().parent().hasClass( 'mobmenu-parent-link' ) || jQuery(this).parent().parent().parent().parent().parent().hasClass( 'mobmenu-parent-link' ) ) {
-            if( 'mobmenuleft' ===  jQuery(this).parent().parent().attr('id') && jQuery(this).parent().find( '.mob-expand-submenu' ).length > 0 )  { 
-              jQuery(this).parent().find( '.mob-expand-submenu' ).first().trigger( 'click' );
-              return false;
-            }
-          }
-          // Parent Link open submenu(2nd Level).
-          if ( $(this).parent().parent().parent().parent().parent().parent().parent().hasClass( 'mobmenu-parent-link-2nd-level' )  ) {
-            if( 'mobmenuleft' ===  $(this).parent().parent().parent().parent().attr('id') && $(this).parent().find( '.mob-expand-submenu' ).length > 0 )  { 
-              $(this).parent().find( '.mob-expand-submenu' ).first().trigger( 'click' );
-              return false;
-            }
-          }
-
-          jQuery('body').toggleClass('show-nav-left'); 
-
-          if ( !jQuery( 'body' ).hasClass( 'show-nav-left') ){  
-            jQuery( 'html' ).removeClass( 'hidden-overflow' );
-            if ( jQuery( this ).hasClass( 'mob-cancel-button') || jQuery( this ).hasClass( 'mobmenu-left-bt' ) ) {
-              return false;
-            }
-  
-          } else {
-            jQuery( 'html' ).addClass( 'hidden-overflow' );
-            e.preventDefault();
-           
-          }
-  
-        });
-  
-        jQuery( document ).on( 'click', '.mobmenu-right-bt, .mob-menu-right-panel .mobmenu_content a, .show-nav-right .mob-cancel-button' , function ( e ) {
-  
-          if ( jQuery(this).parent().parent().parent().parent().hasClass( 'mobmenu-parent-link' ) || jQuery(this).parent().parent().parent().parent().parent().hasClass( 'mobmenu-parent-link' ) ) {
-            if( 'mobmenuright' ===  jQuery(this).parent().parent().attr('id') && jQuery(this).parent().find( '.mob-expand-submenu' ).length > 0 )  { 
-              jQuery(this).parent().find( '.mob-expand-submenu' ).first().trigger( 'click' );
-              return false;
-            }
-          }
-
-          // Parent Link open submenu(2nd Level).
-          if ( $(this).parent().parent().parent().parent().parent().parent().parent().hasClass( 'mobmenu-parent-link-2nd-level' )  ) {
-            if( 'mobmenuright' ===  $(this).parent().parent().parent().parent().attr('id') && $(this).parent().find( '.mob-expand-submenu' ).length > 0 )  { 
-              $(this).parent().find( '.mob-expand-submenu' ).first().trigger( 'click' );
-              return false;
-            }
-          }
-  
-          jQuery('body').toggleClass('show-nav-right'); 
-          
-          if ( !jQuery( 'body' ).hasClass( 'show-nav-right') ){
-            jQuery( 'html' ).removeClass( 'hidden-overflow' );
-            if ( jQuery( this ).hasClass( 'mob-cancel-button') || jQuery( this ).hasClass( 'mobmenu-right-bt' ) ) {
-                return false;
-            }
-  
-          } else {
-            jQuery( 'html' ).addClass( 'hidden-overflow' );
-            e.preventDefault();
-          }
-  
-        });
-  
-        jQuery( '.mobmenu_content .sub-menu' ).each( function(){
-          
-          jQuery( this ).before('<div class="mob-expand-submenu"><i class="mob-icon-down-open"></i><i class="mob-icon-up-open hide"></i></div>');
-  
-        });
-          
-        jQuery( document ).on( 'click', '.mob-expand-submenu' , function ( e ) {
-  
-          e.stopPropagation();
-              
-          if ( jQuery( this ).next().hasClass( 'show-sub-menu' )  ) {
-            jQuery(this).find('.show-sub-menu' ).hide();
-          }
-          if ( ! jQuery( this ).parents('.show-sub-menu').prev().hasClass('mob-expand-submenu') && jQuery( this ).next()[0] !== jQuery('.show-sub-menu')[0] && jQuery( this ).parent('.sub-menu').length <= 0 ) {
-            jQuery(this).find('.mob-icon-down-open').removeClass('hide');
-            jQuery(this).find('.mob-icon-up-open').addClass('hide');
-            jQuery(this).find( '.show-submenu' ).hide().toggleClass( 'show-sub-menu' );
-            
-          }
-          
-          jQuery( this ).find('.mob-icon-down-open').toggleClass('hide');
-          jQuery( this ).find('.mob-icon-up-open').toggleClass('hide');
-          
-          if ( !jQuery( this ).next().hasClass( 'show-sub-menu' ) ) {  
-            jQuery(this).next().fadeIn( 'slow' );   
-          } else {  
-            jQuery(this).next().hide();   
-          }
-  
-          jQuery(this).next().toggleClass( 'show-sub-menu');
-          
-        });
-  
+        submenu.toggleClass( 'show-sub-menu');
         
-        $('.mobmenu a[href*="#"]')
-    // Remove links that don't actually link to anything
-    .not('[href="#"]')
-    .not('[href="#0"]')
-    .on( 'click', function(event) {
-      // On-page links
-      if (
-        location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') 
-        && 
-        location.hostname == this.hostname
-        &&
-        $(this).parents('.mobmenu_content').length > 0
-      ) {
-        // Figure out element to scroll to
-        var target = $(this.hash);
-        target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
-        // Does a scroll target exist?
-        if (target.length) {
-          // Only prevent default if animation is actually gonna happen
-          event.preventDefault();
-          event.stopPropagation();
-          $( '.show-nav-left .mobmenu-left-bt').first().click();
-          $( '.show-nav-right .mobmenu-right-bt').first().trigger( 'click' );
+
+      }
+  
+
+      if ( $( 'body' ).find( '.mobmenu-push-wrap' ).length <= 0 &&  $( 'body' ).hasClass('mob-menu-slideout') ) {
+
+        $( 'body' ).wrapInner( '<div class="mobmenu-push-wrap"></div>' );
+        $( '.mobmenu-push-wrap' ).after( $( '.mobmenu-left-alignment' ).detach() );
+        $( '.mobmenu-push-wrap' ).after( $( '.mobmenu-right-alignment' ).detach() );
+        $( '.mobmenu-push-wrap' ).after( $( '.mob-menu-header-holder' ).detach() ); 
+        $( '.mobmenu-push-wrap' ).after( $( '.mobmenu-footer-menu-holder' ).detach() ); 
+        $( '.mobmenu-push-wrap' ).after( $( '.mobmenu-overlay' ).detach() ); 
+        $( '.mobmenu-push-wrap' ).after( $( '#wpadminbar' ).detach() );
+
+        if ( $('.mob-menu-header-holder' ).attr( 'data-detach-el' ) != '' ) {
+          $( '.mobmenu-push-wrap' ).after( $(   $('.mob-menu-header-holder' ).attr( 'data-detach-el' ) ).detach() );
+        }
+
+      }
+      // Double Check the the menu display classes where added to the body.
+      var menu_display_type = $( '.mob-menu-header-holder' ).attr( 'data-menu-display' );
+
+      
+      if ( menu_display_type != '' && !$( 'body' ).hasClass( 'mob-menu-slideout' ) && !$( 'body' ).hasClass( 'mob-menu-slideout-over' ) && !$( 'body' ).hasClass( 'mob-menu-slideout-top' ) && !$( 'body' ).hasClass( 'mob-menu-overlay' ) ) {
+        $( 'body' ).addClass( menu_display_type );
+      }
+
+      $( 'video' ).each( function(){
+        if( 'autoplay' === $( this ).attr('autoplay') ) {
+          $( this )[0].play();
+        } 
+      });
+
+      var submenu_open_icon  = $( '.mob-menu-header-holder' ).attr( 'data-open-icon' );
+      var submenu_close_icon = $( '.mob-menu-header-holder' ).attr( 'data-close-icon' );
+
+      $( '.mobmenu-content .sub-menu' ).each( function(){
+
+        $( this ).prev().append('<div class="mob-expand-submenu"><i class="mob-icon-' + submenu_open_icon + ' open-icon"></i><i class="mob-icon-' + submenu_close_icon + ' close-icon hide"></i></div>');
+
+        if ( 0 < $( this ).parents( '.mobmenu-parent-link' ).length  ) {
+          $( this ).prev().attr('href', '#');
+        }
+
+      });
+      
+      $( document ).on( 'click', '.mobmenu-parent-link .menu-item-has-children' , function ( e ) {
+        
+        if ( e.target.parentElement != this) return;
+        
+        e.preventDefault();
+        $(this).find('a').find('.mob-expand-submenu').first().trigger('click');
+        e.stopPropagation();
+        
+      });
+      $( document ).on( 'click', '.show-nav-left .mobmenu-push-wrap,  .show-nav-left .mobmenu-overlay', function ( e ) { 
+  
+        e.preventDefault();
+        $( '.mobmenu-left-bt' ).first().trigger( 'click' );
+        e.stopPropagation();
+
+      });
+      
+      $( document ).on( 'click', '.mob-expand-submenu' , function ( e ) {
+
+        // Check if any menu is open and close it.
+        if ( 1 == $( '.mob-menu-header-holder' ).attr( 'data-autoclose-submenus' ) && ! $(this).parent().next().hasClass( 'show-sub-menu' ) ) {
+          if ( 0 < $( '.mob-expand-submenu.show-sub' ).length &&  $(this).parents('.show-sub-menu').length <= 0 ) {
+            mobmenuOpenSubmenus( $( '.mob-expand-submenu.show-sub' ) );
+          }
+        }
+       
+        mobmenuOpenSubmenus( $(this) );
+        e.preventDefault();
+        e.stopPropagation();
+
+      });
+
+      $( document ).on( 'click', '.mobmenu-panel.show-panel .mob-cancel-button, .show-nav-right .mobmenu-overlay, .show-nav-left .mobmenu-overlay', function ( e ) { 
+
+        e.preventDefault();
+        mobmenuClosePanel( 'show-panel' );
+        if ( $('body').hasClass('mob-menu-sliding-menus') ) {
+          $( '.mobmenu-trigger-action .hamburger' ).toggleClass('is-active');
+        }
+
+      });
+
+      $( document ).on( 'click', '.mobmenu-trigger-action', function(e){
+        e.preventDefault();
+        
+        var targetPanel = $( this ).attr( 'data-panel-target' );
+        
+        if ( ! $( 'body' ).hasClass( 'show-nav-left' ) &&  ! $( 'body' ).hasClass( 'show-nav-right' )  ) {
+          if ( 'mobmenu-filter-panel' !==  targetPanel ) {
+            mobmenuOpenPanel( targetPanel );
+          }
+        }
+
+      });
+
+      $( document ).on( 'click', '.hamburger', function(e){
+        var targetPanel = $(this).parent().attr('data-panel-target');
+        e.preventDefault();
+        e.stopPropagation();
+        
+        $(this).toggleClass( 'is-active' );
+        
+        setTimeout(function(){ 
+          if ( $( 'body' ).hasClass('show-nav-left') ) {
+            if ( $('body').hasClass('mob-menu-sliding-menus') ) {
+              $( '.mobmenu-trigger-action .hamburger' ).toggleClass('is-active');
+            }
+            mobmenuClosePanel( targetPanel );
+            
+          } else {
+            mobmenuOpenPanel( targetPanel );
+          }
+            
+        }, 400);
+        
+
+      });
+     
+      $('.mobmenu a[href*="#"], .mobmenu-panel a[href*="#"]')
+        // Remove links that don't actually link to anything
+        .not('[href="#0"]')
+        .on( 'click', function(event) {
+          // On-page links  
+  
+        if (
+          location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') 
+          && 
+          location.hostname == this.hostname
+          &&
+          $(this).parents('.mobmenu-content').length > 0
+        ) {
+          // Figure out element to scroll to.
+          var target;
+
+          try {
+	          target = decodeURIComponent( this.hash );
+          } catch(e) {
+ 	          target = this.hash;
+          }
+
           $( 'html' ).css( 'overflow', '' );
 
-          $('html, body').animate({
-            scrollTop: target.offset().top
-          }, 1000, function() {
-            // Callback after animation
-            // Must change focus!
-            var $target = $(target);
-            $target.focus();
-            if ($target.is(":focus")) { // Checking if the target was focused
-              return false;
-            } else {
-              $target.attr('tabindex','-1'); // Adding tabindex for elements not focusable
-              $target.focus(); // Set focus again
-            };
-          });
+          // Does a scroll target exist?
+          if (target.length) {
+
+            
+          if ( 0 < $(this).parents('.mobmenu-left-panel').length ) {
+            mobmenuClosePanel( 'mobmenu-left-panel' );
+          } else {
+            mobmenuClosePanel( 'mobmenu-right-panel' );
+          }
+
+            target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
+
+            $('body,html').animate({
+              scrollTop: target.offset().top - $(".mob-menu-header-holder").height() - 50
+            }, 1000);
+          }
         }
+      });
+      function mobmenuClosePanel( target ) {
+
+        $( '.' + target ).toggleClass( 'show-panel' );
+        $( 'html' ).removeClass( 'show-mobmenu-filter-panel' );
+        $( 'body' ).removeClass( 'show-nav-right' );
+        $( 'body' ).removeClass( 'show-nav-left' );
+        $( 'html' ).removeClass( 'mob-menu-no-scroll' ); 
+
+        setTimeout( () => {
+          $('.mob-menu-sliding-menus [data-menu-level]').scrollTop( '0' );
+          $('.mobmenu-content .show-sub-menu').removeClass( 'show-sub-menu' );
+        }, 400);
+
+      }
+    
+      function mobmenuOpenPanel( target) {
+        $( '.mobmenu-content' ).scrollTop(0);
+        $( 'html' ).addClass( 'mob-menu-no-scroll' ); 
+    
+        if ( $('.' + target ).hasClass( 'mobmenu-left-alignment' ) ) {
+          $('body').addClass('show-nav-left');
+        }
+        if ( $('.' + target ).hasClass( 'mobmenu-right-alignment' ) ) {
+          $('body').addClass('show-nav-right');
+        }
+    
+        $('.' + target ).addClass( 'show-panel' );
+    
       }
     });
   
-  });
-  }(jQuery));  
+

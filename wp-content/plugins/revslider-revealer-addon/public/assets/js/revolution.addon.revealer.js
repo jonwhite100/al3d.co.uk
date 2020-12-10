@@ -1,8 +1,8 @@
 /**
  * @author    ThemePunch <info@themepunch.com>
  * @link      http://www.themepunch.com/
- * @copyright 2017 ThemePunch
- * @version   1.0.0
+ * @copyright 2019 ThemePunch
+ * @version   2.0.0
  */
 
 ;(function() {
@@ -11,8 +11,10 @@
 		
 		if(!$) return;
 		
-		var opt = slider[0].opt,
-			scriptsLoaded,
+		var opt = $.fn.revolution && $.fn.revolution[slider[0].id] ? $.fn.revolution[slider[0].id] : false;
+		if(!opt) return;
+		
+		var scriptsLoaded,
 			delayReady,
 			options;
 		
@@ -54,7 +56,7 @@
 			
 		if(options.spinner !== 'default') {
 		
-			if(opt.spinner !== 'off') {
+			if(!isFalse(opt.spinner)) {
 				
 				window.requestAnimationFrame(checkSpinner);
 				
@@ -80,15 +82,17 @@
 			
 		}
 		
-		slider.addClass('rs_addon_reveal').find('li').first().attr('fstransition', 'notransition').data('fstransition', 'notransition');
+		slider.addClass('rs_addon_reveal').find('rs-slide').first().attr('data-firstanim', 't:notransition;s:300;sl:0').data('firstanim', 't:notransition;s:300;sl:0');
 		
 		var wrap = $('<div class="rs_addon_revealer" />'),
 			opens = direction.search('open') !== -1,
 			corner = direction.search('corner') !== -1,
-			ease = options.easing.split('.'),
-			special = opt.sliderLayout === 'fullwidth' && direction.search('skew') !== -1,
-			optionsOne = {ease: punchgs[ease[0]][ease[1]], onComplete: onFinish},
-			optionsTwo = {ease: punchgs[ease[0]][ease[1]]},
+			ease = options.easing.split('.');
+			
+		ease = ease.length === 2 ? punchgs[ease[0]][ease[1]] : punchgs.hasOwnProperty(ease[0]) ? punchgs[ease[0]] : punchgs.Power3.easeInOut;
+		var special = opt.sliderLayout === 'fullwidth' && direction.search('skew') !== -1,
+			optionsOne = {ease: ease, onComplete: onFinish},
+			optionsTwo = {ease: ease},
 			calcNeeded = /skew|shrink/.test(direction),
 			duration = options.duration,
 			color = options.color,
@@ -105,14 +109,33 @@
 		duration = parseInt(duration, 10) * 0.001;
 		
 		if(isNaN(delay)) delay = 0;
-		delay = parseInt(delay, 10) * 0.001;
+		delay = parseInt(delay, 10);
 		
 		if(!corner) {
 			sideOne = '<div style="background: ' + color + '; ';
 			if(opens) sideTwo = '<div style="background: ' + color + '; ';
 		}
 		else {
-			sideOne = '<svg version="1.1" viewBox="0 0 500 500" preserveAspectRatio="none">';
+			
+			var defs;
+			color = processColor(color);
+			
+			if(!color[1]) {
+				
+				color = color[0];
+				defs = '';
+				
+			}
+			else {
+
+				var gradient = drawFill(color);
+				color = gradient[0];
+				defs = gradient[1];
+				
+			}
+			
+			sideOne = '<svg version="1.1" viewBox="0 0 500 500" preserveAspectRatio="none">' + defs;
+			
 		}
 		
 		if(!calcNeeded) {
@@ -139,6 +162,8 @@
 		function onReady() {
 			
 			if(abort) return;
+			
+			var skew;
 			switch(direction) {
 				
 				case 'open_horizontal':
@@ -166,7 +191,6 @@
 					sideOne += '<polygon class="rs_addon_point1" points="0,0 500,0 500,500" style="fill:' + color + '; stroke:' + color + '; stroke-width: 1" />' + 
 							   '<polygon class="rs_addon_point2" points="0,0 0,500 500,500" style="fill:' + color + '; stroke:' + color + '; stroke-width: 1" />';
 							   
-					isCorner = true;
 					callback = onSvg;
 					optionsOne.x = 500;
 					optionsTwo.x = -500;
@@ -178,7 +202,6 @@
 					sideOne += '<polygon class="rs_addon_point1" points="0,0 500,0 0,500" style="fill:' + color + '; stroke:' + color + '; stroke-width: 1" />' + 
 							   '<polygon class="rs_addon_point2" points="500,0 500,500 0,500" style="fill:' + color + '; stroke:' + color + '; stroke-width: 1" />';
 							   
-					isCorner = true;
 					callback = onSvg;
 					optionsOne.x = -500;
 					optionsTwo.x = 500;
@@ -233,7 +256,7 @@
 				
 				case 'tlbr_skew':
 					
-					var skew = Math.atan2(slider.width(), slider.height());
+					skew = Math.atan2(slider.width(), slider.height());
 					sideOne += 'width: 200%; height: 200%; top: 0%; left: -100%; transform: skew(-' + skew + 'rad)';
 					optionsOne.left = '100%';
 					
@@ -241,7 +264,7 @@
 				
 				case 'trbl_skew':
 				
-					var skew = Math.atan2(slider.width(), slider.height());
+					skew = Math.atan2(slider.width(), slider.height());
 					sideOne += 'width: 200%; height: 200%; top: 0%; right: -100%; transform: skew(' + skew + 'rad)';
 					optionsOne.right = '100%';
 				
@@ -249,7 +272,7 @@
 				
 				case 'bltr_skew':
 				
-					var skew = Math.atan2(slider.width(), slider.height());
+					skew = Math.atan2(slider.width(), slider.height());
 					sideOne += 'width: 200%; height: 200%; bottom: -100%; left: 0%; transform: skew(' + skew + 'rad)';
 					optionsOne.bottom = '100%';
 				
@@ -257,7 +280,7 @@
 				
 				case 'brtl_skew':
 				
-					var skew = Math.atan2(slider.width(), slider.height());
+					skew = Math.atan2(slider.width(), slider.height());
 					sideOne += 'width: 200%; height: 200%; bottom: -100%; right: 0; transform: skew(-' + skew + 'rad)';
 					optionsOne.bottom = '100%';
 				
@@ -277,12 +300,17 @@
 			if(!special) slider.one('revolution.slide.onafterswap', onStart);
 			
 			if(preloader && preloader.length) opt.loader = preloader;
+			
 			if(delayStart) {
 				
 				timer = setTimeout(function() {
 					
 					delayReady = true;
-					if(scriptsLoaded) slider.revstart();
+					if(scriptsLoaded) {
+							
+						slider.revstart();
+						
+					}
 					
 				}, delay);
 				
@@ -297,24 +325,27 @@
 		}
 		
 		function onStart() {
-
 			
 			if(abort) return;
-			if(opt.stopLoop === 'off') slider.revpause();
-			if(!preloader || !preloader.length) preloader = slider.find('.tp-loader');
+			if(isFalse(opt.stopLoop)) slider.revpause();
+			if(!preloader || !preloader.length) preloader = slider.find('rs-loader');
 			if(preloader.length) {
 				
 				opt.loader = preloader;
 				
 				var obj = {opacity: 0, ease: punchgs.Power3.easeOut, onComplete: callback};
-				if(calcNeeded && delay) obj.delay = delay;
+				if(calcNeeded && delay) obj.delay = delay * 0.001;
 				
 				punchgs.TweenLite.to(preloader, 0.3, obj);
 				
 			}
 			else {
 				
-				if(calcNeeded && delay) timer = setTimeout(callback, delay);
+				if(calcNeeded && delay) {
+						
+					timer = setTimeout(callback, delay);
+					
+				}
 				else callback();
 				
 			}
@@ -376,13 +407,10 @@
 		function complete() {
 			
 			slider.removeClass('rs_addon_reveal rs_addon_revealer_special');
-			slider.find('.tp-loader').css('opacity', 1);
+			slider.find('rs-loader').css('opacity', 1);
 			
 			if(wrap) wrap.remove();
-			if(opt.stopLoop === 'off') slider.revresume();
-			
-			opt = null;
-			slider = null;
+			if(isFalse(opt.stopLoop)) slider.revresume();
 			
 		}
 		
@@ -414,23 +442,174 @@
 		
 		function checkSpinner() {
 			
-			preloader = slider.find('.tp-loader');
-			if(preloader.length) setSpinner(preloader);
-			else window.requestAnimationFrame(checkSpinner);
+			var preloader = slider.find('rs-loader');
+			if(preloader.length) {
+				
+				preloader.remove();
+				setSpinner();
+				
+			}
+			else {
+				
+				window.requestAnimationFrame(checkSpinner);
+				
+			}
 			
 		}
 		
-		function setSpinner(preloader) {
+		function setSpinner() {
 			
-			if(preloader && preloader.length) preloader[0].className = 'tp-loader';
-			else preloader = $('<div class="tp-loader" />').appendTo(slider);
-			
+			preloader = $('<rs-loader />').appendTo(slider);
 			preloader.html(spinner.replace(/{{color}}/g, options.spinnerColor));
 			opt.loader = preloader;
 			
 		}
 		
 	};
+	
+	function isFalse(val) {
+			
+		return typeof val === undefined || val === false || val === 0 || val === '0' || val === 'false' || val === 'off' || false;
+	
+	}
+	
+	function radialGradient(colors) {
+		
+		var len = colors.length,
+			gradient,
+			color;
+			
+		var id = 'rsaddonrevealer' + Math.floor(Math.random() * 10000),
+			st = '<defs><radialGradient id="' + id + '">',
+			pos;
+		
+		for(var i = 0; i < len; i++) {
+
+			color = colors[i];
+			pos = parseInt(color.position, 10);
+			st += '<stop offset="' + pos + '%" style="stop-color: rgb(' + color.r + ',' + color.g + ',' + color.b + '); stop-opacity: ' + color.a + '" />';
+
+		}
+		
+		st += '</radialGradient></defs>';
+		gradient = ['url(#' + id + ')', st];
+		
+		return gradient;
+
+	}
+	
+	function linearGradient(colors, angle) {
+
+		angle = parseInt(angle, 10) / 180 * Math.PI;
+		
+		var segment = Math.floor(angle / Math.PI * 2) + 2,
+			diagonal =  (1/2 * segment + 1/4) * Math.PI,
+			op = Math.cos(Math.abs(diagonal - angle)) * Math.sqrt(2),
+			x = op * Math.cos(angle),
+			y = op * Math.sin(angle);
+
+		var points = [x < 0 ? 1 : 0, y < 0 ? 1 : 0, x >= 0 ? x : x + 1, y >= 0 ? y : y + 1],
+			len = colors.length,
+			gradient,
+			color,
+			pos,
+			i;
+			
+		var id = 'rsaddonrevealer' + Math.floor(Math.random() * 10000),
+			st = '<defs><linearGradient id="' + id + '" x1="' + points[0] + '" y1="' + points[1] + '" x2="' + points[2] + '" y2="' + points[3] + '">';
+		
+		for(i = 0; i < len; i++) {
+
+			color = colors[i];
+			pos = parseInt(color.position, 10);
+			st += '<stop offset="' + pos + '%" style="stop-color: rgb(' + color.r + ',' + color.g + ',' + color.b + '); stop-opacity: ' + color.a + '" />';
+
+		}
+		
+		st += '</linearGradient></defs>';
+		gradient = ['url(#' + id + ')', st];
+		
+		return gradient;
+	
+	}
+	
+	function sanitizeGradient(obj) {
+
+		var colors = obj.colors,
+			len = colors.length,
+			ar = [],
+			prev;
+			
+
+		for(var i = 0; i < len; i++) {
+			
+			var cur = colors[i];
+			delete cur.align;
+			
+			if(prev) {
+				if(JSON.stringify(cur) !== JSON.stringify(prev)) ar[ar.length] = cur;
+			}
+			else {
+				ar[ar.length] = cur;
+			}
+			
+			prev = cur;
+			
+		}
+		
+		obj.colors = ar;
+		return obj;
+		
+	}
+	
+	function drawFill(color) {
+
+		if(color[1]) {
+
+			color = color[0];
+			if(color.type === 'radial') return radialGradient(color.colors);
+			else return linearGradient(color.colors, color.angle);
+
+		}
+		else {
+			return color[0];
+		}
+
+	}
+	
+	function processColor(clr) {
+		
+		if(clr.trim() === 'transparent') {
+			
+			return ['#ffffff', false];
+			
+		}
+		else if(clr.search(/\[\{/) !== -1) {
+			
+			try {
+				clr = JSON.parse(clr.replace(/\&/g, '"'));
+				clr = sanitizeGradient(clr); 
+				return [clr, true];
+			}
+			catch(e) {	
+				return ['#ffffff', false];
+			}
+			
+		}
+		else if(clr.search('#') !== -1) {
+			return [clr, false];
+		}
+		else if(clr.search('rgba') !== -1) {
+			return [clr.replace(/\s/g, '').replace(/false/g, '1'), false];
+		}
+		else if(clr.search('rgb') !== -1) {
+			return [clr.replace(/\s/g, ''), false];
+		}
+		else {
+			return /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(clr) ? [clr, false] : ['#ffffff', false];
+		}
+		
+	}
 	
 })();
 

@@ -3,7 +3,7 @@
  * @package   Essential_Grid
  * @author    ThemePunch <info@themepunch.com>
  * @link      http://www.themepunch.com/essential/
- * @copyright 2016 ThemePunch
+ * @copyright 2020 ThemePunch
  */
  
 if( !defined( 'ABSPATH') ) exit();
@@ -55,11 +55,11 @@ class Essential_Grids_Widget extends WP_Widget {
 			$fieldTitle_Name = $this->get_field_name( $fieldTitle );
 			
 		?>
+			<div class="div13"></div>
 			<label for="<?php echo $fieldTitle_ID; ?>"><?php _e('Title', EG_TEXTDOMAIN); ?>:</label>
 			<input type="text" name="<?php echo $fieldTitle_Name; ?>" id="<?php echo $fieldTitle_ID; ?>" value="<?php echo $title; ?>" class="widefat">
-			
-			<br><br>
-			
+			<div class="div13"></div>
+						
 			<?php _e('Choose Essential Grid', EG_TEXTDOMAIN); ?>:
 			<select name="<?php echo $fieldName; ?>" id="<?php echo $fieldID; ?>">
 				<?php
@@ -71,15 +71,14 @@ class Essential_Grids_Widget extends WP_Widget {
 				?>
 			</select>
 			
-			<div style="padding-top:10px;"></div>
+			<div class="div13"></div>
 			
 			<label for="<?php echo $fieldID_check; ?>"><?php _e('Home Page Only', EG_TEXTDOMAIN); ?>:</label>
-			<input type="checkbox" name="<?php echo $fieldName_check; ?>" id="<?php echo $fieldID_check; ?>" <?php echo $checked; ?> >
-			<br><br>
+			<input type="checkbox" style="margin-top:2px" name="<?php echo $fieldName_check; ?>" id="<?php echo $fieldID_check; ?>" <?php echo $checked; ?> >
+			<div class="div13"></div>
 			<label for="<?php echo $fieldPages_ID; ?>"><?php _e('Pages: (example: 3,8,15)', EG_TEXTDOMAIN); ?></label>
-			<input type="text" name="<?php echo $fieldPages_Name; ?>" id="<?php echo $fieldPages_ID; ?>" value="<?php echo $pagesValue; ?>">
-			
-			<div style="padding-top:10px;"></div>
+			<input type="text" name="<?php echo $fieldPages_Name; ?>" id="<?php echo $fieldPages_ID; ?>" value="<?php echo $pagesValue; ?>">			
+			<div class="div13"></div>
 		<?php
 		}	//else
 		 

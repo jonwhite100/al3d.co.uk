@@ -1,235 +1,72 @@
 <?php
-/*
-Plugin Name: WP Ultimate Post Grid
-Plugin URI: http://bootstrapped.ventures/wp-ultimate-post-grid/
-Description: Easily create filterable responsive grids for your posts, pages or custom post types
-Version: 2.7.1
-Author: Bootstrapped Ventures
-Author URI: http://bootstrapped.ventures
-License: GPLv3
-Text Domain: wp-ultimate-post-grid
-Domain Path: /lang
-*/
-define( 'WPUPG_VERSION', '2.7.1' );
-define( 'WPUPG_POST_TYPE', 'wpupg_grid' );
+/**
+ * The plugin bootstrap file
+ *
+ * This file is read by WordPress to generate the plugin information in the plugin
+ * admin area. This file also includes all of the dependencies used by the plugin,
+ * registers the activation and deactivation functions, and defines a function
+ * that starts the plugin.
+ *
+ * @link              https://bootstrapped.ventures/
+ * @since             3.0.0
+ * @package           WP_Ultimate_Post_Grid
+ *
+ * @wordpress-plugin
+ * Plugin Name:       WP Ultimate Post Grid
+ * Plugin URI:        https://bootstrapped.ventures/wp-ultimate-post-grid/
+ * Description:       Easily create filterable responsive grids for your posts, pages or custom post types.
+ * Version:           3.5.1
+ * Author:            Bootstrapped Ventures
+ * Author URI:        https://bootstrapped.ventures/
+ * License:           GPL-2.0+
+ * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain:       wp-ultimate-post-grid
+ * Domain Path:       /languages
+ */
 
-class WPUltimatePostGrid {
-
-    private static $instance;
-    private static $instantiated_by_premium;
-    private static $addons = array();
-
-    /**
-     * Return instance of self
-     */
-    public static function get( $instantiated_by_premium = false )
-    {
-        // Instantiate self only once
-        if( is_null( self::$instance ) ) {
-            self::$instantiated_by_premium = $instantiated_by_premium;
-            self::$instance = new self;
-            self::$instance->init();
-        }
-
-        return self::$instance;
-    }
-
-    /**
-     * Returns true if we are using the Premium version
-     */
-    public static function is_premium_active()
-    {
-        return self::$instantiated_by_premium;
-    }
-
-    /**
-     * Add loaded addon to array of loaded addons
-     */
-    public static function loaded_addon( $addon, $instance )
-    {
-        if( !array_key_exists( $addon, self::$addons ) ) {
-            self::$addons[$addon] = $instance;
-        }
-    }
-
-    /**
-     * Returns true if the specified addon has been loaded
-     */
-    public static function is_addon_active( $addon )
-    {
-        return array_key_exists( $addon, self::$addons );
-    }
-
-    public static function addon( $addon )
-    {
-        if( isset( self::$addons[$addon] ) ) {
-            return self::$addons[$addon];
-        }
-
-        return false;
-    }
-
-    /**
-     * Access a VafPress option with optional default value
-     */
-    public static function option( $name, $default = null )
-    {
-        $option = vp_option( 'wpupg_option.' . $name );
-
-        return is_null( $option ) ? $default : $option;
-    }
-
-
-    public $pluginName = 'wp-ultimate-post-grid';
-    public $coreDir;
-    public $corePath;
-    public $coreUrl;
-    public $pluginFile;
-
-    protected $helper_dirs = array();
-    protected $helpers = array();
-
-    /**
-     * Initialize
-     */
-    public function init()
-    {
-        // Load external libraries
-        if( !class_exists( 'VP_AutoLoader' ) ) {
-            require_once( 'vendor/vafpress/bootstrap.php' );
-        }
-
-        // Update plugin version
-        update_option( $this->pluginName . '_version', WPUPG_VERSION );
-
-        // Set core directory, URL and main plugin file
-        $this->corePath = str_replace( '/wp-ultimate-post-grid.php', '', plugin_basename( __FILE__ ) );
-        $this->coreDir = apply_filters( 'wpupg_core_dir', WP_PLUGIN_DIR . '/' . $this->corePath );
-        $this->coreUrl = apply_filters( 'wpupg_core_url', plugins_url() . '/' . $this->corePath );
-        $this->pluginFile = apply_filters( 'wpupg_plugin_file', __FILE__ );
-
-        // Load textdomain
-        if( !self::is_premium_active() ) {
-            $domain = 'wp-ultimate-post-grid';
-            $locale = apply_filters( 'plugin_locale', get_locale(), $domain );
-
-            load_textdomain( $domain, WP_LANG_DIR.'/'.$domain.'/'.$domain.'-'.$locale.'.mo' );
-            load_plugin_textdomain( $domain, false, $this->corePath . '/lang/' );
-        }
-
-        // Add core helper directory
-        $this->add_helper_directory( $this->coreDir . '/helpers' );
-
-        // Migrate first if needed
-        $this->helper( 'migration' );
-
-        // Load required helpers
-        $this->helper( 'activate' );
-        $this->helper( 'ajax' );
-        $this->helper( 'content' );
-        $this->helper( 'css' );
-        $this->helper( 'faq' );
-        $this->helper( 'giveaway' );
-        $this->helper( 'grid_cache' );
-        $this->helper( 'grid_save' );
-        $this->helper( 'meta_box' );
-        $this->helper( 'meta_box_post' );
-        $this->helper( 'notices' );
-        $this->helper( 'pagination' );
-        $this->helper( 'plugin_action_link' );
-        $this->helper( 'post_save' );
-        $this->helper( 'post_type' );
-        $this->helper( 'privacy' );
-        $this->helper( 'support_tab' );
-        $this->helper( 'vafpress_menu' );
-        $this->helper( 'vafpress_shortcode' );
-        $this->helper( 'shortcodes/filter_shortcode' );
-        $this->helper( 'shortcodes/grid_shortcode' );
-
-        // Include required helpers but don't instantiate
-        $this->include_helper( 'addons/addon' );
-        $this->include_helper( 'addons/premium_addon' );
-        $this->include_helper( 'models/grid' );
-
-        // Load core addons
-        $this->helper( 'addon_loader' )->load_addons( $this->coreDir . '/addons' );
-
-        // Load default assets
-        $this->helper( 'assets' );
-    }
-
-    /**
-     * Access a helper. Will instantiate if helper hasn't been loaded before.
-     */
-    public function helper( $helper )
-    {
-        // Lazy instantiate helper
-        if( !isset( $this->helpers[$helper] ) ) {
-            $this->include_helper( $helper );
-
-            // Get class name from filename
-            $class_name = 'WPUPG';
-
-            $dirs = explode( '/', $helper );
-            $file = end( $dirs );
-            $name_parts = explode( '_', $file );
-            foreach( $name_parts as $name_part ) {
-                $class_name .= '_' . ucfirst( $name_part );
-            }
-
-            // Instantiate class if exists
-            if( class_exists( $class_name ) ) {
-                $this->helpers[$helper] = new $class_name();
-            }
-        }
-
-        // Return helper instance
-        return $this->helpers[$helper];
-    }
-
-    /**
-     * Include a helper. Looks through all helper directories that have been added.
-     */
-    public function include_helper( $helper )
-    {
-        foreach( $this->helper_dirs as $dir )
-        {
-            $file = $dir . '/'.$helper.'.php';
-
-            if( file_exists( $file ) ) {
-                require_once( $file );
-            }
-        }
-    }
-
-    /**
-     * Add a directory to look for helpers.
-     */
-    public function add_helper_directory( $dir )
-    {
-        if( is_dir( $dir ) ) {
-            $this->helper_dirs[] = $dir;
-        }
-    }
-
-    /*
-     * Quick access functions
-     */
-
-    public function template( $template )
-    {
-        return $this->addon( 'custom-templates' )->get_template( $template );
-    }
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
 }
 
-// Backward compatibility for older versions of WordPress
-if( !function_exists( 'get_term_meta' ) ) {
-    function get_term_meta ( $term_id = 0, $key = '', $single = false ) {
-        return '';
-    }
+/**
+ * The code that runs during plugin activation.
+ * This action is documented in includes/class-wpupg-activator.php
+ */
+function activate_wp_ultimate_post_grid() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wpupg-activator.php';
+	WPUPG_Activator::activate();
 }
 
-// Premium version is responsible for instantiating if available
-if( !class_exists( 'WPUltimatePostGridPremium' ) ) {
-    WPUltimatePostGrid::get();
+/**
+ * The code that runs during plugin deactivation.
+ * This action is documented in includes/class-wpupg-deactivator.php
+ */
+function deactivate_wp_ultimate_post_grid() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wpupg-deactivator.php';
+	WPUPG_Deactivator::deactivate();
 }
+
+register_activation_hook( __FILE__, 'activate_wp_ultimate_post_grid' );
+register_deactivation_hook( __FILE__, 'deactivate_wp_ultimate_post_grid' );
+
+/**
+ * The core plugin class that is used to define internationalization,
+ * admin-specific hooks, and public-facing site hooks.
+ */
+require plugin_dir_path( __FILE__ ) . 'includes/class-wp-ultimate-post-grid.php';
+
+/**
+ * Begins execution of the plugin.
+ *
+ * Since everything within the plugin is registered via hooks,
+ * then kicking off the plugin from this point in the file does
+ * not affect the page life cycle.
+ *
+ * @since    3.0.0
+ */
+function run_wp_ultimate_post_grid() {
+	$plugin = new WP_Ultimate_Post_Grid();
+	add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ) , array( $plugin, 'plugin_action_links' ), 1 );
+}
+run_wp_ultimate_post_grid();

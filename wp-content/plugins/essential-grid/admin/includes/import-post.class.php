@@ -3,7 +3,7 @@
  * @package   Essential_Grid
  * @author    ThemePunch <info@themepunch.com>
  * @link      http://www.themepunch.com/essential/
- * @copyright 2016 ThemePunch
+ * @copyright 2020 ThemePunch
  */
  
 if( !defined( 'ABSPATH') ) exit();
@@ -91,7 +91,7 @@ if(!class_exists('PunchPost')) {
 					}
 					
 					global $imagenr;
-					if($imagenr==4) $imagenr = 1;
+					if($imagenr==10) $imagenr = 1;
 					$attach_id = $this->create_image('demoimage'.$imagenr++.'.jpg');
 					set_post_thumbnail( $this->TP_current_post_id, $attach_id );
 					
@@ -282,6 +282,7 @@ if(!class_exists('PunchPort')) {
 			$posts_json = $this->TP_import_posts;
 			$posts_array = json_decode($this->TP_import_posts,true);
 			foreach ($posts_array as $post){
+				set_time_limit(30);
 				$newPost = new PunchPost;
 				//Standards
 					$newPost->set_title( $post["post_title"] );
@@ -306,7 +307,7 @@ if(!class_exists('PunchPort')) {
 		// Creation functions
 		public function export_pages() {
 			$pages = get_pages(); 
-			foreach ($pages as $page_data) { 
+			foreach ($pages as $page_data) {
 				$this->TP_pages_array[$page_data->ID]['post_title'] = $page_data->post_title; 
 				$this->TP_pages_array[$page_data->ID]['post_author'] = $page_data->post_author;
 				$this->TP_pages_array[$page_data->ID]['post_date'] = $page_data->post_date;

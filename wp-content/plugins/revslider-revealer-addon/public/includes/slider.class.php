@@ -1,92 +1,224 @@
 <?php
-/**
+/* 
  * @author    ThemePunch <info@themepunch.com>
  * @link      http://www.themepunch.com/
- * @copyright 2016 ThemePunch
- */
+ * @copyright 2018 ThemePunch
+*/
 
 if( !defined( 'ABSPATH') ) exit();
 
-require_once(RS_REVEALER_PLUGIN_PATH . 'framework/slider.front.class.php');
+include_once(RS_REVEALER_PLUGIN_PATH . 'public/includes/preloaders.class.php');
 
-class RsRevealerSliderFront extends RsAddonRevealerSliderFront {
-	
-	protected static $_Version,
-					 $_PluginUrl, 
-					 $_PluginTitle;
-					 
-	public function __construct($_version, $_pluginUrl, $_pluginTitle, $_isAdmin = false) {
+if(class_exists('RevSliderFunctions')) {
+
+	class RsRevealerSliderFront extends RevSliderFunctions {
 		
-		static::$_Version     = $_version;
-		static::$_PluginUrl   = $_pluginUrl;
-		static::$_PluginTitle = $_pluginTitle;
-		
-		if(!$_isAdmin) {
-		
-			parent::enqueueScripts();
+		private $version,
+				$pluginUrl, 
+				$pluginTitle;
+						 
+		public function __construct($version, $pluginUrl, $pluginTitle, $isAdmin = false) {
+			
+			$this->version     = $version;
+			$this->pluginUrl   = $pluginUrl;
+			$this->pluginTitle = $pluginTitle;
+			
+			if(!$isAdmin) add_action('revslider_slider_init_by_data_post', array($this, 'check_addon_active'), 10, 1);	
+			else add_action('wp_enqueue_scripts', array($this, 'add_scripts'));
+			
+			add_action('revslider_fe_javascript_output', array($this, 'write_init_script'), 10, 2);
+			add_action('revslider_fe_javascript_option_output', array($this, 'write_init_options'), 10, 1);
 			
 		}
-		else {
 		
-			parent::enqueuePreview();
+		// HANDLE ALL TRUE/FALSE
+		private function isFalse($val) {
+		
+			if(empty($val)) return true;
+			if($val === true || $val === 'on' || $val === 1 || $val === '1' || $val === 'true') return false;
+			return true;
+		
+		}
+		
+		private function isEnabled($slider) {
+			
+			$settings = $slider->get_params();
+			if(empty($settings)) return false;
+			
+			$addOns = $this->get_val($settings, 'addOns', false);
+			if(empty($addOns)) return false;
+			
+			$addOn = $this->get_val($addOns, 'revslider-' . $this->pluginTitle . '-addon', false);
+			if(empty($addOn)) return false;
+			
+			$enabled = $this->get_val($addOn, 'enable', false);
+			if($this->isFalse($enabled)) return false;
+			
+			return $addOn;
+		
+		}
+		
+		public function add_scripts() {
+			
+			$handle = 'rs-' . $this->pluginTitle . '-front';
+			$base = $this->pluginUrl . 'public/assets/';
+			
+			wp_enqueue_style(
+			
+				$handle, 
+				$base . 'css/revolution.addon.' . $this->pluginTitle . '.css', 
+				array(), 
+				$this->version
+				
+			);
+			
+			wp_enqueue_style(
+			
+				$handle . '-preloaders', 
+				$base . 'css/revolution.addon.' . $this->pluginTitle . '.preloaders.css', 
+				array(), 
+				$this->version
+				
+			);
+			
+			wp_enqueue_script(
+			
+				$handle, 
+				$base . 'js/revolution.addon.' . $this->pluginTitle . '.min.js', 
+				array('jquery'), 
+				$this->version, 
+				true
+				
+			);
 			
 		}
 		
-		parent::writeInitScript();
-		add_action('revslider_fe_javascript_option_output', array($this, 'write_init_options'), 10, 1);
-		
-	}
-	
-	public function write_init_options($_slider) {
-		
-		$_title = static::$_PluginTitle;
-		$tabs = "\t\t\t";
-		$tabsa = "\t\t\t\t";
-		
-		if($_slider->getParam($_title . '_enabled', false) == 'true') {
+		public function check_addon_active($record) {
+			if(empty($record)) return $record;
 			
-			$_color = $_slider->getParam('revealer_color', '#000000');
-			$_spinner = $_slider->getParam('revealer_spinner', 'default');
-			$_spinnerColor = $_slider->getParam('revealer_spinner_color', '#FFFFFF');
+			// addon enabled
+			$addOn = $this->isEnabled($record);
+			if(empty($addOn)) return $record;
 			
-			$_overlay_enabled = $_slider->getParam('revealer_overlay_enabled', false) == 'true';
-			if($_overlay_enabled) $_overlay_color = $_slider->getParam('revealer_overlay_color', '#000000');
+			$this->add_scripts();
+			remove_action('revslider_slider_init_by_data_post', array($this, 'check_addon_active'), 10);
 			
-			if(class_exists('TPColorpicker')) {
+			return $record;
+			
+		}
+
+		public function write_init_script($slider, $id) {
+			
+			// addon enabled
+			$addOn = $this->isEnabled($slider);
+			if(!empty($addOn)) {
 				
-				$_color = TPColorpicker::get($_color);
-				if($_overlay_enabled) $_overlay_color = TPColorpicker::get($_overlay_color);
+				$id = $slider->get_id();
+				$preloader = $this->get_val($addOn, 'spinner', array());
+				$preloader = $this->get_val($preloader, 'type', 'default');
+				$preloaders = RsAddOnRevealPreloaders::getPreloaders();
 				
-				if($_spinner == '2') {
-					$_spinnerColor = TPColorpicker::processRgba($_spinnerColor);
-					$_spinnerColor = str_replace('rgb', 'rgba', $_spinnerColor);
-					$_spinnerColor = str_replace(')', ',', $_spinnerColor);
+				if($preloader !== 'default' && array_key_exists($preloader, $preloaders)) {
+					$preloader = $preloaders[$preloader];
+					$preloader = json_encode($preloader);
+				}
+				else {
+					$preloader = 'false';
+				}
+
+				echo "\n";
+				echo "\t\t\t\t\t\t" . 'if(typeof RsRevealerAddOn !== "undefined") RsRevealerAddOn(tpj, revapi' . $id . ', ' . $preloader . ');' . "\n";
+				
+			}
+			
+		}
+		
+		private function minMax($val) {
+		
+			$val = intval($val);
+			$val = max(10, $val);
+			return min(10000, $val);
+		
+		}
+		
+		public function write_init_options($slider) {
+			
+			// addon enabled
+			$addOn = $this->isEnabled($slider);
+			if($addOn) {
+				
+				$_title = $this->pluginTitle;
+				$tabs = "\t\t\t\t\t\t\t\t";
+				$tabsa = "\t\t\t\t\t\t\t\t\t";
+				
+				$color = $this->get_val($addOn, 'color', '#000000');
+				$preloader = $this->get_val($addOn, 'spinner', array());
+				$spinner = $this->get_val($preloader, 'type', 'default');
+				$spinnerColor = $this->get_val($preloader, 'color', '#FFFFFF');
+				$direction = $this->get_val($addOn, 'direction', 'open_horizontal');
+				
+				$overlay = $this->get_val($addOn, 'overlay', array());
+				$overlay_enabled = $this->get_val($overlay, 'enable', false);
+				$overlay_enabled = !$this->isFalse($overlay_enabled);
+				
+				if($overlay_enabled) $overlay_color = $this->get_val($overlay, 'color', '#000000');
+				if(class_exists('RSColorpicker')) {
+					
+					if(strpos($direction, 'corner') === false) {
+						$color = RSColorpicker::get($color);
+					}
+					else {
+						$color = RSColorpicker::process($color, true);
+						$color = strpos($color[1], 'gradient') === false ? $color[0] : json_encode($color[2]);
+					}
+					
+					if($overlay_enabled) $overlay_color = RSColorpicker::get($overlay_color);
+					if($spinner == '2') {
+						$spinnerColor = RSColorpicker::processRgba($spinnerColor);
+						$spinnerColor = str_replace('rgb', 'rgba', $spinnerColor);
+						$spinnerColor = str_replace(')', ',', $spinnerColor);
+					}
+					
 				}
 				
+				$duration = $this->get_val($addOn, 'duration', '500');
+				$delay = $this->get_val($addOn, 'delay', '0');
+				$overlay_duration = $this->get_val($overlay, 'duration', '500');
+				$overlay_delay = $this->get_val($overlay, 'delay', '0');
+				
+				$duration = str_replace('ms', '', $duration);
+				$delay = str_replace('ms', '', $delay);
+				$overlay_duration = str_replace('ms', '', $overlay_duration);
+				$overlay_delay = str_replace('ms', '', $overlay_delay);
+				
+				$delay = $this->minMax($delay);
+				$overlay_delay = $this->minMax($overlay_delay);
+				$duration = $this->minMax($duration);
+				$overlay_duration = $this->minMax($overlay_duration);
+				
+				echo $tabs . 'revealer: {' . "\n";
+				echo $tabsa . 'direction: "' . $direction . '",' . "\n";
+				echo $tabsa . "color: '" . $color . "'," . "\n";
+				echo $tabsa . 'duration: "' . $duration . '",' . "\n";
+				echo $tabsa . 'delay: "' . $delay . '",' . "\n";
+				echo $tabsa . 'easing: "' . $this->get_val($addOn, 'easing', 'Power2.easeOut') . '",' . "\n";
+				
+				if($overlay_enabled) {
+					echo $tabsa . 'overlay_enabled: true,' . "\n";
+					echo $tabsa . 'overlay_color: "' . $overlay_color . '",' . "\n";
+					echo $tabsa . 'overlay_duration: "' . $overlay_duration . '",' . "\n";
+					echo $tabsa . 'overlay_delay: "' . $overlay_delay . '",' . "\n";
+					echo $tabsa . 'overlay_easing: "' . $this->get_val($overlay, 'easing', 'Power2.easeOut') . '",' . "\n";
+				}
+				
+				echo $tabsa . 'spinner: "' . $spinner . '",' . "\n";
+				echo $tabsa . 'spinnerColor: "' . $spinnerColor . '",' . "\n";
+				echo $tabs . '},' . "\n";
+				
 			}
-			
-			echo $tabs . 'revealer: {' . "\n";
-			echo $tabsa . 'direction: "' . $_slider->getParam('revealer_direction', 'open_horizontal') . '",' . "\n";
-			echo $tabsa . 'color: "' . $_color . '",' . "\n";
-			echo $tabsa . 'duration: "' . $_slider->getParam('revealer_duration', '500') . '",' . "\n";
-			echo $tabsa . 'delay: "' . $_slider->getParam('revealer_delay', '0') . '",' . "\n";
-			echo $tabsa . 'easing: "' . $_slider->getParam('revealer_easing', 'Power2.easeOut') . '",' . "\n";
-			
-			if($_overlay_enabled) {
-				echo $tabsa . 'overlay_enabled: true,' . "\n";
-				echo $tabsa . 'overlay_color: "' . $_overlay_color . '",' . "\n";
-				echo $tabsa . 'overlay_duration: "' . $_slider->getParam('revealer_overlay_duration', '500') . '",' . "\n";
-				echo $tabsa . 'overlay_delay: "' . $_slider->getParam('revealer_overlay_delay', '0') . '",' . "\n";
-				echo $tabsa . 'overlay_easing: "' . $_slider->getParam('revealer_overlay_easing', 'Power2.easeOut') . '",' . "\n";
-			}
-			
-			echo $tabsa . 'spinner: "' . $_spinner . '",' . "\n";
-			echo $tabsa . 'spinnerColor: "' . $_spinnerColor . '",' . "\n";
-			echo $tabs . '},' . "\n";
-			
+		
 		}
-	
+		
 	}
-	
 }
 ?>

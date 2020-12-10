@@ -3,7 +3,7 @@
  * @package   Essential_Grid
  * @author    ThemePunch <info@themepunch.com>
  * @link      http://www.themepunch.com/essential/
- * @copyright 2016 ThemePunch
+ * @copyright 2020 ThemePunch
  */
  
 if( !defined( 'ABSPATH') ) exit();
@@ -15,7 +15,7 @@ wp_enqueue_style($this->plugin_slug .'-admin-settings-styles', EG_PLUGIN_URL.'pu
 
 <div id="eg-element-settings-wrap">
 	 <form id="">
-        <div class="postbox eg-postbox"><h3><span><?php _e('Element Settings', EG_TEXTDOMAIN); ?></span><div class="postbox-arrow"></div></h3>
+        <div class="eg-pbox esg-box"><h3><span><?php _e('Element Settings', EG_TEXTDOMAIN); ?></span><div class="eg-pbox-arrow"></div></h3>
             <div class="inside padding-10">
             	<div id="eg-element-settings-tabs">
 					 <ul>
@@ -126,8 +126,8 @@ wp_enqueue_style($this->plugin_slug .'-admin-settings-styles', EG_PLUGIN_URL.'pu
 				</div>
 				
 					<p id="dz-delete" data-sort="9999">
-					<a id="element-delete-button" class="button-primary revred" href="javascript:void(0);"><i class="eg-icon-trash"></i> <?php _e('Delete', EG_TEXTDOMAIN); ?></a>
-					<a id="element-save-as-button" class="button-primary revgreen" href="javascript:void(0);"><i class="eg-icon-save"></i> <?php _e('Save', EG_TEXTDOMAIN); ?></a>
+					<a id="element-delete-button" class="esg-btn esg-red" href="javascript:void(0);"><i class="eg-icon-trash"></i> <?php _e('Delete', EG_TEXTDOMAIN); ?></a>
+					<a id="element-save-as-button" class="esg-btn esg-green" href="javascript:void(0);"><i class="eg-icon-save"></i> <?php _e('Save', EG_TEXTDOMAIN); ?></a>
 				<p>
             </div>
         </div>

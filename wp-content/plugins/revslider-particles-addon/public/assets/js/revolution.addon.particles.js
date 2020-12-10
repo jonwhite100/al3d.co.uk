@@ -1,7 +1,7 @@
 /*
- 2017 ThemePunch
+ 2019 ThemePunch
  http://www.themepunch.com/
- @version   1.0.0
+ @version   2.0.0
 */
 ;(function() { 
 	
@@ -10,81 +10,155 @@
 		// bounce if showDoubleJqueryError
 		if(!slider) return;
 		
-		var options = slider[0].opt.particles,
-			startSlide = options.startSlide,
-			endSlide = options.endSlide,
-			particl = options.particles,
-			lines = particl.line_linked,
-			shape = particl.shape,
-			color = particl.color,
-			stroke = shape.stroke,
-			bWidth = stroke.width,
-			id = slider[0].id,
-			swapAdded,
-			showTimer,
-			swapTimer,
-			isPlaying,
-			instance,
-			sibling,
-			started,
-			inited,
-			canvas,
-			inter,
-			svg;
+		var opt = jQuery.fn.revolution && jQuery.fn.revolution[slider[0].id] ? jQuery.fn.revolution[slider[0].id] : false;
+		if(!opt) return;
+
+		var slides = slider.find('rs-slide'),
+			carousel = opt.sliderType === 'carousel',
+			currentSlideId = 0;
 			
-		
-		canvas = id + '-rs-particles';
-		color.value = color.value.split(',');
-		
-		if(!bWidth) stroke.color = stroke.color.split(',');
-		else stroke.color = toRGBA(stroke.color.split(','), stroke.opacity);
-		
-		inter = options.interactivity.events.onhover;
-		if(lines.enable || (inter.enable && inter.mode === 'grab')) {
-			
-			var ar = lines.color = lines.color.split(','),
-				i = ar.length;
+		slides.each(function() {
 				
-			while(i--) ar[i] = hexToRgb(ar[i]);
+			var $this = jQuery(this),
+				data = $this.attr('data-rsparticles');
+				
+			if(data) {
+				
+				data = JSON.parse(data);
+				data = jQuery.extend(true, getDefaults(), data);
+				data = convertOptions(data);
+				data.carousel = carousel;
+				$this.data('particles', data);
+				
+			}
 			
-		}
+		});
 		
-		if(shape.type === 'image') {
-			
-			svg = shape.image;
-			svg.src = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="{{viewbox}}">' + 
-					  '<path fill="#ffffff" stroke="{{stroke-color}}" stroke-width="{{stroke-width}}" d="' + svg.src + '"></path></svg>';
-			
-			if(!bWidth) {
+		var id = slider[0].id;
+		slides.each(function() {
+		
+			var $this = jQuery(this),
+				options = $this.data('particles');
 				
-				svg.src = svg.src.replace('{{viewbox}}', '0 0 24 24').replace('{{stroke-width}}', 0);
+			if(!options) return;
+			
+			var particl = options.particles,
+				lines = particl.line_linked,
+				shape = particl.shape,
+				color = particl.color,
+				stroke = shape.stroke,
+				bWidth = stroke.width,
+				svg,
+				src,
+				i;
 				
+			var inter = options.interactivity,
+				hover = inter.events.onhover,
+				click = inter.events.onclick;
+				
+			if(hover.mode !== 'none' && click.mode === 'bubble') click.mode = 'none';	
+			if(hover.enable && hover.mode === 'bubble' || click.enable && click.mode === 'bubble') {
+			
+				var bubbleSize = inter.modes.bubble.size;
+				if(bubbleSize > particl.size.value) particl.size.drawSize = Math.ceil(bubbleSize * Math.PI);
+			
 			}
 			else {
 				
-				var size = (bWidth * 2) + 24;
-				svg.src = svg.src.replace('{{stroke-width}}', bWidth)
-								 .replace('{{viewbox}}', -bWidth +  ' ' + -bWidth + ' ' + size + ' ' + size);
+				particl.size.drawSize = particl.size.value * 2;
+				
+			}
+				
+			color.value = color.value.split(',');
+			if(!bWidth) stroke.color = stroke.color.split(',');
+			else stroke.color = toRGBA(stroke.color.split(','), stroke.opacity);
+			
+			if(lines.enable || (hover.enable && hover.mode === 'grab')) {
+				
+				var ar = lines.color = lines.color.split(',');
+				i = ar.length;
+					
+				while(i--) ar[i] = hexToRgb(ar[i]);
 				
 			}
 			
-		}
-		
-		slider.one('revolution.slide.onchange', function() {
+			if(shape.type === 'image') {
+				
+				shape.image.src = shape.image.src.split(',');
+				
+				var len = shape.image.src.length,
+					tagStart,
+					tagEnd,
+					view;
+				
+				for(i = 0; i < len; i++) {
+				
+					svg = shape.image.src[i];
+					if(svg !== 'circle') {
+				
+						tagStart = '<path ';
+						tagEnd = ' d="' + svg + '"></path>';
+						view = svg.search('::') === -1 ? 24 : svg.split('::')[1];
+						
+					}
+					else {
+						
+						tagStart = '<circle cx="12" cy="12" r="12" ';
+						tagEnd = ' />';
+						view = 24;
+						
+					}
+					
+					src = '<svg xmlns="http://www.w3.org/2000/svg" width="' + view + '" height="' + view + '" viewBox="{{viewbox}}">' + 
+							  tagStart + 'fill="#ffffff" stroke="{{stroke-color}}" stroke-width="{{stroke-width}}"' + tagEnd + '</svg>';
+					
+					if(!bWidth) {
+						
+						svg = src.replace('{{viewbox}}', '0 0 ' + view + ' ' + view).replace('{{stroke-width}}', 0);
+						
+					}
+					else {
+						
+						var size = (bWidth * 2) + parseInt(view, 10);
+						svg = src.replace('{{stroke-width}}', bWidth)
+									 .replace('{{viewbox}}', -bWidth +  ' ' + -bWidth + ' ' + size + ' ' + size);
+						
+					}
+					
+					shape.image.src[i] = svg;
+					
+				}
+			}
 			
-			var linkFound,
-				zIndex = options.zIndex,
-				ids = id + '-tp-particles-',
-				events = options.interactivity.events;
-				events = events.onhover.enable || events.onclick.enable;
+			$this.data('particles', options);
+			
+		});
+		
+		slider.one('revolution.slide.onchange', function(e, data) {
+			
+			var slide = data.currentSlide;
+			if(slide && !(slide instanceof jQuery)) slide = jQuery(slide);
+			if(!slide || !slide.length) slide = slider.find('rs-slide').eq(0);
+			
+			var ids = id + '-tp-particles-',
+				linkFound;
 			
 			// determine where the canvas should be placed
-			slider.find('.tp-revslider-slidesli').each(function(i) {
-
+			slider.find('rs-slide').each(function(i) {
+				
+				var $this = jQuery(this),
+					options = $this.data('particles');
+					
+				if(!options) return;	
+				var zIndex = options.zIndex,
+					events = options.interactivity.events;
+					
+				events = events.onhover.enable || events.onclick.enable;
+					
+				if(zIndex === 'default') zIndex = 0;
 				if(events) {
 					
-					var $this = jQuery(this),
-						slideLink = $this.find('.slidelink');
+					var slideLink = $this.find('.slidelink');
 					
 					// particles are interactive, with no slidelink present
 					if(!slideLink.length) {
@@ -96,15 +170,16 @@
 					else {
 						
 						linkFound = true;
-						if($this.data('slideindex') !== 'back') zIndex = 999;
+						if($this.data('seoz') !== 'back') zIndex = 999;
+						else slideLink.closest('rs-layer-wrap').css('z-index', 1);
 						this.className = this.className + ' rs-particles-slidelink';
 						
 					}
 					
 				}
 				
-				this.className = this.className + ' ' + ids + (i + 1);
-				this.setAttribute('data-particles-index', zIndex);
+				this.setAttribute('data-particlesid', ids + (i + 1));
+				this.setAttribute('data-particlesindex', zIndex);
 				
 			});
 			
@@ -114,7 +189,7 @@
 				jQuery('body').off('click.rsparticles')
 							   .on('click.rsparticles', '.rs-particles-canvas', function() {
 					
-					var a = jQuery(this).prev('.tp-parallax-wrap').find('.slidelink a');
+					var a = jQuery(this).prev('rs-parallax-wrap').find('rs-slide[data-link] a', 'rs-slide[data-linktoslide] a');
 					if(!a.length) return;
 					
 					// navigate to url
@@ -134,84 +209,296 @@
 				});
 				
 			}
-			
-			onSwap(false, false)
+
+			slider.on('revolution.slide.onbeforeswap', onBeforeSwap);
+			if(!carousel) slider.on('revolution.slide.onafterswap', onAfterSwap);
+			else slider.on('revolution.slide.carouselchange', carouselChange);	
 			
 		});
 		
-		function onSwap(event, data) {
+		function carouselChange(e, data) {
 			
-			clearTimeout(swapTimer);
-			clearTimeout(showTimer);
-			
-			var index = data ? data.nextslide.index() + 1 : 1;
-			if(startSlide === 'first') startSlide = 1;
-			if(endSlide === 'last') endSlide = slider.revmaxslide();
-			
-			// particles should play
-			if(index >= startSlide && index <= endSlide) {
+			if(slider.revcurrentslide() !== currentSlideId) {
 				
-				sibling = '.' + id + '-tp-particles-' + index;
-				
-				// init
-				if(!started) {
-					
-					started = true;
-					instance = pJSDomRs.length;
-					particlesJSRs(sibling, options, id, canvas, slider);
-					
-				}
-				// replay
-				else if(!isPlaying) {
-					
-					pJSDomRs[instance].pJS.fn.vendors.draw();
-					
-				}
-				
-				// briefly wait for the next slide's visibility to be switched on
-				swapTimer = setTimeout(switchSlides, 100);
-				isPlaying = true;
+				onAfterSwap(false, data);
 				
 			}
-			// particles should pause
-			else if(started) {
-				
-				rspCancelAnimFrame(pJSDomRs[instance].pJS.fn.drawAnimFrame);
-				document.getElementById(canvas).style.opacity = 0;
-				isPlaying = false;
-				
+			else {
+					
+				var slide = data.currentslide,
+					pjs = slide.data('pjs');
+			
+				if(pjs && pjs.instance.pJS.resizeFunction && pjs.instance.pJS.sliderResized) {
+					
+					pjs.instance.pJS.resizeFunction();
+					pjs.instance.pJS.sliderResized = false;
+					
+				}	
+					
 			}
 			
-			if(!swapAdded) {
+		}
+		
+		function onBeforeSwap(e, data) {
+
+			slider.off('.rsparticles');
+			
+			var slide = data.currentslide.off('.rsparticles'),	
+				pjs = slide.data('pjs');
+			
+			if(pjs) {
 				
-				swapAdded = true;
-				slider.on('revolution.slide.onbeforeswap', onSwap);
+				if(pjs.instance.pJS.resizeFunction) {
+					pjs.instance.pJS.sliderResized = false;
+					slider.off('revolution.slide.afterdraw', pjs.instance.pJS.resizeFunction);
+				}
+				
+				pjs.el.off('.rsparticles');
+				punchgs.TweenLite.to(pjs.el, 0.3, {opacity: 0, ease: punchgs.Linear.easeNone, onComplete: function() {
+				
+					pjs.instance.pJS.fn.vendors.destroypJS();
+					slide.removeData('pjs').find('.rs-particles-canvas').remove();
+				
+				}});
 				
 			}
 			
 		}
 		
-		function showParticles() {
-		
-			document.getElementById(canvas).style.opacity = 1;
+		function onAfterSwap(e, data) {
 			
-		}
-		
-		// allows for particle interactivity
-		function switchSlides() {
+			var slide = data.currentslide;
+			if(slide && !(slide instanceof jQuery)) slide = jQuery(slide);
+			if(!slide || !slide.length) slide = slider.find('rs-slide').eq(0);
 			
-			var effect = document.getElementById(canvas),
-				container = document.querySelector(sibling);
+			data = slide.data('particles');
+			if(data) {
+				
+				data = jQuery.extend(true, {}, data);
+				
+				var zIndex = slide.attr('data-particlesindex'),
+					pjs = particlesJSRs(slide, data, slide.attr('data-particlesid'), slider, zIndex);
+					
+				slide.data('pjs', pjs);
+				punchgs.TweenLite.to(pjs.el, 0.5, {opacity: 1, ease: punchgs.Linear.easeNone});
+				
+			}
 			
-			if(inited) container.appendChild(effect);
-			else inited = true;
+			currentSlideId = slider.revcurrentslide();
 			
-			effect.style.zIndex = parseInt(container.getAttribute('data-particles-index'), 10);
-			showTimer = setTimeout(showParticles, 250);
-		
 		}
 		
 	};
+	
+	var svgs = {
+		
+		edge: 'M4 4h16v16H4z', 
+		triangle: 'M12 6L4 20L20 20z', 
+		polygon: 'M5 4 L17 4 L22 12 L17 20 L8 20 L3 12 L8 4 Z', 
+		star: 'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z',
+		heart_1: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+		star_2: 'M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23L16.23 18z',
+		settings: 'M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z',
+		arrow_1: 'M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z',
+		bullseye: 'M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10 10-4.49 10-10S17.51 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3-8c0 1.66-1.34 3-3 3s-3-1.34-3-3 1.34-3 3-3 3 1.34 3 3z',
+		plus_1: 'M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z',
+		triangle_2: 'M12 7.77L18.39 18H5.61L12 7.77M12 4L2 20h20L12 4z',
+		smilie: 'M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z',
+		star_3: 'M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z',
+		heart_2: 'M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55l-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z',
+		plus_2: 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z',
+		close: 'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z',
+		arrow_2: 'M22 12l-4-4v3H3v2h15v3z',
+		dollar: 'M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z',
+		sun_1: 'M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z',
+		sun_2: 'M7 11H1v2h6v-2zm2.17-3.24L7.05 5.64 5.64 7.05l2.12 2.12 1.41-1.41zM13 1h-2v6h2V1zm5.36 6.05l-1.41-1.41-2.12 2.12 1.41 1.41 2.12-2.12zM17 11v2h6v-2h-6zm-5-2c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm2.83 7.24l2.12 2.12 1.41-1.41-2.12-2.12-1.41 1.41zm-9.19.71l1.41 1.41 2.12-2.12-1.41-1.41-2.12 2.12zM11 23h2v-6h-2v6z',
+		snowflake: 'M22 11h-4.17l3.24-3.24-1.41-1.42L15 11h-2V9l4.66-4.66-1.42-1.41L13 6.17V2h-2v4.17L7.76 2.93 6.34 4.34 11 9v2H9L4.34 6.34 2.93 7.76 6.17 11H2v2h4.17l-3.24 3.24 1.41 1.42L9 13h2v2l-4.66 4.66 1.42 1.41L11 17.83V22h2v-4.17l3.24 3.24 1.42-1.41L13 15v-2h2l4.66 4.66 1.41-1.42L17.83 13H22z',
+		party: 'M4.59 6.89c.7-.71 1.4-1.35 1.71-1.22.5.2 0 1.03-.3 1.52-.25.42-2.86 3.89-2.86 6.31 0 1.28.48 2.34 1.34 2.98.75.56 1.74.73 2.64.46 1.07-.31 1.95-1.4 3.06-2.77 1.21-1.49 2.83-3.44 4.08-3.44 1.63 0 1.65 1.01 1.76 1.79-3.78.64-5.38 3.67-5.38 5.37 0 1.7 1.44 3.09 3.21 3.09 1.63 0 4.29-1.33 4.69-6.1H21v-2.5h-2.47c-.15-1.65-1.09-4.2-4.03-4.2-2.25 0-4.18 1.91-4.94 2.84-.58.73-2.06 2.48-2.29 2.72-.25.3-.68.84-1.11.84-.45 0-.72-.83-.36-1.92.35-1.09 1.4-2.86 1.85-3.52.78-1.14 1.3-1.92 1.3-3.28C8.95 3.69 7.31 3 6.44 3 5.12 3 3.97 4 3.72 4.25c-.36.36-.66.66-.88.93l1.75 1.71zm9.29 11.66c-.31 0-.74-.26-.74-.72 0-.6.73-2.2 2.87-2.76-.3 2.69-1.43 3.48-2.13 3.48z',
+		flower_1: 'M18.7 12.4c-.28-.16-.57-.29-.86-.4.29-.11.58-.24.86-.4 1.92-1.11 2.99-3.12 3-5.19-1.79-1.03-4.07-1.11-6 0-.28.16-.54.35-.78.54.05-.31.08-.63.08-.95 0-2.22-1.21-4.15-3-5.19C10.21 1.85 9 3.78 9 6c0 .32.03.64.08.95-.24-.2-.5-.39-.78-.55-1.92-1.11-4.2-1.03-6 0 0 2.07 1.07 4.08 3 5.19.28.16.57.29.86.4-.29.11-.58.24-.86.4-1.92 1.11-2.99 3.12-3 5.19 1.79 1.03 4.07 1.11 6 0 .28-.16.54-.35.78-.54-.05.32-.08.64-.08.96 0 2.22 1.21 4.15 3 5.19 1.79-1.04 3-2.97 3-5.19 0-.32-.03-.64-.08-.95.24.2.5.38.78.54 1.92 1.11 4.2 1.03 6 0-.01-2.07-1.08-4.08-3-5.19zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z',
+		flower_2: 'M12 22c4.97 0 9-4.03 9-9-4.97 0-9 4.03-9 9zM5.6 10.25c0 1.38 1.12 2.5 2.5 2.5.53 0 1.01-.16 1.42-.44l-.02.19c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5l-.02-.19c.4.28.89.44 1.42.44 1.38 0 2.5-1.12 2.5-2.5 0-1-.59-1.85-1.43-2.25.84-.4 1.43-1.25 1.43-2.25 0-1.38-1.12-2.5-2.5-2.5-.53 0-1.01.16-1.42.44l.02-.19C14.5 2.12 13.38 1 12 1S9.5 2.12 9.5 3.5l.02.19c-.4-.28-.89-.44-1.42-.44-1.38 0-2.5 1.12-2.5 2.5 0 1 .59 1.85 1.43 2.25-.84.4-1.43 1.25-1.43 2.25zM12 5.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5S9.5 9.38 9.5 8s1.12-2.5 2.5-2.5zM3 13c0 4.97 4.03 9 9 9 0-4.97-4.03-9-9-9z',
+		fire: 'M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z',
+		pizza: 'M12 2C8.43 2 5.23 3.54 3.01 6L12 22l8.99-16C18.78 3.55 15.57 2 12 2zM7 7c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm5 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z'
+		
+	};
+	
+	function getDefaults() {
+	
+		return {
+	
+			particles: {
+				shape: 'circle',
+				number: 80,
+				size: 6,
+				sizeMin: 1,
+				random: true
+			},
+			styles: {
+				border: {
+					enable: false,
+					color: '#ffffff',
+					opacity: 100,
+					size: 1
+				},
+				lines: {
+					enable: false,
+					color: '#ffffff',
+					width: 1,
+					opacity: 100,
+					distance: 150
+				},
+				particle: {
+					color: '#ffffff',
+					opacity: 100,
+					opacityMin: 25,
+					opacityRandom: false,
+					zIndex: 'default'
+				}
+			},
+			movement: {
+				enable: true,
+				randomSpeed: true,
+				speed: 1,
+				speedMin: 1,
+				direction: 'none',
+				straight: true,
+				bounce: false
+			},
+			interactivity: {
+				hoverMode: 'none',
+				clickMode: 'none'
+			},
+			bubble: {
+				distance: 400,
+				size: 40,
+				opacity: 40
+			},
+			grab: {
+				distance: 400,
+				opacity: 50
+			},
+			repulse: {
+				distance: 200,
+				easing: 100
+			},
+			pulse: {
+				size: {
+					enable: false,
+					speed: 40,
+					min: 1,
+					sync: false
+				},
+				opacity: {
+					enable: false,
+					speed: 3,
+					min: 1,
+					sync: false
+				}
+			}
+			
+		};
+	
+	}
+	
+	function convertSvgs(val) {
+		
+		val = val.split(',');
+		var len = val.length,
+			st = '';
+		
+		for(var i = 0; i < len; i++) {
+			
+			if(i > 0) st += ',';
+			if(svgs.hasOwnProperty(val[i])) st += svgs[val[i]];
+			else st += val[i];
+			
+		}
+		
+		return st;
+		
+	}
+	
+	function convertOpacity(val) {
+		
+		return val.toString().search(/\./g) !== -1 ? parseFloat(val) : parseInt(val, 10) * 0.01;
+		
+	}
+	
+	function trueFalse(val) {
+		
+		if(val === true || val === 'true' || val === 1 || val === '1' || val === 'on') return true;
+		else return false;
+		
+	}
+	
+	function minMax(val, min, max) {
+		
+		return Math.max(Math.min(val, max), val, min);
+	
+	}
+	
+	function convertOptions(data) {
+		
+		var borderSize = data.styles.border.enable ? data.styles.border.size : 0,
+			onHover = data.interactivity.hoverMode === 'none' ? false : true,
+			onClick = data.interactivity.clickMode === 'none' ? false : true;
+			
+		var direction = data.movement.direction,
+			moveStraight = !trueFalse(data.movement.straight),
+			randomMove = trueFalse(data.movement.randomSpeed),
+			outMode = data.movement.bounce ? 'bounce' : 'out';
+			
+		if(direction === 'none') {
+				
+			moveStraight = false;
+			
+		}
+		else if(direction === 'static') {
+			
+			direction = 'none';
+			moveStraight = true;
+			randomMove = false;
+			
+		}
+		
+		return {
+			
+			zIndex: data.styles.particle.zIndex,
+			particles: {
+				number: {value: minMax(parseInt(data.particles.number, 10), 1, 500)}, color: {value: data.styles.particle.color},
+				shape: {
+					type: 'image', 
+					stroke: {width: parseInt(borderSize, 10), color: data.styles.border.color, opacity: minMax(convertOpacity(data.styles.border.opacity), 0, 1)},
+					image: {src: convertSvgs(data.particles.shape)}
+				},
+				opacity: {
+					value: minMax(convertOpacity(data.styles.particle.opacity), 0.1, 1), 
+					random: trueFalse(data.styles.particle.opacityRandom), 
+					min: minMax(convertOpacity(data.styles.particle.opacityMin), 0.1, 1), 
+					anim: {enable: trueFalse(data.pulse.opacity.enable), speed: parseFloat(data.pulse.opacity.speed), opacity_min: minMax(convertOpacity(data.pulse.opacity.min), 0, 1), sync: trueFalse(data.pulse.opacity.sync)}
+				},
+				size: {
+					value: minMax(parseInt(data.particles.size, 10), 1, 250), 
+					random: trueFalse(data.particles.random), 
+					min: minMax(parseInt(data.particles.sizeMin, 10), 0.1, 250), 
+					anim: {enable: trueFalse(data.pulse.size.enable), speed: parseFloat(data.pulse.size.speed), size_min: minMax(parseFloat(data.pulse.size.min), 0.1, 250), sync: trueFalse(data.pulse.size.sync)}
+				},
+				line_linked: {enable: trueFalse(data.styles.lines.enable), distance: parseInt(data.styles.lines.distance, 10), color: data.styles.lines.color, opacity: minMax(convertOpacity(data.styles.lines.opacity), 0, 1), width: parseInt(data.styles.lines.width, 10)},
+				move: {enable: trueFalse(data.movement.enable), speed: minMax(parseInt(data.movement.speed, 10), 1, 50), direction: direction, random: randomMove, min_speed: minMax(parseInt(data.movement.speedMin, 10), 1, 50), straight: moveStraight, out_mode: outMode}
+			},
+			interactivity: {
+				events: {
+					onhover: {enable: onHover, mode: data.interactivity.hoverMode}, 
+					onclick: {enable: onClick, mode: data.interactivity.clickMode}
+				},
+				modes: {
+					grab: {distance: parseFloat(data.grab.distance), line_linked: {opacity: minMax(convertOpacity(data.grab.opacity), 0.1, 1)}}, 
+					bubble: {distance: parseFloat(data.bubble.distance), size: parseFloat(data.bubble.size), opacity: minMax(convertOpacity(data.bubble.opacity), 0, 1)}, 
+					repulse: {distance: parseFloat(data.repulse.distance), easing: parseInt(data.repulse.easing, 10)}
+				}
+			}
+		};
+		
+	}
 	
 	function toRGBA(colors, opacity) {
 		
@@ -237,49 +524,7 @@
 		
 	}
 	
-	// optional argument = revapi reference
-	window.RsDestroyParticles = function(revapi) {
-		
-		if(!pJSDomRs) return;
-		var events = 'revolution.slide.onbeforeswap revolution.slide.onloaded .rsparticles';
-		
-		// destroy particles for specific slider
-		if(!revapi) {
-		
-			while(pJSDomRs.length) {
-				
-				jQuery('#' + PJSDomRs[0].tpId).off(events);
-				pJSDomRs[0].pJS.fn.vendors.destroypJS();
-				pJSDomRs.shift();
-				
-			}
-			
-		}
-		// destroy all particle instances on the page
-		else {
-			
-			var id = revapi[0].id,
-				len = pJSDomRs.length;
-			
-			revapi.off(events);
-			for(var i = 0; i < len; i++) {
-				
-				if(PJSDomRs[i].tpId === id) {
-					
-					pJSDomRs[i].pJS.fn.vendors.destroypJS();
-					pJSDomRs.splice(i, 1);
-					break;
-					
-				}
-				
-			}
-			
-		}
-		
-	};
-	
-	
-	/* the magic, modified slightly for RevSlider */
+	/* the magic, modified for RevSlider */
 
 	/* -----------------------------------------------
 	/* Author : Vincent Garreau  - vincentgarreau.com
@@ -290,10 +535,7 @@
 	/* v2.0.0
 	/* ----------------------------------------------- */
 
-	var pJS = function(canvas_el, tag_id, params, tp_id, slider){
-
-	  // var canvas_el = document.querySelector('#'+tag_id+' > .rs-particles-canvas');
-	  this.tpId = tp_id;
+	var pJS = function(canvas_el, params, slider, revapi){
 	  
 	  /* particles.js variables with default values */
 	  this.pJS = {
@@ -341,6 +583,7 @@
 		  },
 		  size: {
 			value: 20,
+			drawSize: 40,
 			random: false,
 			min: 1,
 			anim: {
@@ -401,7 +644,8 @@
 			},
 			repulse:{
 			  distance: 200,
-			  duration: 0.4
+			  duration: 0.4,
+			  easing: 100
 			},
 			push:{
 			  particles_nb: 4
@@ -423,11 +667,10 @@
 	  };
 
 	  var pJS = this.pJS;
+	  var $this = this;
 
 	  /* params settings */
-	  if(params){
-		Object.deepExtend(pJS, params);
-	  }
+	  pJS = jQuery.extend(true, pJS, params);
 	  
 	  this.size_value = pJS.particles.size.value;
 
@@ -447,7 +690,7 @@
 	  pJS.tmp.count_svg = 0;
 
 	  pJS.fn.retinaInit = function(){
-
+		  
 		if(pJS.retina_detect && window.devicePixelRatio > 1){
 		  pJS.canvas.pxratio = window.devicePixelRatio; 
 		  pJS.tmp.retina = true;
@@ -459,7 +702,7 @@
 
 		pJS.canvas.w = pJS.canvas.el.offsetWidth * pJS.canvas.pxratio;
 		pJS.canvas.h = pJS.canvas.el.offsetHeight * pJS.canvas.pxratio;
-
+		
 		pJS.particles.size.value = pJS.tmp.obj.size_value * pJS.canvas.pxratio;
 		pJS.particles.size.anim.speed = pJS.tmp.obj.size_anim_speed * pJS.canvas.pxratio;
 		pJS.particles.move.speed = pJS.tmp.obj.move_speed * pJS.canvas.pxratio;
@@ -484,13 +727,12 @@
 
 		pJS.canvas.el.width = pJS.canvas.w;
 		pJS.canvas.el.height = pJS.canvas.h;
-
+		
 		if(pJS && pJS.interactivity.events.resize){
-
-		  window.addEventListener('resize', function(){
+			
+		  pJS.resizeFunction = function(){
 			  
-			  pJS.interactivity.offset = slider.offset();
-			  
+			  pJS.offset = slider.offset();
 			  pJS.canvas.w = pJS.canvas.el.offsetWidth;
 			  pJS.canvas.h = pJS.canvas.el.offsetHeight;
 
@@ -510,11 +752,15 @@
 				pJS.fn.particlesDraw();
 				pJS.fn.vendors.densityAutoParticles();
 			  }
+			  
+			  pJS.sliderResized = true;
 
 			/* density particles enabled */
 			pJS.fn.vendors.densityAutoParticles();
 
-		  });
+		  };	
+			
+		  revapi.on('revolution.slide.afterdraw', pJS.resizeFunction);
 
 		}
 
@@ -535,7 +781,6 @@
 	  pJS.fn.particle = function(color, opacity, position){
 
 		/* size */
-		// this.radius = (pJS.particles.size.random ? Math.random() : 1) * pJS.particles.size.value;
 		var rds = pJS.particles.size.value;
 
 		if(pJS.particles.size.random) {
@@ -583,7 +828,7 @@
 
 		/* color */
 		this.color = {};
-		if(typeof(color.value) == 'object'){
+		if(typeof(color.value) === 'object'){
 
 		  if(color.value instanceof Array){
 			var color_selected = color.value[Math.floor(Math.random() * pJS.particles.color.value.length)];
@@ -594,26 +839,26 @@
 				r: color.value.r,
 				g: color.value.g,
 				b: color.value.b
-			  }
+			  };
 			}
 			if(color.value.h != undefined && color.value.s != undefined && color.value.l != undefined){
 			  this.color.hsl = {
 				h: color.value.h,
 				s: color.value.s,
 				l: color.value.l
-			  }
+			  };
 			}
 		  }
 
 		}
-		else if(color.value == 'random'){
+		else if(color.value === 'random'){
 		  this.color.rgb = {
 			r: (Math.floor(Math.random() * (255 - 0 + 1)) + 0),
 			g: (Math.floor(Math.random() * (255 - 0 + 1)) + 0),
 			b: (Math.floor(Math.random() * (255 - 0 + 1)) + 0)
-		  }
+		  };
 		}
-		else if(typeof(color.value) == 'string'){
+		else if(typeof(color.value) === 'string'){
 		  this.color = color;
 		  this.color.rgb = hexToRgb(this.color.value);
 		}
@@ -625,9 +870,6 @@
 		/* variable line colors */
 		var lColor = pJS.particles.line_linked.color;
 		this.lineColor = lColor[Math.floor(Math.random() * lColor.length)];
-
-		/* opacity */
-		// this.opacity = (pJS.particles.opacity.random ? Math.random() : 1) * pJS.particles.opacity.value;
 		
 		var opacit = pJS.particles.opacity.value,
 		mopc = pJS.particles.opacity.min;
@@ -648,64 +890,53 @@
 		}
 
 		/* animation - velocity for speed */
-		var velbase = {}
+		var velbasex = 0, velbasey = 0;
 		switch(pJS.particles.move.direction){
 		  case 'top':
-			velbase = { x:0, y:-1 };
+			velbasey = -1;
 		  break;
 		  case 'top-right':
-			velbase = { x:0.5, y:-0.5 };
+			velbasex = 0.5;
+			velbasey = -0.5;
 		  break;
 		  case 'right':
-			velbase = { x:1, y:-0 };
+			velbasex = 1;
 		  break;
 		  case 'bottom-right':
-			velbase = { x:0.5, y:0.5 };
+			velbasex = 0.5;
+			velbasey = 0.5;
 		  break;
 		  case 'bottom':
-			velbase = { x:0, y:1 };
+			velbasey = 1;
 		  break;
 		  case 'bottom-left':
-			velbase = { x:-0.5, y:1 };
+			velbasex = -0.5;
+			velbasey = 1;
 		  break;
 		  case 'left':
-			velbase = { x:-1, y:0 };
+			velbasex = -1;
 		  break;
 		  case 'top-left':
-			velbase = { x:-0.5, y:-0.5 };
-		  break;
-		  default:
-			velbase = { x:0, y:0 };
+			velbasex = -0.5;
+			velbasey = -0.5;
 		  break;
 		}
 
 		if(pJS.particles.move.straight){
-		  this.vx = velbase.x;
-		  this.vy = velbase.y;
-		  /*
-		  if(pJS.particles.move.random){
-			this.vx = this.vx * (Math.random());
-			this.vy = this.vy * (Math.random());
-		  }
-		  */
+		  this.vx = velbasex;
+		  this.vy = velbasey;
 		}else{
-		  this.vx = velbase.x + Math.random()-0.5;
-		  this.vy = velbase.y + Math.random()-0.5;
+		  this.vx = velbasex + Math.random()-0.5;
+		  this.vy = velbasey + Math.random()-0.5;
 		}
-
-		// var theta = 2.0 * Math.PI * Math.random();
-		// this.vx = Math.cos(theta);
-		// this.vy = Math.sin(theta);
 
 		this.vx_i = this.vx;
 		this.vy_i = this.vy;
-
 		
-
 		/* if shape is image */
 
 		var shape_type = pJS.particles.shape.type;
-		if(typeof(shape_type) == 'object'){
+		if(typeof(shape_type) === 'object'){
 		  if(shape_type instanceof Array){
 			var shape_selected = shape_type[Math.floor(Math.random() * shape_type.length)];
 			this.shape = shape_selected;
@@ -714,14 +945,14 @@
 		  this.shape = shape_type;
 		}
 
-		if(this.shape == 'image'){
+		if(this.shape === 'image'){
 		  var sh = pJS.particles.shape;
 		  this.img = {
 			src: sh.image.src,
 			ratio: sh.image.width / sh.image.height
-		  }
+		  };
 		  if(!this.img.ratio) this.img.ratio = 1;
-		  if(pJS.tmp.img_type == 'svg' && pJS.tmp.source_svg != undefined){
+		  if(pJS.tmp.img_type === 'svg' && pJS.tmp.source_svg != undefined){
 			
 			pJS.fn.vendors.createSvgImg(this);
 			if(pJS.tmp.pushing){
@@ -739,16 +970,16 @@
 		  
 		  pJS.canvas.ctx.drawImage(
 			img_obj,
-			this.x-radius,
-			this.y-radius,
-			radius*2,
-			radius*2 / this.img.ratio
+			this.x - radius,
+			this.y - radius,
+			radius * 2,
+			radius * 2 / this.img.ratio
 		  );
 		  
-	  }
+	  };
 
 	  pJS.fn.particle.prototype.draw = function() {
-
+		
 		var p = this, svg, radius, opacity, color_value;
 
 		if(p.radius_bubble != undefined){
@@ -771,7 +1002,8 @@
 
 		pJS.canvas.ctx.fillStyle = color_value;
 		pJS.canvas.ctx.beginPath();
-
+		
+		/*
 		switch(p.shape){
 
 		  case 'circle':
@@ -809,36 +1041,29 @@
 		  break;
 
 		  case 'image':
+		*/
 			
-			pJS.canvas.ctx.globalAlpha = opacity;
-			
-			function draw(){
-				
-			  pJS.canvas.ctx.drawImage(
-				img_obj,
-				p.x-radius,
-				p.y-radius,
-				radius*2,
-				radius*2 / p.img.ratio
-			  );
-			}
+		pJS.canvas.ctx.globalAlpha = opacity;
+		
+		var img_obj;
+		if(pJS.tmp.img_type === 'svg'){
+		  img_obj = p.img.obj;
+		}else{
+		  img_obj = pJS.tmp.img_obj;
+		}
 
-			if(pJS.tmp.img_type == 'svg'){
-			  var img_obj = p.img.obj;
-			}else{
-			  var img_obj = pJS.tmp.img_obj;
-			}
-
-			if(img_obj){
-			  p.drawSVG(img_obj, radius);
-			}
-			
-			pJS.canvas.ctx.globalAlpha = 1.0;
-			svg = true;
-
+		if(img_obj){
+		  p.drawSVG(img_obj, radius);
+		}
+		
+		pJS.canvas.ctx.globalAlpha = 1.0;
+		svg = true;
+		
+		/*
 		  break;
 
 		}
+		*/
 
 		pJS.canvas.ctx.closePath();
 		
@@ -877,14 +1102,6 @@
 		  /* the particle */
 		  var p = pJS.particles.array[i];
 
-		  // var d = ( dx = pJS.interactivity.mouse.click_pos_x - p.x ) * dx + ( dy = pJS.interactivity.mouse.click_pos_y - p.y ) * dy;
-		  // var f = -BANG_SIZE / d;
-		  // if ( d < BANG_SIZE ) {
-		  //     var t = Math.atan2( dy, dx );
-		  //     p.vx = f * Math.cos(t);
-		  //     p.vy = f * Math.sin(t);
-		  // }
-
 		  /* move the particle */
 		  if(pJS.particles.move.enable){
 			
@@ -917,38 +1134,36 @@
 			}
 			if(p.radius < 0) p.radius = 0;
 		  }
+		  
+		  var x_left, x_right, y_top, y_bottom;
 
 		  /* change particle position if it is out of canvas */
-		  if(pJS.particles.move.out_mode == 'bounce'){
-			var new_pos = {
-			  x_left: p.radius,
-			  x_right:  pJS.canvas.w,
-			  y_top: p.radius,
-			  y_bottom: pJS.canvas.h
-			}
+		  if(pJS.particles.move.out_mode === 'bounce'){
+			x_left = p.radius;
+			x_right = pJS.canvas.w;
+			y_top = p.radius;
+			y_bottom = pJS.canvas.h;
 		  }else{
-			var new_pos = {
-			  x_left: -p.radius,
-			  x_right: pJS.canvas.w + p.radius,
-			  y_top: -p.radius,
-			  y_bottom: pJS.canvas.h + p.radius
-			}
+			x_left = -p.radius;
+			x_right = pJS.canvas.w + p.radius;
+			y_top = -p.radius;
+			y_bottom = pJS.canvas.h + p.radius;
 		  }
 
 		  if(p.x - p.radius > pJS.canvas.w){
-			p.x = new_pos.x_left;
+			p.x = x_left;
 			p.y = Math.random() * pJS.canvas.h;
 		  }
 		  else if(p.x + p.radius < 0){
-			p.x = new_pos.x_right;
+			p.x = x_right;
 			p.y = Math.random() * pJS.canvas.h;
 		  }
 		  if(p.y - p.radius > pJS.canvas.h){
-			p.y = new_pos.y_top;
+			p.y = y_top;
 			p.x = Math.random() * pJS.canvas.w;
 		  }
 		  else if(p.y + p.radius < 0){
-			p.y = new_pos.y_bottom;
+			p.y = y_bottom;
 			p.x = Math.random() * pJS.canvas.w;
 		  }
 
@@ -1030,8 +1245,8 @@
 	  pJS.fn.particlesRefresh = function(){
 
 		/* init all */
-		rspCancelAnimFrame(pJS.fn.checkAnimFrame);
-		rspCancelAnimFrame(pJS.fn.drawAnimFrame);
+		cancelAnimationFrame(pJS.fn.checkAnimFrame);
+		cancelAnimationFrame(pJS.fn.drawAnimFrame);
 		pJS.tmp.source_svg = undefined;
 		pJS.tmp.img_obj = undefined;
 		pJS.tmp.count_svg = 0;
@@ -1061,6 +1276,7 @@
 			
 			/* style */
 			var color_line = p1.lineColor;
+				
 			pJS.canvas.ctx.strokeStyle = 'rgba('+color_line.r+','+color_line.g+','+color_line.b+','+opacity_line+')';
 			pJS.canvas.ctx.lineWidth = pJS.particles.line_linked.width;
 			//pJS.canvas.ctx.lineCap = 'round'; /* performance issue */
@@ -1100,7 +1316,7 @@
 		}
 		
 
-	  }
+	  };
 
 
 	  pJS.fn.interact.bounceParticles = function(p1, p2){
@@ -1118,7 +1334,7 @@
 		  p2.vy = -p2.vy;
 		}
 
-	  }
+	  };
 
 
 	  /* ---------- pJS functions - modes events ------------ */
@@ -1139,7 +1355,7 @@
 				'y': pos ? pos.pos_y : Math.random() * pJS.canvas.h
 			  }
 			)
-		  )
+		  );
 
 		}
 		
@@ -1162,38 +1378,33 @@
 
 
 	  pJS.fn.modes.bubbleParticle = function(p){
-	
+		
+		var size, opacity, dx_mouse, dy_mouse, time_spent, dist_mouse;
 		/* on hover event */
 		if(pJS.interactivity.events.onhover.enable && isInArray('bubble', pJS.interactivity.events.onhover.mode)){
 
-		  var dx_mouse = p.x - pJS.interactivity.mouse.pos_x,
-			  dy_mouse = p.y - pJS.interactivity.mouse.pos_y,
-			  dist_mouse = Math.sqrt(dx_mouse*dx_mouse + dy_mouse*dy_mouse),
-			  ratio = 1 - dist_mouse / pJS.interactivity.modes.bubble.distance;
-			
-		  /*	
-		  function init(){
-			p.opacity_bubble = p.opacity;
-			p.radius_bubble = p.radius;
-		  }
-		  */
+		  dx_mouse = p.x - pJS.interactivity.mouse.pos_x;
+	      dy_mouse = p.y - pJS.interactivity.mouse.pos_y;
+		  dist_mouse = Math.sqrt(dx_mouse*dx_mouse + dy_mouse*dy_mouse);
+		  var ratio = 1 - dist_mouse / pJS.interactivity.modes.bubble.distance;
+
 
 		  /* mousemove - check ratio */
 		  if(dist_mouse <= pJS.interactivity.modes.bubble.distance){
 
-			if(ratio >= 0 && pJS.interactivity.status == 'mousemove'){
+			if(ratio >= 0 && pJS.interactivity.status === 'mousemove'){
 			  
 			  /* size */
 			  if(pJS.interactivity.modes.bubble.size != p.radius){
 
 				if(pJS.interactivity.modes.bubble.size > p.radius){
-				  var size = p.radius + (pJS.interactivity.modes.bubble.size*ratio);
+				  size = p.radius + (pJS.interactivity.modes.bubble.size*ratio);
 				  if(size >= 0){
 					p.radius_bubble = size;
 				  }
 				}else{
-				  var dif = p.radius - pJS.interactivity.modes.bubble.size,
-					  size = p.radius - (dif*ratio);
+				  var dif = p.radius - pJS.interactivity.modes.bubble.size;
+			      size = p.radius - (dif*ratio);
 				  if(size > 0){
 					p.radius_bubble = size;
 				  }else{
@@ -1207,12 +1418,12 @@
 			  if(pJS.interactivity.modes.bubble.opacity != p.opc){
 
 				if(pJS.interactivity.modes.bubble.opacity > p.opc){
-				  var opacity = pJS.interactivity.modes.bubble.opacity*ratio;
+				  opacity = pJS.interactivity.modes.bubble.opacity*ratio;
 				  if(opacity > p.opacity && opacity <= pJS.interactivity.modes.bubble.opacity){
 					p.opacity_bubble = opacity;
 				  }
 				}else{
-				  var opacity = p.opacity - (p.opc-pJS.interactivity.modes.bubble.opacity)*ratio;
+				  opacity = p.opacity - (p.opc-pJS.interactivity.modes.bubble.opacity)*ratio;
 				  if(opacity < p.opacity && opacity >= pJS.interactivity.modes.bubble.opacity){
 					p.opacity_bubble = opacity;
 				  }
@@ -1223,15 +1434,13 @@
 			}
 
 		  }else{
-			// init();
 			p.opacity_bubble = p.opacity;
 			p.radius_bubble = p.radius;
 		  }
 
 
 		  /* mouseleave */
-		  if(pJS.interactivity.status == 'mouseleave'){
-			// init();
+		  if(pJS.interactivity.status === 'mouseleave'){
 			p.opacity_bubble = p.opacity;
 			p.radius_bubble = p.radius;
 		  }
@@ -1243,9 +1452,9 @@
 
 
 		  if(pJS.tmp.bubble_clicking){
-			var dx_mouse = p.x - pJS.interactivity.mouse.click_pos_x,
-				dy_mouse = p.y - pJS.interactivity.mouse.click_pos_y,
-				dist_mouse = Math.sqrt(dx_mouse*dx_mouse + dy_mouse*dy_mouse),
+			    dx_mouse = p.x - pJS.interactivity.mouse.click_pos_x;
+				dy_mouse = p.y - pJS.interactivity.mouse.click_pos_y;
+				dist_mouse = Math.sqrt(dx_mouse*dx_mouse + dy_mouse*dy_mouse);
 				time_spent = (new Date().getTime() - pJS.interactivity.mouse.click_time)/1000;
 
 			if(time_spent > pJS.interactivity.modes.bubble.duration){
@@ -1258,45 +1467,7 @@
 			}
 		  }
 
-		  /*
-		  function process(bubble_param, particles_param, p_obj_bubble, p_obj, id){
-
-			if(bubble_param != particles_param){
-
-			  if(!pJS.tmp.bubble_duration_end){
-				if(dist_mouse <= pJS.interactivity.modes.bubble.distance){
-				  if(p_obj_bubble != undefined) var obj = p_obj_bubble;
-				  else var obj = p_obj;
-				  if(obj != bubble_param){
-					var value = p_obj - (time_spent * (p_obj - bubble_param) / pJS.interactivity.modes.bubble.duration);
-					if(id == 'size') p.radius_bubble = value;
-					if(id == 'opacity') p.opacity_bubble = value;
-				  }
-				}else{
-				  if(id == 'size') p.radius_bubble = undefined;
-				  if(id == 'opacity') p.opacity_bubble = undefined;
-				}
-			  }else{
-				if(p_obj_bubble != undefined){
-				  var value_tmp = p_obj - (time_spent * (p_obj - bubble_param) / pJS.interactivity.modes.bubble.duration),
-					  dif = bubble_param - value_tmp;
-					  value = bubble_param + dif;
-				  if(id == 'size') p.radius_bubble = value;
-				  if(id == 'opacity') p.opacity_bubble = value;
-				}
-			  }
-
-			}
-
-		  }
-		  */
-
 		  if(pJS.tmp.bubble_clicking){
-			  
-			/* size */
-			// process(pJS.interactivity.modes.bubble.size, pJS.particles.size.value, p.radius_bubble, p.radius, 'size');
-			/* opacity */
-			// process(pJS.interactivity.modes.bubble.opacity, pJS.particles.opacity.value, p.opacity_bubble, p.opacity, 'opacity');
 			
 			processBubble(p, dist_mouse, time_spent, pJS.interactivity.modes.bubble.size, p.osize, p.radius_bubble, p.radius, 'size');
 			processBubble(p, dist_mouse, time_spent, pJS.interactivity.modes.bubble.opacity, p.opc, p.opacity_bubble, p.opacity, 'opacity');
@@ -1308,7 +1479,8 @@
 	  };
 		
 	  function processBubble(p, dist_mouse, time_spent, bubble_param, particles_param, p_obj_bubble, p_obj, id){
-
+		
+		var value;
 		if(bubble_param != particles_param){
 
 		  if(!pJS.tmp.bubble_duration_end){
@@ -1318,21 +1490,21 @@
 			  else obj = p_obj;
 			  
 			  if(obj != bubble_param){
-				var value = p_obj - (time_spent * (p_obj - bubble_param) / pJS.interactivity.modes.bubble.duration);
-				if(id == 'size') p.radius_bubble = value;
-				if(id == 'opacity') p.opacity_bubble = value;
+				value = p_obj - (time_spent * (p_obj - bubble_param) / pJS.interactivity.modes.bubble.duration);
+				if(id === 'size') p.radius_bubble = value;
+				if(id === 'opacity') p.opacity_bubble = value;
 			  }
 			}else{
-			  if(id == 'size') p.radius_bubble = undefined;
-			  if(id == 'opacity') p.opacity_bubble = undefined;
+			  if(id === 'size') p.radius_bubble = undefined;
+			  if(id === 'opacity') p.opacity_bubble = undefined;
 			}
 		  }else{
 			if(p_obj_bubble != undefined){
-			  var value_tmp = p_obj - (time_spent * (p_obj - bubble_param) / pJS.interactivity.modes.bubble.duration),
-				  dif = bubble_param - value_tmp;
-				  value = bubble_param + dif;
-			  if(id == 'size') p.radius_bubble = value;
-			  if(id == 'opacity') p.opacity_bubble = value;
+			  var value_tmp = p_obj - (time_spent * (p_obj - bubble_param) / pJS.interactivity.modes.bubble.duration);
+			  var dif = bubble_param - value_tmp;
+			  value = bubble_param + dif;
+			  if(id === 'size') p.radius_bubble = value;
+			  if(id === 'opacity') p.opacity_bubble = value;
 			}
 		  }
 
@@ -1341,29 +1513,40 @@
 	  }	
 
 	  pJS.fn.modes.repulseParticle = function(p){
-
-		if(pJS.interactivity.events.onhover.enable && isInArray('repulse', pJS.interactivity.events.onhover.mode) && pJS.interactivity.status == 'mousemove') {
+		
+		var repulseRadius;
+		if(pJS.interactivity.events.onhover.enable && isInArray('repulse', pJS.interactivity.events.onhover.mode) && pJS.interactivity.status === 'mousemove') {
 
 		  var dx_mouse = p.x - pJS.interactivity.mouse.pos_x,
 			  dy_mouse = p.y - pJS.interactivity.mouse.pos_y,
 			  dist_mouse = Math.sqrt(dx_mouse*dx_mouse + dy_mouse*dy_mouse);
 
-		  var normVec = {x: dx_mouse/dist_mouse, y: dy_mouse/dist_mouse},
-			  repulseRadius = pJS.interactivity.modes.repulse.distance,
-			  velocity = 100,
+		  var normVecx = dx_mouse/dist_mouse,
+			  normVecy = dy_mouse/dist_mouse;
+		  repulseRadius = pJS.interactivity.modes.repulse.distance;
+		  var velocity = 100,
 			  repulseFactor = clamp((1/repulseRadius)*(-1*Math.pow(dist_mouse/repulseRadius,2)+1)*repulseRadius*velocity, 0, 50);
 		  
-		  var pos = {
-			x: p.x + normVec.x * repulseFactor,
-			y: p.y + normVec.y * repulseFactor
+		  var posX,
+			  posY,
+			  easing;
+		  
+		  if(pJS.interactivity.modes.repulse.easing) {
+			easing = pJS.interactivity.modes.repulse.easing / 16;
+			posX = p.x + (((p.x + normVecx * repulseFactor) - p.x) / easing);
+			posY = p.y + (((p.y + normVecy * repulseFactor) - p.y) / easing);
+		  }
+		  else {
+			posX = p.x + normVecx * repulseFactor;
+			posY = p.y + normVecy * repulseFactor;
 		  }
 
-		  if(pJS.particles.move.out_mode == 'bounce'){
-			if(pos.x - p.radius > 0 && pos.x + p.radius < pJS.canvas.w) p.x = pos.x;
-			if(pos.y - p.radius > 0 && pos.y + p.radius < pJS.canvas.h) p.y = pos.y;
+		  if(pJS.particles.move.out_mode === 'bounce'){
+			if(posX - p.radius > 0 && posX + p.radius < pJS.canvas.w) p.x = posX;
+			if(posY - p.radius > 0 && posY + p.radius < pJS.canvas.h) p.y = posY;
 		  }else{
-			p.x = pos.x;
-			p.y = pos.y;
+			p.x = posX;
+			p.y = posY;
 		  }
 		
 		}
@@ -1380,34 +1563,13 @@
 
 		  if(pJS.tmp.repulse_clicking){
 
-			var repulseRadius = Math.pow(pJS.interactivity.modes.repulse.distance/6, 3);
+			repulseRadius = Math.pow(pJS.interactivity.modes.repulse.distance/6, 3);
 
 			var dx = pJS.interactivity.mouse.click_pos_x - p.x,
 				dy = pJS.interactivity.mouse.click_pos_y - p.y,
 				d = dx*dx + dy*dy;
 
 			var force = -repulseRadius / d * 1;
-			
-			/*
-			function process(){
-
-			  var f = Math.atan2(dy,dx);
-			  p.vx = force * Math.cos(f);
-			  p.vy = force * Math.sin(f);
-
-			  if(pJS.particles.move.out_mode == 'bounce'){
-				var pos = {
-				  x: p.x + p.vx,
-				  y: p.y + p.vy
-				}
-				if (pos.x + p.radius > pJS.canvas.w) p.vx = -p.vx;
-				else if (pos.x - p.radius < 0) p.vx = -p.vx;
-				if (pos.y + p.radius > pJS.canvas.h) p.vy = -p.vy;
-				else if (pos.y - p.radius < 0) p.vy = -p.vy;
-			  }
-
-			}
-			*/
 
 			// default
 			if(d <= repulseRadius){
@@ -1418,27 +1580,18 @@
 			  p.vx = force * Math.cos(f);
 			  p.vy = force * Math.sin(f);
 
-			  if(pJS.particles.move.out_mode == 'bounce'){
-				var pos = {
-				  x: p.x + p.vx,
-				  y: p.y + p.vy
-				}
-				if (pos.x + p.radius > pJS.canvas.w) p.vx = -p.vx;
-				else if (pos.x - p.radius < 0) p.vx = -p.vx;
-				if (pos.y + p.radius > pJS.canvas.h) p.vy = -p.vy;
-				else if (pos.y - p.radius < 0) p.vy = -p.vy;
+			  if(pJS.particles.move.out_mode === 'bounce'){
+				  
+				var posx = p.x + p.vx,
+				    posy = p.y + p.vy;
+					
+				if (posx + p.radius > pJS.canvas.w) p.vx = -p.vx;
+				else if (posx - p.radius < 0) p.vx = -p.vx;
+				if (posy + p.radius > pJS.canvas.h) p.vy = -p.vy;
+				else if (posy - p.radius < 0) p.vy = -p.vy;
 			  }
 			  
 			}
-
-			// bang - slow motion mode
-			// if(!pJS.tmp.repulse_finish){
-			//   if(d <= repulseRadius){
-			//     process();
-			//   }
-			// }else{
-			//   process();
-			// }
 			
 
 		  }else{
@@ -1454,12 +1607,12 @@
 
 		}
 
-	  }
+	  };
 
 
 	  pJS.fn.modes.grabParticle = function(p){
 
-		if(pJS.interactivity.events.onhover.enable && pJS.interactivity.status == 'mousemove'){
+		if(pJS.interactivity.events.onhover.enable && pJS.interactivity.status === 'mousemove'){
 
 		  var dx_mouse = p.x - pJS.interactivity.mouse.pos_x,
 			  dy_mouse = p.y - pJS.interactivity.mouse.pos_y,
@@ -1500,7 +1653,7 @@
 	  pJS.fn.vendors.eventsListeners = function(){
 
 		/* events target element */
-		if(pJS.interactivity.detect_on == 'window'){
+		if(pJS.interactivity.detect_on === 'window'){
 		  pJS.interactivity.el = window;
 		}else{
 		  pJS.interactivity.el = pJS.canvas.el;
@@ -1511,36 +1664,14 @@
 		  
 		  slider.on('mousemove.rsparticles', function(e){
 			
-			/*
-			if(pJS.interactivity.el == window){
-			  var pos_x = e.clientX,
-				  pos_y = e.clientY;
-			}
-			else{
-			  var pos_x = e.offsetX || e.clientX,
-				  pos_y = e.offsetY || e.clientY;
-			}
-			*/
-			
-			/*
-			var pos_x = e.pageX - pJS.offset.left,
-				pos_y = e.pageY - pJS.offset.top;
-			
-			if(pJS.tmp.retina){
-			  pJS.interactivity.mouse.pos_x *= pJS.canvas.pxratio;
-			  pJS.interactivity.mouse.pos_y *= pJS.canvas.pxratio;
-			}
-			*/
-			
 			pJS.interactivity.mouse.pos_x = e.pageX - pJS.offset.left;
 			pJS.interactivity.mouse.pos_y = e.pageY - pJS.offset.top;
-
 			pJS.interactivity.status = 'mousemove';
 
 		  });
 
 		  /* el on onmouseleave */
-		  slider[0].addEventListener('mouseleave', function(e){
+		  slider.on('mouseleave.rsparticles', function(e){
 			
 			pJS.interactivity.mouse.pos_x = null;
 			pJS.interactivity.mouse.pos_y = null;
@@ -1553,7 +1684,7 @@
 		/* on click event */
 		if(pJS.interactivity.events.onclick.enable){
 
-		  pJS.interactivity.el.addEventListener('click', function(){
+		  slider.on('click.rsparticles', function(){
 
 			pJS.interactivity.mouse.click_pos_x = pJS.interactivity.mouse.pos_x;
 			pJS.interactivity.mouse.click_pos_y = pJS.interactivity.mouse.pos_y;
@@ -1588,9 +1719,7 @@
 				  pJS.tmp.repulse_clicking = true;
 				  pJS.tmp.repulse_count = 0;
 				  pJS.tmp.repulse_finish = false;
-				  setTimeout(function(){
-					pJS.tmp.repulse_clicking = false;
-				  }, pJS.interactivity.modes.repulse.duration*1000)
+				  setTimeout(onRepulse, pJS.interactivity.modes.repulse.duration*1000);
 				break;
 
 			  }
@@ -1603,6 +1732,12 @@
 
 
 	  };
+	  
+	  function onRepulse() {
+		  
+		  pJS.tmp.repulse_clicking = false;
+		  
+	  }
 
 	  pJS.fn.vendors.densityAutoParticles = function(){
 
@@ -1649,52 +1784,26 @@
 		  }
 		}
 	  };
-	  
-	  function rgbHexReplace() {
-			
-		  var color_value;
-			
-		  if(this.color.rgb){
-			  color_value = 'rgba('+this.color.rgb.r+','+this.color.rgb.g+','+this.color.rgb.b+','+this.opacity.toFixed(2)+')';
-		  }else{
-			  color_value = 'hsla('+this.color.hsl.h+','+this.color.hsl.s+'%,'+this.color.hsl.l+'%,'+this.opacity.toFixed(2)+')';
-		  }
-		  return color_value;
-	  }
 
 	  pJS.fn.vendors.createSvgImg = function(p){
 		
-		/* set color to svg element */
-		var svgXml = pJS.tmp.source_svg,
-			rgbHex = /#([0-9A-F]{3,6})/gi,
-			coloredSvgXml = svgXml.replace(rgbHex, rgbHexReplace.call(p)).replace('{{stroke-color}}', p.strokeColor);
-
-		/* prepare to create img with colored svg */
-		/*
-		var svg = new Blob([coloredSvgXml], {type: 'image/svg+xml;charset=utf-8'}),
-			DOMURL = window.URL || window.webkitURL || window,
-			url = DOMURL.createObjectURL(svg);
-		*/
-		
-		/* create particle img obj */
-		var img = new Image(),
-		url = 'data:image/svg+xml;base64,' + btoa(coloredSvgXml);
-		
-		img.addEventListener('load', function(){
-		  p.img.obj = img;
-		  p.img.loaded = true;
-		  // DOMURL.revokeObjectURL(url);
-		  pJS.tmp.count_svg++;
-		});
-		img.src = url;
+		 p.img.obj = pJS.cachedSvg[Math.floor(Math.random() * pJS.cachedSvg.length)];
+		 p.img.loaded = true;
+		 pJS.tmp.count_svg++;
 
 	  };
 
-
 	  pJS.fn.vendors.destroypJS = function(){
+		  
 		cancelAnimationFrame(pJS.fn.drawAnimFrame);
-		canvas_el.remove();
-		// pJSDomRs = null;
+		
+		var prop;
+		for(prop in pJS) {if(pJS.hasOwnProperty(prop)) delete pJS[prop];}
+		for(prop in $this) {if($this.hasOwnProperty(prop)) delete $this[prop];}
+		
+		pJS = null;
+		$this = null;
+
 	  };
 
 
@@ -1720,90 +1829,43 @@
 
 	  };
 
-	  /*
-	  pJS.fn.vendors.exportImg = function(){
-		window.open(pJS.canvas.el.toDataURL('image/png'), '_blank');
-	  };
-	*/
-
 	  pJS.fn.vendors.loadImg = function(type, svg){
-		
-		/*
-		pJS.tmp.img_error = undefined;
-
-		if(pJS.particles.shape.image.src != ''){
-
-		  if(type == 'svg'){
-			
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET', pJS.particles.shape.image.src);
-			xhr.onreadystatechange = function (data) {
-			  if(xhr.readyState == 4){
-				if(xhr.status == 200){
-				  pJS.tmp.source_svg = data.currentTarget.response;
-				  pJS.fn.vendors.checkBeforeDraw();
-				}else{
-				  console.log('Error pJS - Image not found');
-				  pJS.tmp.img_error = true;
-				}
-			  }
-			}
-			xhr.send();
-
-		  }else{
-
-			var img = new Image();
-			img.addEventListener('load', function(){
-			  pJS.tmp.img_obj = img;
-			  pJS.fn.vendors.checkBeforeDraw();
-			});
-			img.src = pJS.particles.shape.image.src;
-			
-		  }
-
-		}else{
-		  console.log('Error pJS - No image.src');
-		  pJS.tmp.img_error = true;
-		}
-		*/
 		
 		pJS.tmp.source_svg = svg;
 		pJS.fn.vendors.checkBeforeDraw();
 
 	  };
 
-
 	  pJS.fn.vendors.draw = function(){
 
-		if(pJS.particles.shape.type == 'image'){
+		if(pJS.particles.shape.type === 'image'){
 
-		  if(pJS.tmp.img_type == 'svg'){
+		  if(pJS.tmp.img_type === 'svg'){
 
 			if(pJS.tmp.count_svg >= pJS.particles.number.value){
 			  pJS.fn.particlesDraw();
-			  if(!pJS.particles.move.enable) rspCancelAnimFrame(pJS.fn.drawAnimFrame);
-			  else pJS.fn.drawAnimFrame = rspRequestAnimFrame(pJS.fn.vendors.draw);
+			  if(!pJS.particles.move.enable) cancelAnimationFrame(pJS.fn.drawAnimFrame);
+			  else pJS.fn.drawAnimFrame = requestAnimationFrame(pJS.fn.vendors.draw);
 			}else{
-			  // console.log('still loading...');
-			  if(!pJS.tmp.img_error) pJS.fn.drawAnimFrame = rspRequestAnimFrame(pJS.fn.vendors.draw);
+			  if(!pJS.tmp.img_error) pJS.fn.drawAnimFrame = requestAnimationFrame(pJS.fn.vendors.draw);
 			}
 
 		  }else{
 
 			if(pJS.tmp.img_obj != undefined){
 			  pJS.fn.particlesDraw();
-			  if(!pJS.particles.move.enable) rspCancelAnimFrame(pJS.fn.drawAnimFrame);
-			  else pJS.fn.drawAnimFrame = rspRequestAnimFrame(pJS.fn.vendors.draw);
+			  if(!pJS.particles.move.enable) cancelAnimationFrame(pJS.fn.drawAnimFrame);
+			  else pJS.fn.drawAnimFrame = requestAnimationFrame(pJS.fn.vendors.draw);
 			}else{
-			  if(!pJS.tmp.img_error) pJS.fn.drawAnimFrame = rspRequestAnimFrame(pJS.fn.vendors.draw);
+			  if(!pJS.tmp.img_error) pJS.fn.drawAnimFrame = requestAnimationFrame(pJS.fn.vendors.draw);
 			}
 
 		  }
 
 		}else{
 		  pJS.fn.particlesDraw();
-		  if(!pJS.particles.move.enable) rspCancelAnimFrame(pJS.fn.drawAnimFrame);
-		  else pJS.fn.drawAnimFrame = rspRequestAnimFrame(pJS.fn.vendors.draw);
+		  if(!pJS.particles.move.enable) cancelAnimationFrame(pJS.fn.drawAnimFrame);
+		  else pJS.fn.drawAnimFrame = requestAnimationFrame(pJS.fn.vendors.draw);
 		}
 
 	  };
@@ -1812,13 +1874,12 @@
 	  pJS.fn.vendors.checkBeforeDraw = function(){
 
 		// if shape is image
-		if(pJS.particles.shape.type == 'image'){
+		if(pJS.particles.shape.type === 'image'){
 
-		  if(pJS.tmp.img_type == 'svg' && pJS.tmp.source_svg == undefined){
-			pJS.tmp.checkAnimFrame = rspRequestAnimFrame(check);
+		  if(pJS.tmp.img_type === 'svg' && pJS.tmp.source_svg == undefined){
+			pJS.tmp.checkAnimFrame = requestAnimationFrame(check);
 		  }else{
-			//console.log('images loaded! cancel check');
-			rspCancelAnimFrame(pJS.tmp.checkAnimFrame);
+			cancelAnimationFrame(pJS.tmp.checkAnimFrame);
 			if(!pJS.tmp.img_error){
 			  pJS.fn.vendors.init();
 			  pJS.fn.vendors.draw();
@@ -1833,9 +1894,8 @@
 
 	  };
 
-
 	  pJS.fn.vendors.init = function(){
-
+		
 		/* init canvas + particles */
 		pJS.fn.retinaInit();
 		pJS.fn.canvasInit();
@@ -1859,53 +1919,78 @@
 	  };
 
 
-
-
 	  /* ---------- pJS - start ------------ */
-
-
-	  pJS.fn.vendors.eventsListeners();
-
-	  pJS.fn.vendors.start();
 	  
+	  pJS.cachedSvg = [];
+	  var currentCached = 0,
+		  totalToCache;
+		  
+	  function cacheTheSvg(svgXml, theFill, theStroke, size) {
+		  
+		/* set color to svg element */
+		var rgbHex = /#([0-9A-F]{3,6})/gi,
+			coloredSvgXml = svgXml.replace(rgbHex, theFill).replace('{{stroke-color}}', theStroke);
 
+		/* create particle img obj */
+		var img = new Image(),
+			url = 'data:image/svg+xml;base64,' + btoa(coloredSvgXml),
+			canvas = document.createElement('canvas'),
+			ctx = canvas.getContext('2d');
+		
+		canvas.width = canvas.height = size;
+		img.addEventListener('load', function(){
+		
+		  // ctx.mozImageSmoothingEnabled = false;
+		  ctx.webkitImageSmoothingEnabled = false;
+		  ctx.msImageSmoothingEnabled = false;
+		  ctx.imageSmoothingEnabled = false;
+		  ctx.drawImage(this, 0, 0, size, size);
+		  pJS.cachedSvg[pJS.cachedSvg.length] = ctx.canvas;
+		  
+		  currentCached++;
+		  if(currentCached === totalToCache) startItUp();
+		  
+		});
+
+		img.src = url;
+		  
+	  }
+	  
+	  function startItUp() {
+		  
+		pJS.fn.vendors.eventsListeners();
+		pJS.fn.vendors.start();
+		  
+	  }
+	  
+	  if(pJS.particles.shape.type === 'image') {
+		  
+		  var fills = pJS.particles.color.value,
+			  strokes = pJS.particles.shape.stroke.color,
+			  shapes = pJS.particles.shape.image.src,
+			  len1 = shapes.length,
+			  len2 = fills.length,
+			  len3 = strokes.length;
+			  
+		  totalToCache = len1 * len2 * len3;
+		  
+		  for(var i = 0, j, k; i < len1; i++) {
+			  for(j = 0; j < len2; j++) {
+				  for(k = 0; k < len3; k++) {
+					cacheTheSvg(shapes[i], fills[j], strokes[k], pJS.particles.size.drawSize);
+				  }
+			  }
+		  }
+	  }
+	  else {
+		 startItUp();
+	  }
+	  
+	  
 
 	};
 
 	/* ---------- global functions - vendors ------------ */
-
-	Object.deepExtend = function(destination, source) {
-	  for (var property in source) {
-		if (source[property] && source[property].constructor &&
-		 source[property].constructor === Object) {
-		  destination[property] = destination[property] || {};
-		  arguments.callee(destination[property], source[property]);
-		} else {
-		  destination[property] = source[property];
-		}
-	  }
-	  return destination;
-	};
-
-	window.rspRequestAnimFrame = (function(){
-	  return  window.requestAnimationFrame ||
-		window.webkitRequestAnimationFrame ||
-		window.mozRequestAnimationFrame    ||
-		window.oRequestAnimationFrame      ||
-		window.msRequestAnimationFrame     ||
-		function(callback){
-		  window.setTimeout(callback, 1000 / 60);
-		};
-	})();
-
-	window.rspCancelAnimFrame = ( function() {
-	  return window.cancelAnimationFrame         ||
-		window.webkitCancelRequestAnimationFrame ||
-		window.mozCancelRequestAnimationFrame    ||
-		window.oCancelRequestAnimationFrame      ||
-		window.msCancelRequestAnimationFrame     ||
-		clearTimeout
-	} )();
 
 	function hexToRgb(hex){
 	  // By Tim Down - http://stackoverflow.com/a/5624139/3493650
@@ -1920,11 +2005,11 @@
 		  g: parseInt(result[2], 16),
 		  b: parseInt(result[3], 16)
 	  } : null;
-	};
+	}
 
 	function clamp(number, min, max) {
 	  return Math.min(Math.max(number, min), max);
-	};
+	}
 
 	function isInArray(value, array) {
 	  return array.indexOf(value) > -1;
@@ -1932,88 +2017,21 @@
 
 
 	/* ---------- particles.js functions - start ------------ */
-
-	window.pJSDomRs = [];
-
-	window.particlesJSRs = function(tag_id, params, tp_id, rs_id, slider){
-
-	  //console.log(params);
-
-	  /* no string id? so it's object params, and set the id with default id */
-	  /*
-	  if(typeof(tag_id) != 'string'){
-		params = tag_id;
-		tag_id = 'particles-js';
-	  }
-	  */
-	  /* no id? set the id to default id */
-	  /*
-	  if(!tag_id){
-		tag_id = 'particles-js';
-	  }
-	  */
-
-	  /* pJS elements */
-	  var pJS_tag = document.querySelector(tag_id);
-	  if(pJS_tag == null) {
-		  console.log('slide with particles removed from DOM');
-	  }
-	  
-	  /*
-	  var pJS_canvas_class = 'rs-particles-canvas',
-		  exist_canvas = pJS_tag.getElementsByClassName(pJS_canvas_class);
-      */
-	  /* remove canvas if exists into the pJS target tag */
-	  /*
-	  if(exist_canvas.length){
-		while(exist_canvas.length > 0){
-		  pJS_tag.removeChild(exist_canvas[0]);
-		}
-	  }
-	  */
+	function particlesJSRs(slide, data, ids, slider, zIndex){
 
 	  /* create canvas element */
 	  var canvas_el = document.createElement('canvas');
 	  canvas_el.className = 'rs-particles-canvas';
-	  canvas_el.id = rs_id;
+	  canvas_el.style.zIndex = zIndex;
+	  canvas_el.id = ids;
+	  
+	  var container = !data.carousel ? slider : slide;
+	  slide.append(jQuery(canvas_el));
+	  
+	  return {instance: new pJS(canvas_el, data, container, slider), el: jQuery(canvas_el)};
 
-	  /* set size canvas */
-	  /*
-	  canvas_el.style.width = "100%";
-	  canvas_el.style.height = "100%";
-	  */	
-		
-	  /* append canvas */
-	  pJS_tag.appendChild(canvas_el);
 
-	  /* launch particle.js */
-	  //if(container != null){
-	  pJSDomRs.push(new pJS(canvas_el, tag_id, params, tp_id, slider));
-	  //}
+	}
 
-	};
-
-	/*
-	window.particlesJS.load = function(tag_id, path_config_json, callback){
-
-	  // load json config 
-	  var xhr = new XMLHttpRequest();
-	  xhr.open('GET', path_config_json);
-	  xhr.onreadystatechange = function (data) {
-		if(xhr.readyState == 4){
-		  if(xhr.status == 200){
-			var params = JSON.parse(data.currentTarget.response);
-			window.particlesJS(tag_id, params);
-			if(callback) callback();
-		  }else{
-			console.log('Error pJS - XMLHttpRequest status: '+xhr.status);
-			console.log('Error pJS - File config not found');
-		  }
-		}
-	  };
-	  xhr.send();
-
-	};
-	*/
 
 })(); /* END CLOSURE */

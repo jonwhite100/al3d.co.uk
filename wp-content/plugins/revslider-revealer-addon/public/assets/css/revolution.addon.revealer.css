@@ -34,7 +34,7 @@
 	
 }
 
-.rs_addon_reveal .tp-loader {
+.rs_addon_reveal rs-loader {
 	
 	visibility: visible !important;
 	display: inline-block !important;

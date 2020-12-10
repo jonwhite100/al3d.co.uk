@@ -2,7 +2,7 @@
 /**
  * @author    ThemePunch <info@themepunch.com>
  * @link      http://www.themepunch.com/
- * @copyright 2016 ThemePunch
+ * @copyright 2020 ThemePunch
  * @version   1.0.1
  */
  
@@ -12,6 +12,22 @@ if(!class_exists('ThemePunch_Fonts')) {
 	 
 	class ThemePunch_Fonts {
 		const TP_TEXTDOMAIN = 'themepunch-fonts';
+		
+		/**
+		 * save all fonts
+		 **/
+		public function save_fonts($fonts){
+			if(!empty($fonts)){
+				foreach($fonts as $font){
+					if(!isset($font['url']) || strlen($font['url']) < 3) return __('Wrong parameter received', TP_TEXTDOMAIN);
+					if(!isset($font['handle']) || strlen($font['handle']) < 3) return __('Wrong handle received', TP_TEXTDOMAIN);
+				}
+			}
+			
+			$do = update_option('tp-google-fonts', $fonts);
+			
+			return true;
+		}
 		
 		/**
 		 * Add a new Font 
@@ -92,6 +108,7 @@ if(!class_exists('ThemePunch_Fonts')) {
 		public function get_all_fonts(){
 		
 			$fonts = get_option('tp-google-fonts', array());
+			if(empty($fonts)) $fonts = array();
 			
 			return $fonts;
 		}
@@ -148,29 +165,25 @@ if(!class_exists('ThemePunch_Fonts')) {
 			$enable_pe7 = get_option('tp_eg_global_enable_pe7', 'false');
 			
 			if($focus=="admin"){
-				if($enable_fontello!="false") wp_enqueue_style('tp-fontello', EG_PLUGIN_URL . 'public/assets/font/fontello/css/fontello.css', array(), Essential_Grid::VERSION );
+				//if($enable_fontello!="false") wp_enqueue_style('tp-fontello', EG_PLUGIN_URL . 'public/assets/font/fontello/css/fontello.css', array(), Essential_Grid::VERSION );
 				if($enable_pe7!="false") wp_enqueue_style('tp-stroke-7', EG_PLUGIN_URL . 'public/assets/font/pe-icon-7-stroke/css/pe-icon-7-stroke.css', array(), Essential_Grid::VERSION );	
 				if($enable_font_awesome!="false") wp_enqueue_style('tp-font-awesome', EG_PLUGIN_URL . 'public/assets/font/font-awesome/css/font-awesome.css', array(), Essential_Grid::VERSION );
 			}
-			else{
+			else{								
 				if($enable_fontello=="backfront") wp_enqueue_style('tp-fontello', EG_PLUGIN_URL . 'public/assets/font/fontello/css/fontello.css', array(), Essential_Grid::VERSION );
 				if($enable_font_awesome=="backfront") wp_enqueue_style('tp-font-awesome', EG_PLUGIN_URL . 'public/assets/font/font-awesome/css/font-awesome.css', array(), Essential_Grid::VERSION );
-				if($enable_pe7=="backfront") wp_enqueue_style('tp-stroke-7', EG_PLUGIN_URL . 'public/assets/font/pe-icon-7-stroke/css/pe-icon-7-stroke.css', array(), Essential_Grid::VERSION );	
-			}
+				if($enable_pe7=="backfront") wp_enqueue_style('tp-stroke-7', EG_PLUGIN_URL . 'public/assets/font/pe-icon-7-stroke/css/pe-icon-7-stroke.css', array(), Essential_Grid::VERSION );
+			}			
 			
 		}
 		
 		
 		/**
-		 * register all fonts
+		 * register all fonts		 		
 		 */
 		public static function propagate_default_fonts($networkwide = false){
 			
-			$default = array (
-					array('url' => 'Open+Sans:300,400,600,700,800', 'handle' => 'open-sans'),
-					array('url' => 'Raleway:100,200,300,400,500,600,700,800,900', 'handle' => 'raleway'),
-					array('url' => 'Droid+Serif:400,700', 'handle' => 'droid-serif' )
-				); 
+			$default = array (); 
 			
 			$default = apply_filters('essgrid_add_default_fonts', $default); //will be obsolete soon, use tp_add_default_fonts instead
 			$default = apply_filters('tp_add_default_fonts', $default);

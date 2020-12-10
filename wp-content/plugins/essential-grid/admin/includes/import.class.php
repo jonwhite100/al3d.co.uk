@@ -3,7 +3,7 @@
  * @package   Essential_Grid
  * @author    ThemePunch <info@themepunch.com>
  * @link      http://www.themepunch.com/essential/
- * @copyright 2016 ThemePunch
+ * @copyright 2020 ThemePunch
  */
  
 if( !defined( 'ABSPATH') ) exit();
@@ -22,6 +22,7 @@ class Essential_Grid_Import {
 		$import_grids = $d['import_grids'];
 		$import_ids = $d['import_ids'];
 		$check_append = $d['check_append'];
+		$ids = array();
 		
 		if($import_grids !== false && !empty($import_grids)){
 			global $wpdb;
@@ -74,6 +75,53 @@ class Essential_Grid_Import {
 					$skin = $item_skin->get_id_by_handle($check['entry-skin']);
 					if(!empty($skin)){
 						$check['entry-skin'] = $skin['id'];
+						
+						// 2.3
+						// convert all skin modifications to the current skin ID
+						// ... and also convert blank skin item IDs
+						if(isset($i_grid['layers']) && !empty($i_grid['layers'])) {
+						
+							$mods = json_decode($i_grid['layers'], true);
+							$blankSkinId = false;
+							
+							foreach($mods as $key => $val) {
+								
+								// convert skin modifications
+								$mod = json_decode($mods[$key], true);
+								if(isset($mod['eg_settings_custom_meta_skin']) && !empty($mod['eg_settings_custom_meta_skin'])) {
+									
+									$skin_mods = $mod['eg_settings_custom_meta_skin'];
+									$mod_ids = array();
+									foreach($skin_mods as $i) {
+										$mod_ids[] = $skin['id'];
+									}
+									$mod['eg_settings_custom_meta_skin'] = $mod_ids;
+									
+								}
+								
+								// convert blank skin IDs
+								if(isset($mod['custom-type']) && !empty($mod['custom-type'])) {
+									
+									$alternateSkin = $mod['custom-type'];
+									if($alternateSkin === 'blank') {
+										
+										// only get the ID once and store it outside the loop
+										if(empty($blankSkinId)) {
+											$blankSkin = $item_skin->get_id_by_handle('esgblankskin');
+											if(!empty($blankSkin) && isset($blankSkin['id'])) $blankSkinId = $blankSkin['id'];
+										}
+										if(!empty($blankSkinId)) $mod['use-skin'] = $blankSkinId;
+										
+									}
+									
+								}
+								
+								$mods[$key] = json_encode($mod);
+							}
+							$i_grid['layers'] = json_encode($mods);
+							
+						}
+						
 					}
 					$i_grid['params'] = json_encode($check);
 				}
@@ -123,12 +171,15 @@ class Essential_Grid_Import {
 					}
 				}
 			}
+			
+			if($response !== false)	$ids[] = $wpdb->insert_id;
 		}
 		
+		return $ids;
 	}
 	
 	
-	public function import_skins($import_skins, $import_ids, $check_append = true){
+	public function import_skins($import_skins, $import_ids, $check_append = true, $ignore_exists = false){
 		$d = apply_filters('essgrid_import_skins', array('import_skins' => $import_skins, 'import_ids' => $import_ids, 'check_append' => $check_append));
 		$import_skins = $d['import_skins'];
 		$import_ids = $d['import_ids'];
@@ -165,6 +216,9 @@ class Essential_Grid_Import {
 							break;
 						}
 					}
+				}
+				if($ignore_exists && $exist){
+					continue;
 				}
 				
 				$append = true;
@@ -258,7 +312,7 @@ class Essential_Grid_Import {
 	}
 	
 	
-	public function import_navigation_skins($import_navigation_skins, $import_ids, $check_append = true){
+	public function import_navigation_skins($import_navigation_skins, $import_ids, $check_append = true, $ignore_exists = false){
 		$d = apply_filters('essgrid_import_navigation_skins', array('import_navigation_skins' => $import_navigation_skins, 'import_ids' => $import_ids, 'check_append' => $check_append));
 		$import_navigation_skins = $d['import_navigation_skins'];
 		$import_ids = $d['import_ids'];
@@ -297,6 +351,10 @@ class Essential_Grid_Import {
 					}
 				}
 				
+				if($ignore_exists && $exist){
+					continue;
+				}
+				
 				$append = true;
 				if($exist){ //skin exists - append or overwrite
 					if($check_append){ //check in $_POST if append or overwrite
@@ -307,9 +365,10 @@ class Essential_Grid_Import {
 				
 				$i_nav_skin['css'] = str_replace(array('\n', '\t'), array(chr(13), chr(9)), $i_nav_skin['css']);
 				//remove first and last "
-				if(substr($i_nav_skin['css'], 0, 1) == '"') $i_nav_skin['css'] = substr($i_nav_skin['css'], 1);
-				if(substr($i_nav_skin['css'], -1) == '"') $i_nav_skin['css'] = substr($i_nav_skin['css'], 0, -1);
-				
+				if(!empty($i_nav_skin['css'])){
+					if(substr($i_nav_skin['css'], 0, 1) == '"') $i_nav_skin['css'] = substr($i_nav_skin['css'], 1);
+					if(substr($i_nav_skin['css'], -1) == '"') $i_nav_skin['css'] = substr($i_nav_skin['css'], 0, -1);
+				}
 				$i_nav_skin['css'] = preg_replace_callback('/\\\\u([0-9a-fA-F]{4})/', array('Essential_Grid_Import', 'mb_convert_string'), $i_nav_skin['css']);
 				
 				
@@ -500,7 +559,7 @@ class Essential_Grid_Import {
 	
 	
 	public function import_global_styles($import_global_styles, $check_append = true){
-		$d = apply_filters('essgrid_import_global_styles', array('import_global_styles' => $import_global_styles, 'import_handles' => $import_handles, 'check_append' => $check_append));
+		$d = apply_filters('essgrid_import_global_styles', array('import_global_styles' => $import_global_styles, 'import_handles' => true, 'check_append' => $check_append));
 		$import_global_styles = $d['import_global_styles'];
 		$check_append = $d['check_append'];
 		
@@ -515,9 +574,10 @@ class Essential_Grid_Import {
 		
 		$import_global_styles = str_replace(array('\n', '\t'), array(chr(13), chr(9)), $import_global_styles);
 		//remove first and last "
-		if(substr($import_global_styles, 0, 1) == '"') $import_global_styles = substr($import_global_styles, 1);
-		if(substr($import_global_styles, -1) == '"') $import_global_styles = substr($import_global_styles, 0, -1);
-		
+		if(!empty($import_global_styles)){
+			if(substr($import_global_styles, 0, 1) == '"') $import_global_styles = substr($import_global_styles, 1);
+			if(substr($import_global_styles, -1) == '"') $import_global_styles = substr($import_global_styles, 0, -1);
+		}
 		$import_global_styles = preg_replace_callback('/\\\\u([0-9a-fA-F]{4})/', array('Essential_Grid_Import', 'mb_convert_string'), $import_global_styles);
 		
 		if($append){ //append

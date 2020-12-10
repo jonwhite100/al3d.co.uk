@@ -3,7 +3,7 @@
  * @package   Essential_Grid
  * @author    ThemePunch <info@themepunch.com>
  * @link      http://www.themepunch.com/essential/
- * @copyright 2016 ThemePunch
+ * @copyright 2020 ThemePunch
  */
  
 if( !defined( 'ABSPATH') ) exit();
@@ -28,7 +28,7 @@ class Essential_Grid_Woocommerce {
 	const SORTBY_NUMSALES = 'meta_num_total_sales';
 	const SORTBY_REGULAR_PRICE = 'meta_num__regular_price';
 	const SORTBY_SALE_PRICE = 'meta_num__sale_price';
-	const SORTBY_FEATURED = 'meta__featured';
+	//const SORTBY_FEATURED = 'meta__featured';
 	const SORTBY_SKU = 'meta__sku';
 	const SORTBY_STOCK = 'meta_num_stock';
 	
@@ -143,7 +143,7 @@ class Essential_Grid_Woocommerce {
 		$arrSortBy[self::SORTBY_REGULAR_PRICE] = __('Price', EG_TEXTDOMAIN);
 		//$arrSortBy[self::SORTBY_SALE_PRICE] = __('Sale Price', EG_TEXTDOMAIN);
 		$arrSortBy[self::SORTBY_NUMSALES] = __('Number Of Sales', EG_TEXTDOMAIN);
-		$arrSortBy[self::SORTBY_FEATURED] = __('Featured Products', EG_TEXTDOMAIN);
+		//$arrSortBy[self::SORTBY_FEATURED] = __('Featured Products', EG_TEXTDOMAIN);
 		$arrSortBy[self::SORTBY_SKU] = __('SKU', EG_TEXTDOMAIN);
 		$arrSortBy[self::SORTBY_STOCK] = __('Stock Quantity', EG_TEXTDOMAIN);
 		
@@ -325,7 +325,7 @@ class Essential_Grid_Woocommerce {
 	 * get all attached images
 	 * @since: 1.5.4
 	 */
-	public static function get_image_attachements($post_id, $url = false){
+	public static function get_image_attachements($post_id, $url = false, $source = 'full'){
 		$is_30 = self::version_check('3.0');
 		
 		$product = ($is_30) ? wc_get_product($post_id) : get_product($post_id);
@@ -338,7 +338,7 @@ class Essential_Grid_Woocommerce {
 			if($url){
 				$images = array();
 				foreach($wc_img as $img){
-					$t_img = wp_get_attachment_image_src($img, 'full');
+					$t_img = wp_get_attachment_image_src($img, $source);
 					if($t_img !== false){
 						$images[] = $t_img[0];
 					}

@@ -1,20 +1,19 @@
 <?php
-/**
- * @package   Essential_Grid
- * @author    ThemePunch <info@themepunch.com>
- * @link      http://codecanyon.net/item/essential-grid-wordpress-plugin/7563340
- * @copyright 2018 ThemePunch
- *
- * @wordpress-plugin
- * Plugin Name:       Essential Grid
- * Plugin URI:        https://essential.themepunch.com
- * Description:       Essential Grid - The Original Premium Grid Plugin
- * Version:           2.2.5
- * Author:            ThemePunch
- * Author URI:        https://themepunch.com
- * Text Domain:       essential-grid
- * Domain Path:       /languages
- */
+/*
+@package   Essential_Grid
+@author    ThemePunch <info@themepunch.com>
+@link      http://codecanyon.net/item/essential-grid-wordpress-plugin/7563340
+@copyright 2018 ThemePunch
+@wordpress-plugin
+Plugin Name:       Essential Grid
+Plugin URI:        https://www.essential-grid.com
+Description:       Essential Grid - The Original Premium Grid Plugin
+Version:           3.0.10
+Author:            ThemePunch
+Author URI:        https://themepunch.com
+Text Domain:       essential-grid
+Domain Path:       /languages
+*/
  
  
 // If this file is called directly, abort.
@@ -26,11 +25,13 @@ if(class_exists('Essential_Grid')) {
 	die('ERROR: It looks like you have more than one instance of Essential Grid installed. Please remove additional instances for this plugin to work again.');
 }
 
-define( 'EG_PLUGIN_PATH', plugin_dir_path(__FILE__) );
-define( 'EG_PLUGIN_URL', str_replace('index.php','',plugins_url( 'index.php', __FILE__ )));
+define('EG_PLUGIN_PATH', plugin_dir_path(__FILE__) );
+define('EG_PLUGIN_URL', str_replace('index.php','',plugins_url( 'index.php', __FILE__ )));
+define('EG_TEXTDOMAIN', 'essential-grid');
 
-define( 'EG_TEXTDOMAIN', 'essential-grid');
+define('ESG_TP_TOOLS', '6.2.0');
 
+$esg_dev_mode	 = (file_exists(EG_PLUGIN_PATH . 'public/assets/js/dev/essential-grid.js')) ? true : false;
 $wc_is_localized = false; //used to determinate if already done for cart button on this skin
 
 
@@ -39,40 +40,28 @@ $wc_is_localized = false; //used to determinate if already done for cart button 
  *----------------------------------------------------------------------------*/
 
  /* 2.1.6 */
-require_once(EG_PLUGIN_PATH . '/includes/colorpicker.class.php');
- 
 require_once(EG_PLUGIN_PATH . '/includes/base.class.php');
-
 require_once(EG_PLUGIN_PATH . '/public/essential-grid.class.php');
-
 require_once(EG_PLUGIN_PATH . '/includes/global-css.class.php');
-
+require_once(EG_PLUGIN_PATH . '/includes/colorpicker.class.php');
 require_once(EG_PLUGIN_PATH . '/includes/navigation.class.php');
-
 require_once(EG_PLUGIN_PATH . '/includes/grids-widget.class.php');
-
 require_once(EG_PLUGIN_PATH . '/includes/item-skin.class.php');
-
 require_once(EG_PLUGIN_PATH . '/includes/item-element.class.php');
-
 require_once(EG_PLUGIN_PATH . '/includes/wpml.class.php');
-
 require_once(EG_PLUGIN_PATH . '/includes/woocommerce.class.php');
-
 require_once(EG_PLUGIN_PATH . '/includes/meta.class.php');
-
 require_once(EG_PLUGIN_PATH . '/includes/fonts.class.php');
-
 require_once(EG_PLUGIN_PATH . '/includes/search.class.php');
-
 require_once(EG_PLUGIN_PATH . '/includes/aq_resizer.class.php');
-
-require_once(EG_PLUGIN_PATH . '/includes/jackbox.class.php');
-
-require_once(EG_PLUGIN_PATH . '/includes/social-gallery.class.php');
-
 require_once(EG_PLUGIN_PATH . '/includes/external-sources.class.php');
 require_once(EG_PLUGIN_PATH . '/includes/wordpress-update-fix.class.php');
+
+require_once(EG_PLUGIN_PATH . 'includes/loadbalancer.class.php');
+$esg_rsl			= (isset($_GET['esg_refresh_server'])) ? true : false;
+$esglb				= new Essential_Grid_LoadBalancer();
+$GLOBALS['esglb']	= $esglb;
+$esglb->refresh_server_list($esg_rsl);
 
 /*
  * Register hooks that are fired when the plugin is activated or deactivated.
@@ -165,29 +154,19 @@ if(is_admin()){ // && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX )
 	
 	
 	add_action('plugins_loaded', array( 'Essential_Grid', 'create_tables' ));
-	
 	require_once(EG_PLUGIN_PATH . '/admin/essential-grid-admin.class.php');
-	
 	require_once(EG_PLUGIN_PATH . '/admin/includes/update.class.php');
-	
 	require_once(EG_PLUGIN_PATH . '/admin/includes/dialogs.class.php');
-	
 	require_once(EG_PLUGIN_PATH . '/admin/includes/import.class.php');
-	
 	require_once(EG_PLUGIN_PATH . '/admin/includes/export.class.php');
-	
 	require_once(EG_PLUGIN_PATH . '/admin/includes/import-post.class.php');
-	
 	require_once(EG_PLUGIN_PATH . '/admin/includes/plugin-update.class.php');
-	
 	require_once(EG_PLUGIN_PATH . '/admin/includes/newsletter.class.php');
-
 	// require_once(EG_PLUGIN_PATH . 'admin/includes/addon-admin.class.php');
+	require_once(EG_PLUGIN_PATH . '/admin/includes/library.class.php');
 	
 	add_action('plugins_loaded', array( 'Essential_Grid_Admin', 'do_update_checks' )); //add update checks
-	
 	add_action('plugins_loaded', array( 'Essential_Grid_Admin', 'get_instance' ));
-	
 	add_action('plugins_loaded', array( 'Essential_Grid_Admin', 'visual_composer_include' )); //VC functionality
 	//add_action('init', array('Essential_Grid_Admin', 'visual_composer_include')); //VC functionality
 	

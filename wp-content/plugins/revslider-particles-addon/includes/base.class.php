@@ -15,7 +15,7 @@ class RsParticlesBase extends RsAddOnParticlesBase {
 					 $_PluginUrl     = RS_PARTICLES_PLUGIN_URL,
 					 $_PluginTitle   = 'particles',
 				     $_FilePath      = __FILE__,
-				     $_Version       = '1.0.6';
+				     $_Version       = '2.1.0';
 	
 	public function __construct() {
 		
@@ -28,7 +28,7 @@ class RsParticlesBase extends RsAddOnParticlesBase {
 			
 			require_once(RS_PARTICLES_PLUGIN_PATH . 'framework/notices.class.php');
 			
-			new RsAddOnParticlesNotice($notice, static::$_PluginTitle);
+			new RsAddOnParticlesNotice($notice, static::$_PluginTitle, static::$_Version);
 			return;
 			
 		}

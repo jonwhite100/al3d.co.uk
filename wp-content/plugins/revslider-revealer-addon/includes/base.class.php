@@ -1,9 +1,9 @@
 <?php
-/**
+/* 
  * @author    ThemePunch <info@themepunch.com>
  * @link      http://www.themepunch.com/
- * @copyright 2016 ThemePunch
- */
+ * @copyright 2018 ThemePunch
+*/
 
 if(!defined('ABSPATH')) exit();
 
@@ -15,7 +15,7 @@ class RsRevealerBase extends RsAddOnRevealerBase {
 					 $_PluginUrl     = RS_REVEALER_PLUGIN_URL,
 					 $_PluginTitle   = 'revealer',
 				     $_FilePath      = __FILE__,
-				     $_Version       = '1.0.1';
+				     $_Version       = '2.0.0';
 	
 	public function __construct() {
 		
@@ -28,7 +28,7 @@ class RsRevealerBase extends RsAddOnRevealerBase {
 			
 			require_once(RS_REVEALER_PLUGIN_PATH . 'framework/notices.class.php');
 			
-			new RsAddOnRevealerNotice($notice, static::$_PluginTitle);
+			new RsAddOnRevealerNotice($notice, static::$_PluginTitle, static::$_Version);
 			return;
 			
 		}

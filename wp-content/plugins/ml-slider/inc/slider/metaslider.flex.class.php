@@ -90,13 +90,12 @@ class MetaFlexSlider extends MetaSlider {
      * @return string
      */
     public function remove_bottom_margin( $class, $id, $settings ) {
-        if ( isset( $settings["navigation"] ) && $settings['navigation'] == 'false' ) {
+        if (isset($settings["navigation"] ) && 'false' == $settings['navigation']) {
             return $class .= " nav-hidden";
         }
 
-        // we don't want this filter hanging around if there's more than one slideshow on the page
-        remove_filter( 'metaslider_css_classes', array( $this, 'remove_bottom_margin' ), 11, 3 );
-
+        // We don't want this filter hanging around if there's more than one slideshow on the page
+        remove_filter('metaslider_css_classes', array($this, 'remove_bottom_margin' ), 12);
         return $class;
     }
 
@@ -166,7 +165,7 @@ class MetaFlexSlider extends MetaSlider {
         $class = $this->get_setting( 'noConflict' ) == 'true' ? "" : ' class="flexslider"';
 
         $return_value = '<div id="' . $this->get_identifier() . '"' . $class . '>';
-        $return_value .= "\n            <ul class=\"slides\">";
+        $return_value .= "\n            <ul aria-live=\"polite\" class=\"slides\">";
 
         foreach ( $this->slides as $slide ) {
             // backwards compatibility with older versions of MetaSlider Pro (< v2.0)
