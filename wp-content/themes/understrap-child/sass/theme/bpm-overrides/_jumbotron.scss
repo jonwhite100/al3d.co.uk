@@ -1,0 +1,64 @@
+.jumbotron {
+	height: $s-jumbotron-height-sm;
+
+	@include media-breakpoint-up(md) {
+		height: $s-jumbotron-height-md;
+	}
+
+	@include media-breakpoint-up(lg) {
+		height: $s-jumbotron-height-lg;
+	}
+
+	@include media-breakpoint-up(xl) {
+		height: $s-jumbotron-height-xl;
+	}
+}
+
+.jumbotron-main {
+	width: 100%;
+	// padding: $s-sm;
+	background-color: $c-jumbotron-h2-bg;
+	margin-bottom: auto;
+
+	h1,
+	h2,
+	h3 {
+		color: $c-jumbotron-h1;
+		font-weight: 300;
+	}
+}
+
+.wp-block-cover {
+	.jumbotron & {
+
+		background-attachment: fixed;
+		background-position: center;
+		background-size: cover;
+		min-height: $s-jumbotron-height-sm;
+
+		@include media-breakpoint-up(md) {
+			min-height: $s-jumbotron-height-md;
+		}
+
+		@include media-breakpoint-up(lg) {
+			min-height: $s-jumbotron-height-lg;
+		}
+
+		@include media-breakpoint-up(xl) {
+			min-height: $s-jumbotron-height-xl;
+		}
+	}
+}
+//
+// .jumbotron-bg {
+// 	&::after {
+// 		position: absolute;
+// 		top: 0;
+// 		left: 0;
+// 		width: 100%;
+// 		height: 100%;
+// 		background-color: $jumbotron-bg;
+// 		content: '';
+// 		z-index: 1;
+// 	}
+// }
