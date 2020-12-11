@@ -34,21 +34,26 @@
 		background-attachment: fixed;
 		background-position: center;
 		background-size: cover;
-		min-height: $s-jumbotron-height-sm;
+		min-height: $s-jumbotron-height-sm !important;
 
 		@include media-breakpoint-up(md) {
-			min-height: $s-jumbotron-height-md;
+			min-height: $s-jumbotron-height-md !important;
 		}
 
 		@include media-breakpoint-up(lg) {
-			min-height: $s-jumbotron-height-lg;
+			min-height: $s-jumbotron-height-lg !important;
 		}
 
 		@include media-breakpoint-up(xl) {
-			min-height: $s-jumbotron-height-xl;
+			min-height: $s-jumbotron-height-xl !important;
 		}
 	}
+
+	.wp-block-cover__inner-container {
+		position: fixed !important;
+	}
 }
+
 //
 // .jumbotron-bg {
 // 	&::after {

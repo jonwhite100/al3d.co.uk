@@ -65,13 +65,12 @@ $h2-font-size: $font-size-base * 2.1 !default;
 $h3-font-size: $font-size-base * 1.5 !default;
 $h4-font-size: $font-size-base * 1.1 !default;
 
-
 // $h5-font-size: $font-size-base * 1.25 !default;
 // $h6-font-size: $font-size-base !default;
 
 // Footer widgets
 $c-wrapper-footer-widgets: $white !default;
-$c-wrapper-footer-widgets-bg: pink !default;
+$c-wrapper-footer-widgets-bg: $primary !default;
 $c-wrapper-footer-widgets-link: $white !default;
 
 // Footer copyright info
@@ -93,9 +92,9 @@ $c-jumbotron-base-bg: $white !default;
 $s-jumbotron-height: 100vh !default; // TODO: put this and the Site (see above) into JMWhite properly
 
 $s-jumbotron-height-xs: 100vh;
-$s-jumbotron-height-sm: calc(#{$s-jumbotron-height} - 0);
-$s-jumbotron-height-md: calc(#{$s-jumbotron-height} - 0);
-$s-jumbotron-height-lg: calc(#{$s-jumbotron-height} - 0);
+$s-jumbotron-height-sm: calc(#{$s-jumbotron-height} - 100px);
+$s-jumbotron-height-md: calc(#{$s-jumbotron-height} - 85px);
+$s-jumbotron-height-lg: calc(#{$s-jumbotron-height} - 90px);
 $s-jumbotron-height-xl: 100vh;
 $jumbotron-bg: transparent;
 

@@ -68,4 +68,5 @@ jQuery(document).ready(function ($) {
 	ScrollReveal().reveal('.card', { interval: 200 });
 	ScrollReveal().reveal('.wp-block-image', { interval: 200 });
 	ScrollReveal().reveal('.blocks-gallery-item', { interval: 200 });
+	ScrollReveal().reveal('.section', { interval: 200 });
 });

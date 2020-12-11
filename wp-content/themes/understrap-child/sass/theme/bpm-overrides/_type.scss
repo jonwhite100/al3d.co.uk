@@ -1,0 +1,18 @@
+.lead {
+	line-height: 1.5;
+
+	.section-no-lead & {
+		display: none;
+	}
+}
+
+h2 {
+	.section & {
+		font-size: $h3-font-size;
+		text-align: right;
+	}
+
+	&.display-4 {
+		// font-size: $h2-font-size;
+	}
+}
