@@ -122,7 +122,7 @@ class Base extends Instance {
 	## -------------------------------------------------- ##
 	const O_OPTM_CSS_MIN 			= 'optm-css_min';
 	const O_OPTM_CSS_COMB 			= 'optm-css_comb';
-	const O_OPTM_CSS_UNIQUE 		= 'optm-css_unique';
+	const O_OPTM_CSS_COMB_EXT_INL	= 'optm-css_comb_ext_inl';
 	const O_OPTM_UCSS 				= 'optm-ucss';
 	const O_OPTM_UCSS_ASYNC 		= 'optm-ucss_async';
 	const O_OPTM_UCSS_WHITELIST 	= 'optm-ucss_whitelist';
@@ -149,7 +149,6 @@ class Base extends Instance {
 	const O_OPTM_EMOJI_RM 			= 'optm-emoji_rm';
 	const O_OPTM_NOSCRIPT_RM 		= 'optm-noscript_rm';
 	const O_OPTM_GGFONTS_ASYNC 		= 'optm-ggfonts_async';
-	const O_OPTM_RM_COMMENT 		= 'optm-rm_comment';
 	const O_OPTM_EXC_ROLES 			= 'optm-exc_roles';
 	const O_OPTM_CCSS_CON			= 'optm-ccss_con';
 	const O_OPTM_JS_DEFER_EXC 		= 'optm-js_defer_exc';
@@ -225,12 +224,6 @@ class Base extends Instance {
 	## --------------		Crawler		----------------- ##
 	## -------------------------------------------------- ##
 	const O_CRAWLER 				= 'crawler';
-	const O_CRAWLER_POSTS 			= 'crawler-inc_posts';
-	const O_CRAWLER_PAGES 			= 'crawler-inc_pages';
-	const O_CRAWLER_CATS 			= 'crawler-inc_cats';
-	const O_CRAWLER_TAGS 			= 'crawler-inc_tags';
-	const O_CRAWLER_EXC_CPT 		= 'crawler-exc_cpt';
-	const O_CRAWLER_ORDER_LINKS 	= 'crawler-order_links';
 	const O_CRAWLER_USLEEP 			= 'crawler-usleep';
 	const O_CRAWLER_RUN_DURATION 	= 'crawler-run_duration';
 	const O_CRAWLER_RUN_INTERVAL 	= 'crawler-run_interval';
@@ -418,7 +411,7 @@ class Base extends Instance {
 		// HTML Optm
 		self::O_OPTM_CSS_MIN 			=> false,
 		self::O_OPTM_CSS_COMB 			=> false,
-		self::O_OPTM_CSS_UNIQUE 		=> false,
+		self::O_OPTM_CSS_COMB_EXT_INL	=> false,
 		self::O_OPTM_UCSS 				=> false,
 		self::O_OPTM_UCSS_ASYNC			=> false,
 		// self::O_OPTM_UCSS_WHITELIST		=> array(),
@@ -443,7 +436,6 @@ class Base extends Instance {
 		self::O_OPTM_EMOJI_RM 			=> false,
 		self::O_OPTM_NOSCRIPT_RM 		=> false,
 		self::O_OPTM_GGFONTS_ASYNC 		=> false,
-		self::O_OPTM_RM_COMMENT 		=> false,
 		self::O_OPTM_EXC_ROLES			=> array(),
 		self::O_OPTM_CCSS_CON			=> '',
 		self::O_OPTM_JS_DEFER_EXC		=> array(),
@@ -511,12 +503,6 @@ class Base extends Instance {
 
 		// Crawler
 		self::O_CRAWLER 				=> false,
-		self::O_CRAWLER_POSTS 			=> false,
-		self::O_CRAWLER_PAGES 			=> false,
-		self::O_CRAWLER_CATS 			=> false,
-		self::O_CRAWLER_TAGS 			=> false,
-		self::O_CRAWLER_EXC_CPT 		=> array(),
-		self::O_CRAWLER_ORDER_LINKS 	=> false,
 		self::O_CRAWLER_USLEEP 			=> 0,
 		self::O_CRAWLER_RUN_DURATION 	=> 0,
 		self::O_CRAWLER_RUN_INTERVAL 	=> 0,
@@ -613,7 +599,6 @@ class Base extends Instance {
 		self::O_DEBUG 			=> 2,
 		self::O_OPTM_CSS_FONT_DISPLAY 	=> 4,
 		self::O_OPTM_JS_INLINE_DEFER 	=> 2,
-		self::O_CRAWLER_ORDER_LINKS 	=> 3,
 	);
 
 

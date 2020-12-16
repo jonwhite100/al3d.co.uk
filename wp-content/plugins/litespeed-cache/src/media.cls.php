@@ -409,6 +409,13 @@ class Media extends Instance {
 				return true;
 			}
 
+			if ( preg_match("/(?:version\/|safari)([\d.]+)/i", $_SERVER['HTTP_USER_AGENT'], $matches) ) {
+        			$lscwp_mac_version = $matches[1];
+        			if (version_compare($lscwp_mac_version, '14.0.0', '>')){
+                			return true;
+        			}
+			}
+
 			if ( preg_match( "/iPhone OS (\d+)_/i", $_SERVER[ 'HTTP_USER_AGENT' ], $matches ) ) {
 				$lscwp_ios_version = $matches[1];
 				if ($lscwp_ios_version >= 14){
@@ -523,7 +530,7 @@ class Media extends Instance {
 		// Include lazyload lib js and init lazyload
 		if ( $cfg_lazy || $cfg_iframe_lazy ) {
 			if ( Conf::val( Base::O_MEDIA_LAZYJS_INLINE ) ) {
-				$lazy_lib = '<script>' . File::read( LSCWP_DIR . self::LIB_FILE_IMG_LAZYLOAD ) . '</script>';
+				$lazy_lib = '<script data-no-optimize="1">' . File::read( LSCWP_DIR . self::LIB_FILE_IMG_LAZYLOAD ) . '</script>';
 			} else {
 				$lazy_lib_url = LSWCP_PLUGIN_URL . self::LIB_FILE_IMG_LAZYLOAD;
 				$lazy_lib = '<script src="' . $lazy_lib_url . '"></script>';

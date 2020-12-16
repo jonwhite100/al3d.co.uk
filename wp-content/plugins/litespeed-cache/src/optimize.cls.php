@@ -92,6 +92,7 @@ class Optimize extends Base {
 		 * @since 1.5
 		 */
 		if ( $this->cfg_js_defer || $this->cfg_js_inline_defer ) {
+			add_filter( 'litespeed_optm_js_defer_exc', array( $this->__data, 'load_js_defer_exc' ) );
 			$this->cfg_js_defer_exc = apply_filters( 'litespeed_optm_js_defer_exc', Conf::val( Base::O_OPTM_JS_DEFER_EXC ) );
 		}
 
@@ -336,6 +337,7 @@ class Optimize extends Base {
 
 		// Parse css from content
 		if ( $this->cfg_css_min || $this->cfg_css_comb || $this->cfg_http2_css || $this->cfg_ggfonts_rm || $this->cfg_css_async || $this->cfg_ggfonts_async  || $this->_conf_css_font_display ) {
+			add_filter( 'litespeed_optimize_css_excludes', array( $this->__data, 'load_css_exc' ) );
 			list( $src_list, $html_list ) = $this->_parse_css();
 		}
 
@@ -933,6 +935,11 @@ class Optimize extends Base {
 	 * @access private
 	 */
 	private function _js_inline_defer( $con, $attrs ) {
+		if ( strpos( $attrs, 'data-no-defer' ) !== false ) {
+			Debug2::debug2( '[Optm] bypass: attr api data-no-defer' );
+			return;
+		}
+
 		if ( $this->cfg_js_defer_exc ) {
 			$hit = Utility::str_hit_array( $con, $this->cfg_js_defer_exc );
 			if ( $hit ) {
@@ -1002,6 +1009,8 @@ class Optimize extends Base {
 	 */
 	private function _parse_css() {
 		$excludes = apply_filters( 'litespeed_optimize_css_excludes', Conf::val( Base::O_OPTM_CSS_EXC ) );
+
+		$combine_ext_inl = Conf::val( Base::O_OPTM_CSS_COMB_EXT_INL );
 
 		$css_to_be_removed = apply_filters( 'litespeed_optm_css_to_be_removed', array() );
 
@@ -1073,6 +1082,21 @@ class Optimize extends Base {
 					continue;
 				}
 
+				$is_internal = Utility::is_internal_file( $attrs[ 'href' ] );
+				$ext_excluded = ! $combine_ext_inl && ! $is_internal;
+				if ( $ext_excluded ) {
+					Debug2::debug2( '[Optm] Bypassed due to external link' );
+					// Maybe defer
+					if ( $this->cfg_css_async ) {
+						$snippet = $this->_async_css( $match[ 0 ] );
+						if ( $snippet != $match[ 0 ] ) {
+							$this->content = str_replace( $match[ 0 ], $snippet, $this->content );
+						}
+					}
+
+					continue;
+				}
+
 				if ( ! empty( $attrs[ 'media' ] ) && $attrs[ 'media' ] !== 'all' ) {
 					$this_src_arr[ 'media' ] = $attrs[ 'media' ];
 				}
@@ -1080,12 +1104,18 @@ class Optimize extends Base {
 				$this_src_arr[ 'src' ] = $attrs[ 'href' ];
 			}
 			else { // Inline style
+				if ( ! $combine_ext_inl ) {
+					Debug2::debug2( '[Optm] Bypassed due to inline' );
+					continue;
+				}
+
 				$attrs = Utility::parse_attr( $match[ 2 ] );
 
 				if ( ! empty( $attrs[ 'media' ] ) && $attrs[ 'media' ] !== 'all' ) {
 					$this_src_arr[ 'media' ] = $attrs[ 'media' ];
 				}
-								$this_src_arr[ 'inl' ] = true;
+
+				$this_src_arr[ 'inl' ] = true;
 				$this_src_arr[ 'src' ] = $match[ 3 ];
 			}
 
