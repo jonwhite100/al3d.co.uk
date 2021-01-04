@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Plugins - Gutenberg - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2020-12-08 16:18:36+0000\n"
+"PO-Revision-Date: 2020-12-23 13:38:05+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -157,32 +157,6 @@ msgstr "Home"
 #: lib/full-site-editing/default-template-types.php:18
 msgid "The default template which is used when no other template can be found"
 msgstr "The default template which is used when no other template can be found"
-
-#: lib/class-wp-theme-json-resolver.php:160
-msgid "Heavy"
-msgstr "Heavy"
-
-#: lib/class-wp-theme-json-resolver.php:158
-msgid "Semibold"
-msgstr "Semibold"
-
-#: lib/class-wp-theme-json-resolver.php:154
-msgid "Thin"
-msgstr "Thin"
-
-#: lib/class-wp-theme-json-resolver.php:153
-msgid "Ultralight"
-msgstr "Ultralight"
-
-#: lib/class-wp-theme-json-resolver.php:144
-#: lib/class-wp-theme-json-resolver.php:163
-msgid "Inherit"
-msgstr "Inherit"
-
-#: lib/class-wp-theme-json-resolver.php:143
-#: lib/class-wp-theme-json-resolver.php:162
-msgid "Initial"
-msgstr "Initial"
 
 #: lib/full-site-editing.php:26
 msgid "You're using an experimental Full Site Editing theme. Full Site Editing is an experimental feature and potential API changes are to be expected!"
@@ -548,99 +522,99 @@ msgstr "But of all there were none he liked so well as those of the famous Felic
 msgid "They must know, then, that the above-named gentleman whenever he was at leisure (which was mostly all the year round) gave himself up to reading books of chivalry with such ardour and avidity that he almost entirely neglected the pursuit of his field-sports, and even the management of his property; and to such a pitch did his eagerness and infatuation go that he sold many an acre of tillageland to buy books of chivalry to read, and brought home as many of them as he could get."
 msgstr "They must know, then, that the above-named gentleman, whenever he was at leisure, which was mostly all the year round, gave himself up to reading books of chivalry with such ardour and avidity that he almost entirely neglected the pursuit of his field sports, and even the management of his property; and to such a pitch did his eagerness and infatuation go, that he sold many an acre of tillageland to buy books of chivalry to read, and brought home as many of them as he could get."
 
-#: lib/edit-site-page.php:200
+#: lib/edit-site-page.php:201
 msgid "The ID of the page that should be displayed on the front page"
 msgstr "The ID of the page that should be displayed on the front page"
 
-#: lib/edit-site-page.php:190
+#: lib/edit-site-page.php:191
 msgid "What to show on the front page"
 msgstr "What to show on the front page"
 
-#: lib/compat.php:557
+#: lib/compat.php:599
 msgid "Reusable Block updated."
 msgstr "Reusable Block updated."
 
-#: lib/compat.php:556
+#: lib/compat.php:598
 msgid "Reusable Block scheduled."
 msgstr "Reusable Block scheduled."
 
-#: lib/compat.php:555
+#: lib/compat.php:597
 msgid "Reusable Block reverted to draft."
 msgstr "Reusable Block reverted to draft."
 
-#: lib/compat.php:554
+#: lib/compat.php:596
 msgid "Reusable Block published privately."
 msgstr "Reusable Block published privately."
 
-#: lib/compat.php:553
+#: lib/compat.php:595
 msgid "Reusable Block published."
 msgstr "Reusable Block published."
 
-#: lib/compat.php:552
+#: lib/compat.php:594
 msgid "Reusable Blocks list"
 msgstr "Reusable Blocks list"
 
-#: lib/compat.php:551
+#: lib/compat.php:593
 msgid "Reusable Blocks list navigation"
 msgstr "Reusable Blocks list navigation"
 
-#: lib/compat.php:550
+#: lib/compat.php:592
 msgid "Filter reusable blocks list"
 msgstr "Filter reusable blocks list"
 
-#: lib/compat.php:549
+#: lib/compat.php:591
 msgid "No reusable blocks found in Trash."
 msgstr "No reusable blocks found in Bin."
 
-#: lib/compat.php:548
+#: lib/compat.php:590
 msgid "No reusable blocks found."
 msgstr "No reusable blocks found."
 
-#: lib/compat.php:547
+#: lib/compat.php:589
 msgid "Search Reusable Blocks"
 msgstr "Search Reusable Blocks"
 
-#: lib/compat.php:546
+#: lib/compat.php:588
 msgid "All Reusable Blocks"
 msgstr "All Reusable Blocks"
 
-#: lib/compat.php:545
+#: lib/compat.php:587
 msgid "View Reusable Block"
 msgstr "View Reusable Block"
 
-#: lib/compat.php:544
+#: lib/compat.php:586
 msgid "Edit Reusable Block"
 msgstr "Edit Reusable Block"
 
-#: lib/compat.php:543
+#: lib/compat.php:585
 msgid "New Reusable Block"
 msgstr "New Reusable Block"
 
-#: lib/compat.php:542
+#: lib/compat.php:584
 msgid "Add New Reusable Block"
 msgstr "Add New Reusable Block"
 
-#: lib/compat.php:541
+#: lib/compat.php:583
 msgctxt "Reusable Block"
 msgid "Add New"
 msgstr "Add New"
 
-#: lib/compat.php:540
+#: lib/compat.php:582
 msgctxt "add new on admin bar"
 msgid "Reusable Block"
 msgstr "Reusable Block"
 
-#: lib/compat.php:539
+#: lib/compat.php:581
 msgctxt "admin menu"
 msgid "Reusable Blocks"
 msgstr "Reusable Blocks"
 
-#: lib/compat.php:538
+#: lib/compat.php:580
 msgctxt "post type singular name"
 msgid "Reusable Block"
 msgstr "Reusable Block"
 
-#: lib/compat.php:537
+#: lib/compat.php:579
 msgctxt "post type general name"
 msgid "Reusable Blocks"
 msgstr "Reusable Blocks"
@@ -1074,8 +1048,8 @@ msgstr "Whether to filter for resolved templates"
 msgid "White"
 msgstr "White"
 
-#: lib/class-wp-theme-json-resolver.php:88
-#: lib/class-wp-theme-json-resolver.php:161 build/block-editor/index.js:27
+#: lib/class-wp-theme-json-resolver.php:88 build/block-editor/index.js:7
+#: build/block-editor/index.js:27
 msgid "Black"
 msgstr "Black"
 
@@ -1096,9 +1070,9 @@ msgid "The theme slug for the theme that created the template part."
 msgstr "The theme slug for the theme that created the template part."
 
 #. translators: accessibility text for the content landmark region.
-#: lib/navigation.php:338 build/edit-post/index.js:39
-#: build/edit-site/index.js:9 build/edit-site/index.js:15
-#: build/edit-widgets/index.js:24
+#: lib/navigation.php:338 build/edit-widgets/index.js:24
+#: build/edit-post/index.js:43 build/edit-site/index.js:9
+#: build/edit-site/index.js:15
 msgid "Content"
 msgstr "Content"
 
@@ -1245,8 +1219,8 @@ msgstr "Cannot create existing post."
 msgid "Sorry, you cannot view these menu items, unless you have access to permission edit them. "
 msgstr "Sorry, you cannot view these menu items, unless you have permission to edit them."
 
-#: lib/class-wp-rest-menu-items-controller.php:158
 #: lib/class-wp-rest-customizer-nonces.php:51
+#: lib/class-wp-rest-menu-items-controller.php:158
 msgid "Sorry, you are not allowed to edit posts in this post type."
 msgstr "Sorry, you are not allowed to edit posts in this post type."
 
@@ -1328,7 +1302,7 @@ msgstr "Sorry, you are not allowed to view menu locations."
 msgid "An alphanumeric identifier for the menu location."
 msgstr "An alphanumeric identifier for the menu location."
 
-#: lib/class-wp-theme-json-resolver.php:340 build/edit-site/index.js:9
+#: lib/class-wp-theme-json-resolver.php:304 build/edit-site/index.js:9
 msgid "Global Styles"
 msgstr "Global Styles"
 
@@ -1340,7 +1314,7 @@ msgstr "Empty template."
 msgid "No matching template found."
 msgstr "No matching template found."
 
-#: lib/full-site-editing/templates-utils.php:18 lib/templates.php:98
+#: lib/templates.php:98 lib/full-site-editing/templates-utils.php:18
 #: build/edit-site/index.js:9
 msgid "Theme"
 msgstr "Theme"
@@ -1354,18 +1328,14 @@ msgid "Site Editor (beta)"
 msgstr "Site Editor (beta)"
 
 #: build/block-library/blocks/query-pagination.php:33
-#: build/components/index.js:22 build/block-library/index.js:60
+#: build/components/index.js:22 build/block-library/index.js:63
 msgid "Next"
 msgstr "Next"
 
 #: build/block-library/blocks/query-pagination.php:26
-#: build/components/index.js:22 build/block-library/index.js:60
+#: build/components/index.js:22 build/block-library/index.js:63
 msgid "Previous"
 msgstr "Previous"
-
-#: lib/class-wp-theme-json-resolver.php:155
-msgid "Light"
-msgstr "Light"
 
 #: lib/class-wp-rest-widget-types-controller.php:63
 msgid "Current widget instance"
@@ -1445,7 +1415,7 @@ msgctxt "Admin Menu text"
 msgid "Template Parts"
 msgstr "Template Parts"
 
-#: lib/template-parts.php:18 build/block-library/index.js:60
+#: lib/template-parts.php:18 build/block-library/index.js:63
 msgid "Template Part"
 msgstr "Template Part"
 
@@ -1453,8 +1423,8 @@ msgstr "Template Part"
 msgid "Template Parts"
 msgstr "Template Parts"
 
-#: lib/experiments-page.php:45 build/block-library/index.js:30
-#: build/edit-navigation/index.js:3
+#: lib/experiments-page.php:45 build/edit-navigation/index.js:3
+#: build/block-library/index.js:30
 msgid "Navigation"
 msgstr "Navigation"
 
@@ -1528,7 +1498,7 @@ msgctxt "Admin Menu text"
 msgid "Templates"
 msgstr "Templates"
 
-#: lib/templates.php:37
+#: lib/templates.php:37 build/edit-post/index.js:24
 msgid "Template"
 msgstr "Template"
 
@@ -1632,7 +1602,7 @@ msgstr "RSS error:"
 
 #: build/block-library/blocks/search.php:25
 #: build/block-library/blocks/search.php:26
-#: build/block-library/blocks/search.php:52 build/block-editor/index.js:42
+#: build/block-library/blocks/search.php:52 build/block-editor/index.js:43
 #: build/block-library/index.js:49
 msgid "Search"
 msgstr "Search"
@@ -1652,7 +1622,7 @@ msgid "Full Size"
 msgstr "Full Size"
 
 #: lib/full-site-editing/default-template-types.php:69 lib/compat.php:329
-#: build/core-data/index.js:1 build/block-editor/index.js:67
+#: build/block-editor/index.js:67 build/core-data/index.js:1
 #: build/blocks/index.js:1
 msgid "Media"
 msgstr "Media"
@@ -1666,17 +1636,17 @@ msgstr "M j, Y g:i a"
 msgid "Sorry, you are not allowed to edit images."
 msgstr "Sorry, you are not allowed to edit images."
 
-#: lib/class-wp-theme-json-resolver.php:132 build/block-library/index.js:55
+#: lib/class-wp-theme-json-resolver.php:132 build/block-library/index.js:58
 msgid "Huge"
 msgstr "Huge"
 
-#: lib/class-wp-theme-json-resolver.php:130
-#: lib/class-wp-theme-json-resolver.php:157 lib/editor-settings.php:29
-#: build/components/index.js:10 build/block-editor/index.js:27
+#: lib/class-wp-theme-json-resolver.php:130 lib/editor-settings.php:29
+#: build/block-editor/index.js:7 build/block-editor/index.js:27
+#: build/components/index.js:10
 msgid "Medium"
 msgstr "Medium"
 
-#: lib/class-wp-theme-json-resolver.php:129 build/block-library/index.js:55
+#: lib/class-wp-theme-json-resolver.php:129 build/block-library/index.js:58
 msgid "Normal"
 msgstr "Normal"
 
@@ -1851,7 +1821,7 @@ msgid "Unique identifier for the object."
 msgstr "Unique identifier for the object."
 
 #: lib/class-wp-theme-json-resolver.php:128 build/components/index.js:10
-#: build/block-library/index.js:55
+#: build/block-library/index.js:58
 msgid "Small"
 msgstr "Small"
 
@@ -1934,15 +1904,10 @@ msgid "Pale pink"
 msgstr "Pale pink"
 
 #: lib/class-wp-theme-json-resolver.php:131 lib/editor-settings.php:30
-#: build/components/index.js:10 build/block-editor/index.js:27
-#: build/block-library/index.js:55
+#: build/block-editor/index.js:27 build/components/index.js:10
+#: build/block-library/index.js:58
 msgid "Large"
 msgstr "Large"
-
-#: lib/class-wp-theme-json-resolver.php:141
-#: lib/class-wp-theme-json-resolver.php:156
-msgid "Regular"
-msgstr "Regular"
 
 #: lib/class-wp-rest-menu-items-controller.php:487
 msgid "Invalid term ID."
@@ -1964,36 +1929,28 @@ msgstr "Embed Handler"
 msgid "Status"
 msgstr "Status"
 
-#: lib/client-assets.php:164 build/editor/index.js:13
-#: build/edit-post/index.js:7 build/edit-post/index.js:22
-#: build/block-library/index.js:60
+#: lib/client-assets.php:164 build/edit-post/index.js:7
+#: build/edit-post/index.js:26 build/editor/index.js:13
+#: build/block-library/index.js:63
 msgid "Featured image"
 msgstr "Featured image"
 
 #. translators: ARIA label for the Block Settings Sidebar tab, not selected.
 #. translators: Text label for the Block Settings Sidebar tab.
 #: lib/class-wp-widget-block.php:40 lib/navigation.php:91 lib/navigation.php:96
-#: build/edit-post/index.js:21 build/edit-post/index.js:22
-#: build/edit-widgets/index.js:9
+#: build/edit-widgets/index.js:9 build/edit-post/index.js:23
+#: build/edit-post/index.js:24
 msgid "Block"
 msgstr "Block"
 
-#: build/block-library/blocks/latest-comments.php:31
 #: build/block-library/blocks/latest-posts.php:102
-#: build/block-library/blocks/rss.php:31 build/editor/index.js:31
-#: build/editor/index.js:45 build/edit-post/index.js:22
-#: build/block-library/index.js:30 build/block-library/index.js:38
-#: build/edit-site/index.js:9 build/edit-navigation/index.js:3
+#: build/block-library/blocks/latest-comments.php:31
+#: build/block-library/blocks/rss.php:31 build/edit-post/index.js:26
+#: build/edit-site/index.js:9 build/editor/index.js:31 build/editor/index.js:45
+#: build/edit-navigation/index.js:3 build/block-library/index.js:30
+#: build/block-library/index.js:38
 msgid "(no title)"
 msgstr "(no title)"
-
-#: lib/class-wp-theme-json-resolver.php:142 build/format-library/index.js:1
-msgid "Italic"
-msgstr "Italic"
-
-#: lib/class-wp-theme-json-resolver.php:159 build/format-library/index.js:1
-msgid "Bold"
-msgstr "Bold"
 
 #: lib/patterns/quote.php:9 build/editor/index.js:15
 #: build/block-library/index.js:12
@@ -2009,8 +1966,8 @@ msgstr "Write title…"
 msgid "Experiments"
 msgstr "Experiments"
 
-#: gutenberg.php:49 gutenberg.php:50 build/core-data/index.js:1
-#: build/blocks/index.js:1 build/edit-widgets/index.js:10
+#: gutenberg.php:49 gutenberg.php:50 build/edit-widgets/index.js:10
+#: build/core-data/index.js:1 build/blocks/index.js:1
 msgid "Widgets"
 msgstr "Widgets"
 
@@ -2039,8 +1996,8 @@ msgid "Gutenberg"
 msgstr "Gutenberg"
 
 #. translators: button label text should, if possible, be under 16 characters.
-#: lib/full-site-editing/templates-utils.php:15 build/components/index.js:5
-#: build/editor/index.js:35
+#: lib/full-site-editing/templates-utils.php:15 build/editor/index.js:35
+#: build/components/index.js:5
 msgid "Slug"
 msgstr "Slug"
 
@@ -2059,9 +2016,9 @@ msgstr "F j, Y"
 msgid "g:i a"
 msgstr "g:i a"
 
-#. translators: %s: Human-readable time difference.
 #. translators: %s: Duration.
-#: lib/class-wp-rest-block-directory-controller.php:138 lib/compat.php:281
+#. translators: %s: Human-readable time difference.
+#: lib/compat.php:281 lib/class-wp-rest-block-directory-controller.php:138
 msgid "%s ago"
 msgstr "%s ago"
 
