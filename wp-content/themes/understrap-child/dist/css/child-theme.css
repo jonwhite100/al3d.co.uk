@@ -12070,6 +12070,8 @@ body {
   padding-bottom: 2rem;
   color: #fff;
   font-size: 0.9375rem; }
+  .site-info a {
+    color: #fff; }
 
 .footer-menu {
   padding-top: 2rem;
