@@ -17,7 +17,7 @@ $s-xl: $s-lg + $s-md; // 96px
 
 $section-space-md: $s-md;
 $section-space-lg: $s-lg;
-$section-space-xl: $s-xl;
+$section-space-xl: $s-sm;
 
 // Colours
 $primary:  #5f4b79 !default; // red
@@ -47,10 +47,11 @@ $input-bg: darken($gray-100, 5%);
 $input-border-color: darken($gray-100, 5%);
 
 // Fonts
-@import url("https://use.typekit.net/ieo8wqq.css"); // sass-lint:disable-line no-url-domains no-url-protocols
+// @import url("https://use.typekit.net/ieo8wqq.css"); // sass-lint:disable-line no-url-domains no-url-protocols
+@import url('//db.onlinewebfonts.com/c/87a824a0503379c84e1d249b2bd0409f?family=Kalinga');
 
-$font-family-sans-serif: 'Muli', sans-serif !default;
-$headings-font-family: 'Muli', sans-serif !default;
+$font-family-sans-serif: 'Kalinga', sans-serif !default;
+$headings-font-family: 'Kalinga', sans-serif !default;
 $logo-font-family: handel-gothic, sans-serif !default;
 $headings-font-weight: 300 !default;
 $headings-text-transform: 'none' !default;
@@ -83,7 +84,7 @@ $c-footer-menu-link: $white !default;
 $c-site-info-link: $white !default;
 
 // Site (comes befor Jombotron becasue of use of variables)
-$s-site-margin-top-sm: 0;
+$s-site-margin-top-sm: $s-xl + $s-md;
 $s-site-margin-top-md: 0;
 $s-site-margin-top-lg: 0;
 

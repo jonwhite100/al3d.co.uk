@@ -1,0 +1,18 @@
+.site {
+	.home & {
+		margin-top: 0;
+	}
+}
+
+.content-area {
+	width: 100%;
+}
+
+#full-width-page-wrapper {
+	position: relative;
+	z-index: 2;
+}
+
+.entry-content {
+	background-color: $white;
+}

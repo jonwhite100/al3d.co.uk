@@ -1,5 +1,5 @@
 @charset "UTF-8";
-@import url("https://use.typekit.net/ieo8wqq.css");
+@import url("//db.onlinewebfonts.com/c/87a824a0503379c84e1d249b2bd0409f?family=Kalinga");
 /*!
  * Bootstrap v4.1.0 (https://getbootstrap.com)
  * Copyright 2011-2018 The Bootstrap Authors
@@ -33,7 +33,7 @@
   --breakpoint-md: 768px;
   --breakpoint-lg: 992px;
   --breakpoint-xl: 1200px;
-  --font-family-sans-serif: "Muli", sans-serif;
+  --font-family-sans-serif: "Kalinga", sans-serif;
   --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
 
 *,
@@ -53,7 +53,7 @@ article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
 
 body {
   margin: 0;
-  font-family: "Muli", sans-serif;
+  font-family: "Kalinga", sans-serif;
   font-size: 1.25rem;
   font-weight: 400;
   line-height: 1.5;
@@ -306,7 +306,7 @@ template {
 h1, h2, h3, h4, h5, h6,
 .h1, .h2, .h3, .h4, .h5, .h6 {
   margin-bottom: 0.5rem;
-  font-family: "Muli", sans-serif;
+  font-family: "Kalinga", sans-serif;
   font-weight: 300;
   line-height: 1.2;
   color: #5f4b79; }
@@ -12137,7 +12137,7 @@ label {
       .shrink .navbar-brand {
         font-size: 3.90625rem; } }
   .navbar-brand-sub {
-    font-family: "Muli", sans-serif;
+    font-family: "Kalinga", sans-serif;
     font-size: 1.25rem;
     text-align: center; }
     .shrink .navbar-brand-sub {
@@ -12459,8 +12459,18 @@ label {
   visibility: hidden; }
 
 .section {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
   position: relative;
   z-index: 1; }
+  @media (min-width: 992px) {
+    .section {
+      padding-top: 4rem;
+      padding-bottom: 4rem; } }
+  @media (min-width: 1200px) {
+    .section {
+      padding-top: 1rem;
+      padding-bottom: 1rem; } }
 
 .section-newsletter h2,
 .section-newsletter p,
@@ -12569,13 +12579,13 @@ p {
   color: #5f4b79; }
 
 .site {
-  margin-top: 0; }
+  margin-top: 8rem; }
   @media (min-width: 768px) {
     .site {
-      margin-top: 0; } }
+      margin-top: 8rem; } }
   @media (min-width: 992px) {
     .site {
-      margin-top: 0; } }
+      margin-top: 8rem; } }
 
 .home .entry-header {
   display: none; }
@@ -12661,8 +12671,28 @@ p {
   padding-bottom: 4rem; }
 
 .section-xl {
-  padding-top: 6rem;
-  padding-bottom: 6rem; }
+  padding-top: 1rem;
+  padding-bottom: 1rem; }
+
+.home .site {
+  margin-top: 0; }
+
+.content-area {
+  width: 100%; }
+
+#full-width-page-wrapper {
+  position: relative;
+  z-index: 2; }
+
+.entry-content {
+  background-color: #fff; }
+
+.entry-header {
+  padding-right: 1rem;
+  padding-left: 1rem; }
+
+.entry-title {
+  padding-bottom: 0; }
 
 .lead {
   line-height: 1.5; }
@@ -12670,8 +12700,7 @@ p {
     display: none; }
 
 .section h2 {
-  font-size: 1.875rem;
-  text-align: right; }
+  font-size: 1.875rem; }
 
 body.mob-menu-slideout-over {
   padding-top: 0 !important; }

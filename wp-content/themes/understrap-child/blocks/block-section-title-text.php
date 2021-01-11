@@ -1,4 +1,4 @@
-<section id="" class="section <?php block_field( 'section-class' ); ?>">
+<section id="<?php block_field( 'section-id' ); ?>" class="section <?php block_field( 'section-class' ); ?>">
     <div class="container">
         <div class="row">
             <div class="col-md-4">

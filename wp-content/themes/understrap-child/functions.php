@@ -154,12 +154,12 @@ add_filter('get_the_excerpt', 'trim_excerpt');
 ///
 
 // 1. Deregister Contact Form 7 JavaScript files on all pages without a form
-// add_action( 'wp_print_scripts', 'aa_deregister_javascript', 100 );
-// function aa_deregister_javascript() {
-// 	if ( ! is_page( array('ID', 'page-id-9', 'page-id-534', 'page-id-747') ) ) {
-// 		wp_deregister_script( 'contact-form-7' );
-// 	}
-// }
+add_action( 'wp_print_scripts', 'aa_deregister_javascript', 100 );
+function aa_deregister_javascript() {
+	if ( ! is_page( array('ID', 'page-id-9', 'page-id-534', 'page-id-747') ) ) {
+		wp_deregister_script( 'contact-form-7' );
+	}
+}
 
 // // 2. Remove Contact Form 7's reCAPTCHA files on all pages without a form
 // add_action( 'wp_enqueue_scripts', 'aa_remove_recaptcha', 9 );

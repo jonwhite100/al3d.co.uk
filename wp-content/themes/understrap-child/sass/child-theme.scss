@@ -1,6 +1,9 @@
 // Core theme building blocks that won't ever change
 // @import '../../../../../jmdwhite/sass/bpm-default-core';
 
+// Mixins f rom Default
+@import '../../../../../jmdwhite/sass/bpm-default/mixins';
+
 // Site specific overrides of Defaults
 @import 'theme/bpm-overrides/bpm-overrides-variables';
 
